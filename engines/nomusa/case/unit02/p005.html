@@ -170,11 +170,16 @@ function thinkHTML(){
  else if(curStep==="sj"){
   h+='<div class="card"><div class="lead">소전제 2단 — 사고 과정을 먼저, 답안 문장을 다음에.</div>';
   h+='<div class="substep">① 가능한 모든 소전제 — 사고 사슬</div>'+thinkPair(esc(D.sojeon_v2.why_chain),'<div class="dj">'+esc(D.sojeon_v2.chain)+'</div>',D.why_draft);
-  var chips='<div class="mnq">두문자: <b>'+esc(D.sojeon_v2.mnemonic)+'</b></div><div class="chips">';
-  D.sojeon_v2.elements.forEach(function(e2){
-   var cls = e2.state==="issue"? "chip chip-"+e2.color : "chip chip-clear";
-   chips+='<span class="'+cls+'">'+esc(e2.k)+'<small>'+esc(e2.full)+'</small></span>';
-  });
+  var els = Array.isArray(D.sojeon_v2.elements)? D.sojeon_v2.elements : [];
+  var chips='<div class="mnq">두문자: <b>'+esc(D.sojeon_v2.mnemonic||"(정본 대기)")+'</b></div><div class="chips">';
+  if(els.length){
+   els.forEach(function(e2){
+    var cls = e2.state==="issue"? "chip chip-"+e2.color : "chip chip-clear";
+    chips+='<span class="'+cls+'">'+esc(e2.k)+'<small>'+esc(e2.full)+'</small></span>';
+   });
+  } else {
+   chips+='<span class="chip chip-clear">요건 두문자 · 정본 대기</span>';
+  }
   chips+='</div><p class="ans-p" style="margin-top:9px;">'+esc(D.sojeon_v2.sift)+'</p>';
   h+='<div class="substep">② 요건 전수 + 분별</div>'+thinkPair(esc(D.sojeon_v2.why_sift),chips,D.why_draft);
   h+='<div class="stepnav"><button class="btn btn-line btn-sm" onclick="goStep(\'dj\')">← 대전제</button><button class="btn btn-navy btn-sm" onclick="goStep(\'outline\')">목차펼치기 →</button></div></div>';
