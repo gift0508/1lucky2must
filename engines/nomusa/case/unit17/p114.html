@@ -3,357 +3,327 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>[제1문] 2016년 행시기출문제 제2문 1) — 1행2필 암기 학습엔진</title>
+<title>[제1문] 2016년 행시기출문제 제2문 1) — 1행2필 학습엔진 (파일럿)</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif; background:#f5f4f0; color:#1a1a18; padding-bottom:56px; }
-.hdr { background:linear-gradient(135deg,#0A1628,#1a2a4a); padding:16px 16px 12px; border-bottom:3px solid #C9A84C; }
-.hdr .brand { color:#C9A84C; font-size:11px; font-weight:700; letter-spacing:3px; margin-bottom:5px; }
-.hdr h1 { color:#fff; font-size:15.5px; font-weight:800; line-height:1.4; }
-.hdr .sub { color:#8fa0bd; font-size:11.5px; margin-top:4px; }
-.tabbar { position:sticky; top:0; z-index:10; background:#0A1628; display:flex; overflow-x:auto; gap:4px; padding:8px 10px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+body { font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif; background:#f5f4f0; color:#1a1a18; padding-bottom:52px; }
+.hdr { background:linear-gradient(135deg,#0A1628,#1a2a4a); padding:15px 16px 12px; border-bottom:3px solid #C9A84C; }
+.hdr .brand { color:#C9A84C; font-size:11px; font-weight:700; letter-spacing:3px; margin-bottom:4px; }
+.hdr h1 { color:#fff; font-size:15px; font-weight:800; }
+.hdr .sub { color:#8fa0bd; font-size:11.5px; margin-top:3px; }
+.tabbar { position:sticky; top:0; z-index:10; background:#0A1628; display:flex; overflow-x:auto; gap:4px; padding:8px 10px; scrollbar-width:none; }
 .tabbar::-webkit-scrollbar { display:none; }
 .tab { flex-shrink:0; background:transparent; color:#8fa0bd; border:1px solid #2c3e5c; border-radius:16px; padding:7px 13px; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
 .tab.on { background:#C9A84C; color:#0A1628; border-color:#C9A84C; }
 .wrap { max-width:760px; margin:0 auto; padding:14px 12px; }
 .card { background:#fff; border:0.5px solid #ddd; border-radius:12px; padding:15px; margin-bottom:12px; }
-.lead { font-size:13px; color:#5a4a1f; background:#faf6ea; border-left:3px solid #C9A84C; padding:8px 10px; margin-bottom:11px; line-height:1.6; }
-.type-tag { display:inline-block; background:#FBEEF0; color:#B0334A; border-left:3px solid #B0334A; font-size:12px; font-weight:700; padding:5px 9px; margin-bottom:8px; }
-.probhead { background:#243B5E; color:#fff; font-weight:700; font-size:14px; padding:10px 13px; border-radius:8px 8px 0 0; }
-.probbox { background:#F4F1EC; border-left:4px solid #C9A84C; padding:13px 15px; border-radius:0 0 8px 8px; font-size:14px; line-height:1.7; }
-.probbox p { margin-bottom:7px; }
-.balmun { background:#fff8e2; border:1.5px solid #C9A84C; border-radius:7px; padding:9px 11px; font-weight:700; }
-.hint { font-size:11.5px; color:#999; margin-top:9px; text-align:center; line-height:1.6; }
-.btn { display:inline-block; border:none; cursor:pointer; font-weight:700; border-radius:8px; padding:11px 17px; font-size:14px; }
-.btn-navy { background:#243B5E; color:#fff; }
-.btn-gold { background:#C9A84C; color:#0A1628; }
-.btn-sm { padding:7px 11px; font-size:12px; }
+.probhead { background:#243B5E; color:#fff; font-weight:700; font-size:13.5px; padding:9px 12px; border-radius:8px 8px 0 0; }
+.probbox { background:#F4F1EC; border-left:4px solid #C9A84C; padding:13px 15px; border-radius:0 0 8px 8px; font-size:14px; line-height:1.8; }
+.probbox p { margin-bottom:8px; }
+.qbold { font-weight:800; }
+.lead { font-size:12.5px; color:#5a4a1f; background:#faf6ea; border-left:3px solid #C9A84C; padding:8px 10px; margin-bottom:11px; line-height:1.6; }
 .hidebox { position:relative; border:1px dashed #C9A84C; border-radius:9px; margin-top:6px; cursor:pointer; overflow:hidden; }
-.hidebox .hb-body { filter:blur(6px); padding:11px 13px; user-select:none; transition:filter .25s; }
-.hidebox .hb-tip { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#8A6D1F; background:rgba(250,246,234,.55); z-index:2; }
-.hidebox.revealed .hb-body { filter:none; user-select:auto; }
+.hidebox .hb-body { filter:blur(6px); padding:12px 14px; user-select:none; transition:filter .25s; }
+.hidebox .hb-tip { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#8A6D1F; background:rgba(250,246,234,.5); z-index:2; }
+.hidebox.revealed .hb-body { filter:none; }
 .hidebox.revealed .hb-tip { display:none; }
-.ans-h { font-weight:800; color:#B0334A; font-size:13.5px; margin:6px 0 4px; }
-.ans-p { font-size:13px; line-height:1.75; color:#333; margin-bottom:5px; }
-.mid-h { font-weight:800; color:#0A1628; border-bottom:1px solid #C9A84C; padding-bottom:2px; margin:8px 0 4px; font-size:13.5px; }
-.iss { background:#F4F1EC; border-left:4px solid #B0334A; font-weight:700; font-size:13.5px; padding:8px 10px; margin-bottom:6px; border-radius:0 6px 6px 0; }
-.fr-t { font-weight:800; font-size:13px; color:#243B5E; margin:8px 0 3px; }
-.fr-i { font-size:12.5px; color:#444; padding:2px 0 0 8px; line-height:1.6; }
-.toc { line-height:1.6; padding:2px 0; }
-.toc.l1 { color:#0A1628; font-weight:800; font-size:14px; border-left:3px solid #B0334A; padding-left:8px; margin-top:8px; }
-.toc.l2 { color:#243B5E; font-weight:700; font-size:13.5px; padding-left:16px; }
-.toc.l3 { color:#444; font-weight:600; font-size:13px; padding-left:28px; }
+.dj { font-size:14px; line-height:1.85; color:#0A1628; font-weight:600; }
+.sj { border-radius:9px; padding:11px 13px; margin-bottom:9px; font-size:14px; line-height:1.8; font-weight:600; border-left-width:5px; border-left-style:solid; }
+.sj .num { font-weight:900; margin-right:5px; }
+.c-red  { background:#FDF1F2; border-color:#B0334A; color:#7c1f30; }
+.c-blue { background:#EFF4FB; border-color:#2C5CA8; color:#1d3f74; }
+.c-green{ background:#EFF8EF; border-color:#1E7D32; color:#175424; }
+.c-purple{ background:#F5F0FA; border-color:#7A3FA0; color:#532a6e; }
+.toc { line-height:1.65; padding:2px 0; }
+.t-dj  { color:#0A1628; font-weight:800; font-size:14px; border-left:4px solid #243B5E; padding-left:9px; margin-top:9px; }
+.t-ans { color:#8A6D1F; font-weight:800; font-size:14px; border-left:4px solid #C9A84C; padding-left:9px; margin-top:9px; }
+.t0 { font-weight:800; font-size:14px; padding-left:9px; margin-top:9px; border-left-width:4px; border-left-style:solid; }
+.ts { font-weight:600; font-size:13px; padding-left:26px; }
+.tc-red  { color:#B0334A; border-color:#B0334A; }
+.tc-blue { color:#2C5CA8; border-color:#2C5CA8; }
+.tc-green{ color:#1E7D32; border-color:#1E7D32; }
+.tc-purple{ color:#7A3FA0; border-color:#7A3FA0; }
+.tsc-red { color:#9c5560; } .tsc-blue{ color:#4a689a; } .tsc-green{ color:#4a7d54; } .tsc-purple{ color:#7c5f93; }
+.ans-p { font-size:14px; line-height:1.85; color:#333; }
+.pending { background:#fff8e2; border:1px dashed #CCAA00; border-radius:8px; padding:10px 12px; font-size:12.5px; color:#886600; }
+.foot { text-align:center; font-size:10.5px; color:#aaa; margin-top:22px; line-height:1.7; }
+
+.subbar { position:sticky; top:44px; z-index:9; background:#f5f4f0; display:flex; overflow-x:auto; gap:4px; padding:7px 10px 4px; border-bottom:1px solid #e5e1d6; scrollbar-width:none; }
+.subbar::-webkit-scrollbar { display:none; }
+.stab { flex-shrink:0; background:#fff; color:#666; border:1px solid #ddd; border-radius:14px; padding:5px 11px; font-size:11.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.stab.on { background:#243B5E; color:#C9A84C; border-color:#243B5E; }
+.btn { display:inline-block; border:none; cursor:pointer; font-weight:700; border-radius:8px; padding:10px 16px; font-size:13.5px; }
+.btn-navy { background:#243B5E; color:#fff; } .btn-gold { background:#C9A84C; color:#0A1628; }
+.btn-line { background:#fff; color:#243B5E; border:1.5px solid #243B5E; } .btn-sm { padding:7px 11px; font-size:12px; }
+.stepnav { display:flex; justify-content:space-between; margin-top:12px; }
+.qref { font-size:13px; color:#666; margin-bottom:8px; }
+.draftnote { font-size:11px; font-weight:400; margin-top:5px; opacity:.7; }
 .grade { display:flex; gap:8px; margin-top:12px; }
-.grade button { flex:1; padding:13px 0; font-size:15px; font-weight:800; border:none; border-radius:9px; cursor:pointer; }
+.grade button { flex:1; padding:12px 0; font-size:14px; font-weight:800; border:none; border-radius:9px; cursor:pointer; }
 .g-o { background:#e8f8e8; color:#006600; border:1.5px solid #00AA00; }
 .g-x { background:#fff0f0; color:#cc0000; border:1.5px solid #FF2222; }
-.fcard { background:#fff; border:2px solid #243B5E; border-radius:13px; min-height:170px; display:flex; align-items:center; justify-content:center; padding:18px; cursor:pointer; text-align:center; }
+.fcard { background:#fff; border:2px solid #243B5E; border-radius:13px; min-height:160px; display:flex; align-items:center; justify-content:center; padding:18px; cursor:pointer; text-align:center; }
 .fcard.done { flex-direction:column; font-weight:800; color:#243B5E; }
-.fc-side { font-size:15px; font-weight:800; color:#0A1628; line-height:1.6; width:100%; }
+.fc-side { font-size:14.5px; font-weight:800; color:#0A1628; line-height:1.6; width:100%; }
 .fc-back { text-align:left; font-weight:400; }
-.ox-q { background:#F4F1EC; border-left:4px solid #C9A84C; padding:13px 15px; border-radius:0 8px 8px 0; font-size:14.5px; line-height:1.75; font-weight:600; }
-.ox-fb { margin-top:11px; border-radius:9px; padding:11px 13px; font-weight:800; font-size:14px; }
-.ox-fb.okk { background:#e8f8e8; color:#006600; }
-.ox-fb.nok { background:#fff0f0; color:#cc0000; }
-.ox-src { font-size:11.5px; font-weight:400; color:#777; margin-top:5px; }
+.hint { font-size:11.5px; color:#999; margin-top:8px; text-align:center; }
 .prec-card { border:1px solid #e4dfd2; border-radius:10px; padding:11px 13px; margin-bottom:10px; background:#fbfaf6; }
-.prec-iss { font-weight:800; font-size:13px; color:#0A1628; margin-bottom:4px; }
+.prec-iss { font-weight:800; font-size:13px; margin-bottom:4px; }
 .memck { display:block; margin-top:8px; font-size:12.5px; color:#243B5E; font-weight:700; }
 .mm { margin:4px 0 4px 12px; border-left:2px solid #d8d2c4; padding-left:10px; }
 .mm1 { border-left:3px solid #C9A84C; margin-left:0; }
-.mm-l { font-size:13px; font-weight:700; color:#243B5E; padding:5px 8px; background:#fff; border:1px solid #e4dfd2; border-radius:7px; display:inline-block; cursor:pointer; margin:2px 0; }
+.mm-l { font-size:12.5px; font-weight:700; color:#243B5E; padding:5px 8px; background:#fff; border:1px solid #e4dfd2; border-radius:7px; display:inline-block; cursor:pointer; margin:2px 0; }
 .mm1 > .mm-l { background:#0A1628; color:#C9A84C; border-color:#0A1628; }
 .mmf > .mm-l { background:#243B5E; color:#fff; }
-.mma > .mm-l { background:#FBEEF0; color:#B0334A; border-color:#B0334A; }
-.mmp > .mm-l { color:#8A6D1F; font-weight:600; font-size:12px; }
-.ai-log { max-height:300px; overflow-y:auto; margin-bottom:9px; }
-.ai-u { background:#F4F1EC; border-radius:9px; padding:8px 11px; font-size:13px; margin:5px 0 5px 30px; }
-.ai-a { background:#eef2f8; border-radius:9px; padding:8px 11px; font-size:13px; margin:5px 30px 5px 0; line-height:1.7; white-space:pre-wrap; }
-.stage-inp { width:100%; border:1px solid #ccc; border-radius:8px; padding:9px 11px; font-size:13.5px; font-family:inherit; line-height:1.6; background:#fdfcf9; }
-.foot { text-align:center; font-size:10.5px; color:#aaa; margin-top:24px; line-height:1.7; }
+.mma > .mm-l { background:#FBF3E4; color:#8A6D1F; border-color:#C9A84C; }
+.inp { width:100%; border:1px solid #ccc; border-radius:8px; padding:9px 11px; font-size:13.5px; font-family:inherit; line-height:1.6; background:#fdfcf9; }
+
+.mapwrap { display:flex; gap:10px; align-items:flex-start; }
+.maptree { flex:1; min-width:0; }
+.mappanel { flex:1.15; min-width:0; background:#fbfaf6; border:1px solid #e4dfd2; border-radius:10px; padding:11px 13px; position:sticky; top:96px; max-height:70vh; overflow-y:auto; }
+.mp-h { font-weight:800; font-size:13.5px; color:#0A1628; border-bottom:1px solid #C9A84C; padding-bottom:4px; margin-bottom:8px; }
+.mnode { font-size:12.5px; font-weight:700; background:#fff; border:1px solid #e4dfd2; border-radius:7px; padding:6px 9px; margin:3px 0; cursor:pointer; }
+.mnode.sel { border-color:#C9A84C; background:#FBF3E4; box-shadow:0 0 0 2px rgba(201,168,76,.25); }
+.mnode.lvl1 { margin-left:12px; } .mnode.lvl2 { margin-left:26px; } .mnode.lvl3 { margin-left:42px; font-weight:600; }
+.mnode.lvl0 { background:#0A1628; color:#C9A84C; border-color:#0A1628; }
+.mnode.mnavy > span { color:#243B5E; } .mnode.mgold > span { color:#8A6D1F; }
+@media (max-width:640px){ .mapwrap { flex-direction:column; } .mappanel { position:static; max-height:none; width:100%; } }
+
+.substep { font-size:12.5px; font-weight:800; color:#243B5E; margin:12px 0 4px; }
+.mnq { font-size:13px; color:#0A1628; margin-bottom:8px; }
+.mnq b { font-size:16px; letter-spacing:2px; color:#B0334A; }
+.chips { display:flex; flex-wrap:wrap; gap:6px; }
+.chip { display:inline-flex; flex-direction:column; align-items:center; border-radius:9px; padding:6px 10px; font-weight:900; font-size:15px; border:1.5px solid; min-width:52px; }
+.chip small { font-size:9.5px; font-weight:600; margin-top:2px; }
+.chip-red { background:#FDF1F2; border-color:#B0334A; color:#B0334A; }
+.chip-blue { background:#EFF4FB; border-color:#2C5CA8; color:#2C5CA8; }
+.chip-green { background:#EFF8EF; border-color:#1E7D32; color:#1E7D32; }
+.chip-purple { background:#F5F0FA; border-color:#7A3FA0; color:#7A3FA0; }
+.chip-clear { background:#f3f1ec; border-color:#ccc; color:#999; }
+
+.whylab { font-size:11.5px; font-weight:800; color:#7A3FA0; letter-spacing:.03em; margin-bottom:5px; }
+.whybox { background:#F7F4FA; border-left:3px solid #7A3FA0; border-radius:0 8px 8px 0; padding:9px 12px; font-size:13px; line-height:1.75; color:#3d2f4f; }
+.write-lab { font-size:11.5px; font-weight:800; color:#8A6D1F; letter-spacing:.03em; margin-bottom:5px; }
 </style>
 </head>
 <body>
 <div class="hdr">
-  <div class="brand">1행2필 아카데미 · 암기 학습엔진</div>
+  <div class="brand">1행2필 아카데미 · 학습엔진 (파일럿)</div>
   <h1>[제1문] 2016년 행시기출문제 제2문 1)</h1>
-  <div class="sub">17 부작위위법확인소송 · 답안작성 훈련은 법답5단체계 사례형 엔진에서</div>
+  <div class="sub">17 부작위위법확인소송 · 사례→대전제→소전제→목차→포섭→해결</div>
 </div>
 <div class="tabbar" id="tabs"></div>
-<div class="wrap">
-  <div id="content"></div>
-  <div class="foot">기록(플래시카드·OX·암기체크)은 이 기기 브라우저에 저장됩니다<br>ⓒ 1행2필 행정법구조연구소 · 교재 구매자 제공용</div>
-</div>
+<div class="subbar" id="subbar"></div>
+<div class="wrap"><div id="content"></div>
+<div class="foot">ⓒ 1행2필 행정법구조연구소 — 협업 파일럿 (형식 확정용)</div></div>
 <script>
-window.AI_CONFIG = { endpoint:"", apiKey:"", model:"claude-sonnet-4-6" }; /* 관리자: 프록시 endpoint 설정 시 AI상담 활성화 */
-window.__PROB__ = {"id": 114, "head": "[제1문] 2016년 행시기출문제 제2문 1)", "type": "", "q": ["甲은 B광역시장의 허가를 받지 아니하고 B광역시에 공장 건물을 증축하여 사용하고 있다. 이에 B광역시장은 甲에 대하여 증축한 부분을 철거하라는 시정명령을 내렸으나 甲은 이를 이행하지 아니하고 있다. B광역시장은 상당한 기간이 경과하였음에도 甲에 대하여 이행강제금을 부과․징수하지 않고 있다. 이에 대하여 B광역시 주민 乙은 부작위위법확인소송을 통하여 다투려고 한다. B광역시장이 甲에 대하여 이행강제금을 부과•징수하지 않고 있는 행위는 부작위위법확인소송의 대상이 되는가? (10점)"], "blocks": [{"kind": "roman", "h": "Ⅰ. 문제의 소재", "subs": [], "body": ["행정소송법(이하 동법) 제38조 제2항, 동법 제19조, 동법 제2조 제1항 제2호에 의하면 부작위위법확인소송의 대상인 \"부작위\"라 함은 행정청이 당사자의 신청에 대하여 상당한 기간 내에 일정한 처분을 하여야 할 법률상 의무가 있음에도 불구하고 이를 하지 아니하는 것을 말한다. B광역시장은 건축법 제80조 제1항에 의하여 甲에 대하여 이행강제금을 부과해야 할 법률상 의무가 있음에도 아무런 처분을 하지 않았다. B광역시장이 甲에 대하여 이행강제금을 부과•징수하지 않고 있는 행위는 부작위위법확인소송의 대상이 되는가와 관련하여 당사자의 신청에 신청권이 있는지 문제된다."], "role": "frame"}, {"kind": "roman", "h": "Ⅱ. 당사자의 신청에 신청권이 있는지 여부", "subs": [{"l": 2, "t": "1. 학설"}, {"l": 2, "t": "2. 판례"}, {"l": 2, "t": "3. 검토"}, {"l": 2, "t": "4. 사안의 경우"}], "body": [], "prec": "신청권의 존부는 구체적 사건에서 신청인이 누구인지 고려하지 않고 관계법규의 해석에 의하여 일반 국민에게 그러한 신청권이 인정되는가를 살펴 추상적으로 결정한다.", "role": "issue"}, {"kind": "roman", "h": "Ⅲ. 설문의 해결", "subs": [], "body": ["B광역시장이 甲에 대하여 이행강제금을 부과․징수하지 않고 있는 행위는 부작위위법확인소송의 대상이 아니다."], "role": "answer"}]};
-window.__UNIT__ = {"id": 17, "title": "부작위위법확인소송"};
-window.__OX__ = [{"s": "신청권의 존부는 구체적 사건에서 신청인이 누구인지 고려하지 않고 관계법규의 해석에 의하여 일반 국민에게 그러한 신청권이 인정되는가를 살펴 추상적으로 결정한다.", "n": "신청권의 존부는 구체적 사건에서 신청인이 누구인지 고려하지 않고 관계법규의 해석에 의하여 일반 국민에게 그러한 신청권이 인정되는가를 살펴 추상적으로 결정하지 않는다.", "src": "[제1문] 2016년 행시기출문제 제2문 1)", "pid": 114, "iss": "Ⅱ. 당사자의 신청에 신청권이 있는지 여부"}];
+window.__D__ = {"id": 114, "unit": "17 부작위위법확인소송", "head": "[제1문] 2016년 행시기출문제 제2문 1)", "case_body": [], "question": "甲은 B광역시장의 허가를 받지 아니하고 B광역시에 공장 건물을 증축하여 사용하고 있다. 이에 B광역시장은 甲에 대하여 증축한 부분을 철거하라는 시정명령을 내렸으나 甲은 이를 이행하지 아니하고 있다. B광역시장은 상당한 기간이 경과하였음에도 甲에 대하여 이행강제금을 부과․징수하지 않고 있다. 이에 대하여 B광역시 주민 乙은 부작위위법확인소송을 통하여 다투려고 한다. B광역시장이 甲에 대하여 이행강제금을 부과•징수하지 않고 있는 행위는 부작위위법확인소송의 대상이 되는가? (10점)", "daejeon": {"if_conv": "(발문을 IF로 변환 — 정본 대기)", "should": "행정소송법(이하 동법) 제38조 제2항, 동법 제19조, 동법 제2조 제1항 제2호에 의하면 부작위위법확인소송의 대상인 \"부작위\"라 함은 행정청이 당사자의 신청에 대하여 상당한 기간 내에 일정한 처분을 하여야 할 법률상 의무가 있음에도 불구하고 이를 하지 아니하는 것을 말한다. B광역시장은 건축법 제80조 제1항에 의하여 甲에 대하여 이행강제금을 부과해야 ", "concl": "(결론적 대전제 분기문 — 정본 대기)", "why_if": "발문이 묻는 가능 여부를 요건 충족 여부로 바꾸어, 술어를 그대로 뒤집어 요건 문장의 입구를 만든다.", "why_should": "요건은 조문에서 나온다. 근거 조문으로 요건화하고 배제 규정으로 범위를 좁힌다.", "why_concl": "배제 후 남은 선택지의 갈림 기준을 조건으로 하는 분기문을 세운다. 이 분기문이 다음 단계가 검토할 질문을 지정한다."}, "sojeon": [{"color": "red", "text": "당사자의 신청에 신청권이 있는지(이)라면 그에 따라 판단하고, 그렇지 아니하면 달리 판단한다. (교재 기반 초벌 — 정본 대기)", "draft": true, "tags": ""}], "sojeon_v2": {"chain": "(가능한 모든 소전제의 사고 사슬 — 정본 대기)", "mnemonic": "", "elements": "", "sift": "이 사안에서 문제되는 소전제는 당사자의 신청에 신청권이 있는지 여부이다. 기타 요건은 명백하여 문제되지 않는다. (초벌 — 정본 대기)", "why_chain": "결론적 대전제가 지정한 질문에서 출발하여, 충족될 때 이어지는 다음 관문을 순서대로 밟는다.", "why_sift": "요건을 전수 점검하여 사안이 다투게 만드는 것만 쟁점으로 남기고, 나머지는 명백히 충족으로 한 문장 처리한다."}, "outline": [{"t": "Ⅰ. 문제의 소재", "layer": "daejeon", "subs": []}, {"t": "Ⅱ. 당사자의 신청에 신청권이 있는지 여부", "layer": 0, "subs": ["1. 학설", "2. 판례", "3. 검토", "4. 사안의 경우"]}, {"t": "Ⅲ. 설문의 해결", "layer": "answer", "subs": []}], "subsume": [{"layer": 0, "title": "Ⅱ. 당사자의 신청에 신청권이 있는지 여부", "content": "판례 → 사안의 경우 (교재 해설 참조 — 형식 확정 대기)"}], "precs": [{"layer": 0, "title": "Ⅱ. 당사자의 신청에 신청권이 있는지 여부", "text": "신청권의 존부는 구체적 사건에서 신청인이 누구인지 고려하지 않고 관계법규의 해석에 의하여 일반 국민에게 그러한 신청권이 인정되는가를 살펴 추상적으로 결정한다."}], "answer": "B광역시장이 甲에 대하여 이행강제금을 부과․징수하지 않고 있는 행위는 부작위위법확인소송의 대상이 아니다.", "why_draft": true};
 </script>
 <script>
-/* 1행2필 암기 학습엔진 — 사례문제 1개 전용 */
-var P = window.__PROB__;      // 문제 데이터
-var U = window.__UNIT__;      // {id,title}
-var OX = window.__OX__ || []; // 이 문제의 OX 뱅크
-var KEY = "ohpmem_p" + P.id;
+var D = window.__D__;
+var KEY = "ohp_pilot_p" + D.id;
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||"{}");}catch(e){return{};}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(ST));}catch(e){}}
+var ST=load(); if(!ST.fc)ST.fc={}; if(!ST.mem)ST.mem={};
 
-var FRAMES = [
- {t:"취소소송 제기의 적법요건 (7)", s:["① 대상적격 — 처분등","② 원고적격 — 법률상 이익","③ 피고적격 — 처분청","④ 협의의 소익","⑤ 제소기간","⑥ 관할법원 (선결문제 포함)","⑦ 행정심판전치 (해당 시)"]},
- {t:"본안 인용요건", s:["① 처분의 위법성 — 법령 위반 (주체·절차·형식·내용)","② 위법성 판단 기준시","③ 위법성의 정도 (취소/무효 구별)"]},
- {t:"무효등확인소송", s:["① 대상적격 ② 원고적격 ③ 협의의 소익(확인의 이익·보충성)","④ 무효사유 — 중대명백설"]},
- {t:"부작위위법확인소송", s:["① 당사자의 신청 ② 법규상·조리상 신청권","③ 상당한 기간 ④ 처분의 부존재(무응답)"]},
- {t:"당사자소송", s:["① 공법상 법률관계 여부","② 당사자적격 ③ 확인소송이면 확인의 이익"]},
- {t:"가구제 (집행정지)", s:["① 적법한 본안소송 계속 ② 처분의 존재","③ 회복하기 어려운 손해 ④ 긴급한 필요","⑤ 공공복리 중대영향 없을 것"]}
-];
+var MENUS=[["think","사고훈련"],["fc","플래시카드"],["ox","OX문제"],["prec","필수암기판례카드"],["map","마인드맵"],["ai","AI상담"]];
+var STEPS=[["case","지문"],["dj","대전제"],["sj","소전제"],["outline","목차펼치기"],["sub","목차별 사안포섭"],["ans","설문의 해결"]];
+var COLORS=["red","blue","green","purple"];
+var $=function(id){return document.getElementById(id);};
+function esc(t){var d=document.createElement("div");d.textContent=t;return d.innerHTML;}
+function hideBox(inner){return '<div class="hidebox" onclick="this.classList.toggle(\'revealed\')"><div class="hb-tip">가리고 떠올린 뒤 탭하여 확인</div><div class="hb-body">'+inner+'</div></div>';}
+function colorOf(i){ return D.sojeon[i]? D.sojeon[i].color : COLORS[i%4]; }
 
-function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ return {}; } }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(ST)); }catch(e){} }
-var ST = load();
-if(!ST.fc) ST.fc={};      // 플래시카드 pid→{know,dont}
-if(!ST.ox) ST.ox={c:0,w:0};
-if(!ST.mem) ST.mem={};    // 판례 암기체크
-if(!ST.visited) ST.visited={};
+var curMenu="think", curStep="case";
+function goMenu(m){curMenu=m;
+ document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("on",b.dataset.k===m);});
+ $("subbar").style.display = (m==="think")? "flex":"none";
+ render(); window.scrollTo(0,0);}
+function goStep(s){curStep=s;
+ document.querySelectorAll(".stab").forEach(function(b){b.classList.toggle("on",b.dataset.k===s);});
+ render(); window.scrollTo(0,0);}
 
-var $=function(id){ return document.getElementById(id); };
-function esc(t){ var d=document.createElement("div"); d.textContent=t; return d.innerHTML; }
-
-function frameOf(){ var r=null; P.blocks.forEach(function(b){ if(!r&&b.role==="frame") r=b; }); return r; }
-function issueGroups(){ var g=[],m=null; P.blocks.forEach(function(b){ if(b.role==="mid")m=b.h; if(b.role==="issue"){g.push({mid:m,b:b});m=null;} }); return g; }
-function answersOf(){ var o=[],m=""; P.blocks.forEach(function(b){ if(b.role==="mid")m=b.h; if(b.role==="answer")o.push({mid:m,h:b.h,body:b.body}); }); return o; }
-function precs(){ var o=[]; P.blocks.forEach(function(b){ if(b.prec) o.push({iss:b.h,prec:b.prec}); }); return o; }
-
-/* ─ 탭 ─ */
-var TABS=[["case","사례"],["frame","대전제 설정"],["extract","모든 소전제 추출"],["sift","소전제 분별"],
-["outline","목차 설정과 사안포섭"],["answer","설문의 해결"],["fc","플래시카드"],["ox","OX문제"],
-["prec","필수암기판례"],["map","마인드맵"],["ai","AI상담"]];
-var curTab="case";
-function go(tab){
-  curTab=tab; ST.visited[tab]=1; save();
-  document.querySelectorAll(".tab").forEach(function(t){ t.classList.toggle("on", t.dataset.k===tab); });
-  var el=document.querySelector('.tab[data-k="'+tab+'"]'); if(el) el.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
-  render();
+function thinkPair(why, sentence, draft){
+ var d1='<div class="whylab">사고 과정 — 왜 이렇게 가는가'+(draft?' <span class="draftnote" style="display:inline">※ 초벌</span>':'')+'</div>'
+   +'<div class="whybox">'+why+'</div>';
+ var d2='<div class="write-lab">답안 문장 — 결론적 문장으로 기재</div>'+sentence;
+ return hideBox(d1)+hideBox(d2);
 }
-function hideBox(id, inner){
-  return '<div class="hidebox" id="'+id+'" onclick="this.classList.toggle(\'revealed\')">'
-   +'<div class="hb-tip">가리고 떠올린 뒤 탭하여 확인</div><div class="hb-body">'+inner+'</div></div>';
-}
-function render(){
-  var h="";
-  if(curTab==="case"){
-    h+='<div class="card">'+(P.type?'<div class="type-tag">'+esc(P.type)+'</div>':'')
-     +'<div class="probhead">'+esc(P.head)+'</div><div class="probbox">';
-    for(var i=0;i<P.q.length;i++){
-      h+= (i===P.q.length-1)? '<p class="balmun">'+esc(P.q[i])+'</p>' : '<p>'+esc(P.q[i])+'</p>';
-    }
-    h+='</div><div class="hint">골드 박스가 발문 — 이 문제의 모든 암기는 발문에서 출발합니다</div></div>';
-  }
-  else if(curTab==="frame"){
-    var f=frameOf();
-    h+='<div class="card"><div class="lead">발문으로부터 세워지는 <b>대전제(요건 프레임)</b>입니다. 가린 상태에서 먼저 소리 내어 재현해 보세요.</div>';
-    if(f){ h+=hideBox("hb-frame",'<div class="ans-h">'+esc(f.h)+'</div>'+f.body.map(function(t){return '<p class="ans-p">'+esc(t)+'</p>';}).join("")); }
-    else h+='<p class="ans-p">이 문제는 해설이 곧바로 쟁점 검토로 들어갑니다 — [소전제 분별] 탭에서 쟁점을 암기하세요.</p>';
-    h+='</div>';
-  }
-  else if(curTab==="extract"){
-    h+='<div class="card"><div class="lead">대전제에서 나올 수 있는 소전제를 <b>은닉된 것까지 전부</b> 암기합니다. 지도를 가리고 전수 암송 → 탭하여 대조.</div>';
-    var inner=FRAMES.map(function(f){ return '<div class="fr-t">'+esc(f.t)+'</div>'+f.s.map(function(s){return '<div class="fr-i">'+esc(s)+'</div>';}).join(""); }).join("");
-    h+=hideBox("hb-ext", inner)+'</div>';
-  }
-  else if(curTab==="sift"){
-    var gs=issueGroups();
-    h+='<div class="card"><div class="lead">이 사안에서 <b>문제되는 소전제</b>만 골라내는 것이 분별입니다. 가리고: "이 문제의 쟁점은 몇 개, 무엇?"</div>';
-    var inner='<div class="ans-h">문제되는 소전제 ('+gs.length+')</div>';
-    gs.forEach(function(g){ if(g.mid) inner+='<div class="mid-h">'+esc(g.mid)+'</div>'; inner+='<div class="iss">'+esc(g.b.h)+'</div>'; });
-    inner+='<p class="ans-p" style="color:#886600;">여기 없는 소전제는 "문제되지 않는다" 한 문장 처리 — 은닉 소전제 관리</p>';
-    h+=hideBox("hb-sift", inner)+'</div>';
-  }
-  else if(curTab==="outline"){
-    h+='<div class="card"><div class="lead">쟁점별 <b>목차와 포섭 골격</b>입니다. 목차 흐름을 통째로 암기하세요 (법리 전문·포섭 전개는 교재 해설).</div>';
-    var inner="";
-    var m=null;
-    P.blocks.forEach(function(b){
-      if(b.role==="mid"){ inner+='<div class="mid-h">'+esc(b.h)+'</div>'; return; }
-      if(b.role==="frame"||b.role==="issue"||b.role==="answer"){
-        inner+='<div class="toc l1">'+esc(b.h)+'</div>';
-        b.subs.forEach(function(s){ inner+='<div class="toc l'+s.l+'">'+esc(s.t)+'</div>'; });
-      }
-    });
-    h+=hideBox("hb-out", inner)+'</div>';
-  }
-  else if(curTab==="answer"){
-    var ans=answersOf();
-    h+='<div class="card"><div class="lead">발문에 대한 <b>결론</b>입니다. 가린 상태에서 결론을 한 문장으로 말한 뒤 확인.</div>';
-    if(ans.length){
-      var inner="";
-      ans.forEach(function(a){ if(a.mid) inner+='<div class="mid-h">'+esc(a.mid)+'</div>';
-        inner+='<div class="ans-h">'+esc(a.h)+'</div>'+a.body.map(function(t){return '<p class="ans-p">'+esc(t)+'</p>';}).join(""); });
-      h+=hideBox("hb-ans", inner);
-    } else h+='<p class="ans-p">이 문제의 결론은 교재 해설 말미에서 확인하세요.</p>';
-    h+='</div>';
-  }
-  else if(curTab==="fc"){ h+=fcHTML(); }
-  else if(curTab==="ox"){ h+=oxHTML(); }
-  else if(curTab==="prec"){
-    var pr=precs();
-    h+='<div class="card"><div class="lead">이 문제의 <b>필수암기판례</b> — 요지를 가리고 암송 → 탭 확인 → 암기되면 체크.</div>';
-    if(!pr.length) h+='<p class="ans-p">이 문제에는 별도 판례 요지 카드가 없습니다.</p>';
-    pr.forEach(function(x,i){
-      var ck=ST.mem["m"+i]? " checked":"";
-      h+='<div class="prec-card"><div class="prec-iss">'+esc(x.iss)+'</div>'
-       +hideBox("hb-prec"+i,'<p class="ans-p">'+esc(x.prec)+'</p>')
-       +'<label class="memck"><input type="checkbox" onchange="memChk('+i+',this.checked)"'+ck+'> 암기 완료</label></div>';
-    });
-    h+='</div>';
-  }
-  else if(curTab==="map"){ h+=mapHTML(); }
-  else if(curTab==="ai"){ h+=aiHTML(); }
-  $("content").innerHTML=h;
-  if(curTab==="fc") fcMount();
-  if(curTab==="ox") oxMount();
-  window.scrollTo(0,0);
+function thinkHTML(){
+ var h="";
+ if(curStep==="case"){
+  h+='<div class="card"><div class="probhead">'+esc(D.head)+'</div><div class="probbox">';
+  D.case_body.forEach(function(p){h+='<p>'+esc(p)+'</p>';});
+  h+='<p class="qbold">'+esc(D.question)+'</p></div>'
+   +'<div style="text-align:center;margin-top:10px;"><button class="btn btn-gold" onclick="goStep(\'dj\')">대전제 세우러 가기 →</button></div></div>';
+ }
+
+
+ else if(curStep==="dj"){
+  h+='<div class="card"><div class="lead">각 단계는 두 번 확인합니다 — 먼저 <b>사고 과정</b>(왜)을 떠올려 확인하고, 그다음 <b>답안 문장</b>(무엇을 쓰는가)을 확인합니다.</div>';
+  h+='<p class="qref">발문: <b>'+esc(D.question)+'</b></p>';
+  h+='<div class="substep">① 묻는 문제를 IF로 변환</div>'+thinkPair(esc(D.daejeon.why_if),'<div class="dj">'+esc(D.daejeon.if_conv)+'</div>',D.why_draft);
+  h+='<div class="substep">② SHOULD 문장 (조문 정박 + 배제)</div>'+thinkPair(esc(D.daejeon.why_should),'<div class="dj">'+esc(D.daejeon.should)+'</div>',D.why_draft);
+  h+='<div class="substep">③ 결론적 대전제 (분기문)</div>'+thinkPair(esc(D.daejeon.why_concl),'<div class="dj">'+esc(D.daejeon.concl)+'</div>',D.why_draft);
+  h+='<div class="stepnav"><button class="btn btn-line btn-sm" onclick="goStep(\'case\')">← 지문</button><button class="btn btn-navy btn-sm" onclick="goStep(\'sj\')">소전제 →</button></div></div>';
+ }
+ else if(curStep==="sj"){
+  h+='<div class="card"><div class="lead">소전제 2단 — 사고 과정을 먼저, 답안 문장을 다음에.</div>';
+  h+='<div class="substep">① 가능한 모든 소전제 — 사고 사슬</div>'+thinkPair(esc(D.sojeon_v2.why_chain),'<div class="dj">'+esc(D.sojeon_v2.chain)+'</div>',D.why_draft);
+  var chips='<div class="mnq">두문자: <b>'+esc(D.sojeon_v2.mnemonic)+'</b></div><div class="chips">';
+  D.sojeon_v2.elements.forEach(function(e2){
+   var cls = e2.state==="issue"? "chip chip-"+e2.color : "chip chip-clear";
+   chips+='<span class="'+cls+'">'+esc(e2.k)+'<small>'+esc(e2.full)+'</small></span>';
+  });
+  chips+='</div><p class="ans-p" style="margin-top:9px;">'+esc(D.sojeon_v2.sift)+'</p>';
+  h+='<div class="substep">② 요건 전수 + 분별</div>'+thinkPair(esc(D.sojeon_v2.why_sift),chips,D.why_draft);
+  h+='<div class="stepnav"><button class="btn btn-line btn-sm" onclick="goStep(\'dj\')">← 대전제</button><button class="btn btn-navy btn-sm" onclick="goStep(\'outline\')">목차펼치기 →</button></div></div>';
+ }
+ else if(curStep==="outline"){
+  h+='<div class="card"><div class="lead">색이 계보입니다 — 소전제의 색이 그 분기에서 태어난 목차 가지에 입혀집니다.</div>';
+  var inner="";
+  D.outline.forEach(function(o){
+   if(o.layer==="daejeon"){ inner+='<div class="toc t-dj">'+esc(o.t)+'</div>'; }
+   else if(o.layer==="answer"){ inner+='<div class="toc t-ans">'+esc(o.t)+'</div>'; }
+   else { var c=colorOf(o.layer);
+    inner+='<div class="toc t0 tc-'+c+'">'+esc(o.t)+'</div>';
+    (o.subs||[]).forEach(function(s){ inner+='<div class="toc ts tsc-'+c+'">'+esc(s)+'</div>'; });
+   }
+  });
+  h+=hideBox(inner);
+  h+='<div class="stepnav"><button class="btn btn-line btn-sm" onclick="goStep(\'sj\')">← 소전제</button><button class="btn btn-navy btn-sm" onclick="goStep(\'sub\')">사안포섭 →</button></div></div>';
+ }
+ else if(curStep==="sub"){
+  h+='<div class="card"><div class="lead">각 색 가지 안에서 판례 → 사안 대입 훈련.</div>';
+  D.subsume.forEach(function(s){
+   var c=colorOf(s.layer);
+   h+='<div class="sj c-'+c+'" style="font-weight:400;"><b>'+esc(s.title)+'</b><br>'+esc(s.content)+'</div>';
+  });
+  h+='<div class="pending">▶ 이 탭의 문장 형식은 확정 대기 중입니다.</div>';
+  h+='<div class="stepnav"><button class="btn btn-line btn-sm" onclick="goStep(\'outline\')">← 목차</button><button class="btn btn-navy btn-sm" onclick="goStep(\'ans\')">설문의 해결 →</button></div></div>';
+ }
+ else if(curStep==="ans"){
+  h+='<div class="card"><div class="lead">발문이 물은 그대로, 결론 한 문장.</div>';
+  h+='<p class="qref">발문: <b>'+esc(D.question)+'</b></p>';
+  h+=hideBox('<p class="ans-p">'+esc(D.answer)+'</p>');
+  h+='<div class="stepnav"><button class="btn btn-line btn-sm" onclick="goStep(\'sub\')">← 사안포섭</button><button class="btn btn-gold btn-sm" onclick="goStep(\'case\')">처음부터 다시</button></div></div>';
+ }
+ return h;
 }
 
-/* ─ 플래시카드 ─ */
+/* 플래시카드: 사고훈련 정본에서 생성 */
 var deck=[], fi=0, flipped=false;
 function buildDeck(){
-  deck=[];
-  var f=frameOf();
-  if(f) deck.push({f:"발문에서 세울 대전제는?", b:'<div class="ans-h">'+esc(f.h)+'</div>'+f.body.map(function(t){return '<p class="ans-p">'+esc(t)+'</p>';}).join("")});
-  issueGroups().forEach(function(g){
-    var subs=g.b.subs.map(function(s){return '<div class="toc l'+s.l+'">'+esc(s.t)+'</div>';}).join("");
-    deck.push({f:"쟁점 「"+g.b.h+"」의 하위 목차는?", b: subs||'<p class="ans-p">판례 → 사안의 경우</p>'});
-    if(g.b.prec) deck.push({f:"「"+g.b.h+"」 판례의 태도는?", b:'<p class="ans-p">'+esc(g.b.prec)+'</p>'});
-  });
-  answersOf().forEach(function(a){ deck.push({f:(a.mid?a.mid+" — ":"")+"결론은?", b:a.body.map(function(t){return '<p class="ans-p">'+esc(t)+'</p>';}).join("")||'<p class="ans-p">교재 해설 참조</p>'}); });
+ deck=[{f:"① 발문의 IF 변환은?", b:'<div class="dj">'+esc(D.daejeon.if_conv)+'</div>'},{f:"② SHOULD 문장은?", b:'<div class="dj">'+esc(D.daejeon.should)+'</div>'},{f:"③ 결론적 대전제는?", b:'<div class="dj">'+esc(D.daejeon.concl)+'</div>'},{f:"가능한 모든 소전제(사고 사슬)는?", b:'<div class="dj">'+esc(D.sojeon_v2.chain)+'</div>'},{f:"요건 두문자와 이 사안의 분별은?", b:'<p class="ans-p"><b>'+esc(D.sojeon_v2.mnemonic)+'</b> — '+esc(D.sojeon_v2.sift)+'</p>'}];
+ D.sojeon.forEach(function(s,i){ deck.push({f:"소전제 "+(i+1)+"의 분기문은?", b:'<div class="sj c-'+s.color+'" style="margin:0;">'+esc(s.text)+'</div>'}); });
+ D.outline.forEach(function(o){
+  if(typeof o.layer==="number" && o.subs && o.subs.length){
+   var c=colorOf(o.layer);
+   deck.push({f:"「"+o.t+"」의 하위 목차는?", b:o.subs.map(function(s){return '<div class="toc ts tsc-'+c+'">'+esc(s)+'</div>';}).join("")});
+  }
+ });
+ deck.push({f:"설문의 해결(결론)은?", b:'<p class="ans-p">'+esc(D.answer)+'</p>'});
 }
-function fcHTML(){
-  return '<div class="card"><div class="lead">이 문제에서 뽑은 암기 카드입니다. 카드를 탭하면 뒤집힙니다.</div>'
-   +'<div id="fc-stage"></div><div class="grade" id="fc-grade" style="display:none">'
-   +'<button class="g-o" onclick="fcMark(1)">외웠다</button><button class="g-x" onclick="fcMark(0)">더 보자</button></div>'
-   +'<div class="hint" id="fc-cnt"></div></div>';
-}
+function fcHTML(){ return '<div class="card"><div class="lead">사고훈련 정본에서 자동 생성된 카드입니다. 탭하여 뒤집기.</div><div id="fc-stage"></div><div class="grade" id="fc-grade" style="display:none"><button class="g-o" onclick="fcMark(1)">외웠다</button><button class="g-x" onclick="fcMark(0)">더 보자</button></div><div class="hint" id="fc-cnt"></div></div>'; }
 function fcMount(){ buildDeck(); fi=0; fcShow(); }
 function fcShow(){
-  if(!deck.length){ $("fc-stage").innerHTML='<p class="ans-p">카드가 없습니다.</p>'; return; }
-  if(fi>=deck.length){
-    var again=deck.filter(function(c,i){ return !ST.fc["c"+i]; });
-    $("fc-stage").innerHTML='<div class="fcard done"><div>한 바퀴 완료 · 외운 카드 '+(deck.length-again.length)+'/'+deck.length+'</div>'
-      +'<button class="btn btn-gold" style="margin-top:10px" onclick="fcRestart()">다시 (안 외운 것부터)</button></div>';
-    $("fc-grade").style.display="none"; $("fc-cnt").textContent=""; return;
-  }
-  var c=deck[fi]; flipped=false;
-  $("fc-stage").innerHTML='<div class="fcard" onclick="fcFlip()"><div class="fc-side" id="fc-front">'+esc(c.f)+'</div>'
-    +'<div class="fc-side fc-back" id="fc-back" style="display:none">'+c.b+'</div></div>';
-  $("fc-grade").style.display="none";
-  $("fc-cnt").textContent=(fi+1)+" / "+deck.length+(ST.fc["c"+fi]?" · 외움":"");
+ if(fi>=deck.length){ $("fc-stage").innerHTML='<div class="fcard done"><div>한 바퀴 완료</div><button class="btn btn-gold" style="margin-top:10px" onclick="fi=0;fcShow()">다시</button></div>'; $("fc-grade").style.display="none"; $("fc-cnt").textContent=""; return; }
+ var c=deck[fi]; flipped=false;
+ $("fc-stage").innerHTML='<div class="fcard" onclick="fcFlip()"><div id="fc-front" class="fc-side">'+esc(c.f)+'</div><div id="fc-back" class="fc-side fc-back" style="display:none">'+c.b+'</div></div>';
+ $("fc-grade").style.display="none"; $("fc-cnt").textContent=(fi+1)+" / "+deck.length;
 }
 function fcFlip(){ flipped=!flipped; $("fc-front").style.display=flipped?"none":"block"; $("fc-back").style.display=flipped?"block":"none"; $("fc-grade").style.display=flipped?"flex":"none"; }
-function fcMark(k){ if(k) ST.fc["c"+fi]=1; else delete ST.fc["c"+fi]; save(); fi++; fcShow(); }
-function fcRestart(){
-  var unknown=[]; deck.forEach(function(c,i){ if(!ST.fc["c"+i]) unknown.push(i); });
-  if(unknown.length){ /* 재정렬: 안 외운 것 앞으로 */ var nd=unknown.map(function(i){return deck[i];}).concat(deck.filter(function(c,i){return ST.fc["c"+i];}));
-    deck=nd; ST.fc={}; save(); }
-  fi=0; fcShow();
-}
+function fcMark(k){ if(k)ST.fc["c"+fi]=1; save(); fi++; fcShow(); }
 
-/* ─ OX ─ */
-var oxCur=null;
-function oxHTML(){
-  if(!OX.length) return '<div class="card"><div class="lead">OX 문제</div><p class="ans-p">이 문제에는 OX 문항이 없습니다. [필수암기판례]·[플래시카드]로 암기하세요.</p></div>';
-  return '<div class="card"><div class="lead">판례의 태도로 <b>옳으면 O, 틀리면 X</b>.</div>'
-   +'<div id="ox-q" class="ox-q"></div>'
-   +'<div class="grade"><button class="g-o" onclick="oxPick(true)">O</button><button class="g-x" onclick="oxPick(false)">X</button></div>'
-   +'<div id="ox-fb"></div><div class="hint" id="ox-score"></div></div>';
+function precHTML(){
+ var h='<div class="card"><div class="lead">이 문제의 필수암기판례 — 요지를 가리고 암송 → 탭 확인 → 암기 체크.</div>';
+ (D.precs||[]).forEach(function(x,i){
+  h+='<div class="prec-card"><div class="prec-iss tc-'+colorOf(x.layer)+'">'+esc(x.title)+'</div>'
+   +hideBox('<p class="ans-p">'+esc(x.text)+'</p>')
+   +'<label class="memck"><input type="checkbox" onchange="ST.mem[\'m'+i+'\']=this.checked?1:0;save()"'+(ST.mem["m"+i]?" checked":"")+'> 암기 완료</label></div>';
+ });
+ if(!(D.precs||[]).length) h+='<div class="pending">판례 카드 정본 대기</div>';
+ return h+'</div>';
 }
-function oxMount(){ oxNext(); }
-function oxNext(){
-  var it=OX[Math.floor(Math.random()*OX.length)];
-  var useNeg = it.n && Math.random()<0.5;
-  oxCur={text: useNeg? it.n : it.s, ans: !useNeg, src: it.src, iss: it.iss};
-  $("ox-q").textContent=oxCur.text;
-  $("ox-fb").innerHTML=""; $("ox-score").textContent="정답 "+ST.ox.c+" · 오답 "+ST.ox.w;
+function mapNodes(){
+ var nodes=[];
+ nodes.push({id:"q", lvl:0, color:null, label:"발문", content:"<p class='ans-p'><b>"+esc(D.question)+"</b></p>"});
+ nodes.push({id:"dj", lvl:1, color:"navy", label:"대전제(3단)", content:"<div class='dj'>① "+esc(D.daejeon.if_conv)+"</div><div class='dj' style='margin-top:6px'>② "+esc(D.daejeon.should)+"</div><div class='dj' style='margin-top:6px'>③ "+esc(D.daejeon.concl)+"</div>"});
+ D.sojeon.forEach(function(s,i){
+  nodes.push({id:"sj"+i, lvl:1, color:s.color, label:"소전제 "+(i+1), content:"<div class='sj c-"+s.color+"' style='margin:0'>"+esc(s.text)+"</div>"});
+  D.outline.forEach(function(o){
+   if(o.layer===i){
+    nodes.push({id:"o"+i, lvl:2, color:s.color, label:o.t, content: issueContent(i,o)});
+    (o.subs||[]).forEach(function(sub,k){
+     nodes.push({id:"o"+i+"_"+k, lvl:3, color:s.color, label:sub, content: subContent(i,sub)});
+    });
+   }
+  });
+ });
+ nodes.push({id:"ans", lvl:1, color:"gold", label:"설문의 해결", content:"<p class='ans-p'>"+esc(D.answer)+"</p>"});
+ return nodes;
 }
-function oxPick(v){
-  var ok = (v===oxCur.ans);
-  if(ok) ST.ox.c++; else ST.ox.w++;
-  save();
-  $("ox-fb").innerHTML='<div class="ox-fb '+(ok?"okk":"nok")+'">'+(ok?"정답":"오답")+' — 정답은 '+(oxCur.ans?"O":"X")
-   +'<div class="ox-src">'+esc(oxCur.iss)+' · '+esc(oxCur.src)+'</div>'
-   +'<button class="btn btn-navy btn-sm" style="margin-top:8px" onclick="oxNext()">다음 문제</button></div>';
-  $("ox-score").textContent="정답 "+ST.ox.c+" · 오답 "+ST.ox.w;
+function issueContent(i,o){
+ var s=D.sojeon[i];
+ var h="<div class='sj c-"+s.color+"' style='margin:0 0 8px'>"+esc(s.text)+"</div>";
+ h+="<div style='font-size:12.5px;color:#666'>하위 전개: "+(o.subs||[]).map(esc).join(" → ")+"</div>";
+ return h;
 }
-
-/* ─ 마인드맵 ─ */
+function subContent(i,sub){
+ if(/판\s*례/.test(sub)){
+  var pr=(D.precs||[]).filter(function(x){return x.layer===i;});
+  if(pr.length) return "<p class='ans-p'>"+esc(pr[0].text)+"</p>";
+ }
+ if(/사안의 경우/.test(sub)) return "<div class='pending'>포섭 문장 — 정본 대기</div>";
+ if(/소결/.test(sub)) return "<div class='pending'>소결 문장 — 정본 대기</div>";
+ return "<div class='pending'>이 목차의 내용 정본 대기</div>";
+}
+var mapSel=null;
 function mapHTML(){
-  var f=frameOf(), gs=issueGroups(), ans=answersOf();
-  function node(cls,label,children){
-    return '<div class="mm '+cls+'"><div class="mm-l" onclick="var n=this.nextElementSibling;if(n)n.style.display=(n.style.display===\'none\'?\'block\':\'none\')">'+label+'</div>'
-      +(children?'<div class="mm-c">'+children+'</div>':'')+'</div>';
-  }
-  var balmun=P.q.length? esc(P.q[P.q.length-1]).slice(0,80)+"…":"발문";
-  var issHtml=gs.map(function(g){
-    var subs=g.b.subs.map(function(s){ return node("mm3", esc(s.t), null); }).join("");
-    if(g.b.prec) subs+=node("mm3 mmp","판례: "+esc(g.b.prec.slice(0,60))+"…",null);
-    return node("mm2", esc(g.b.h), subs||null);
-  }).join("");
-  var ansHtml=ans.map(function(a){ return node("mm2 mma", esc(a.h), null); }).join("");
-  var tree=node("mm1","발문 — "+balmun,
-      node("mm2 mmf", f? esc(f.h):"대전제", null) + issHtml + ansHtml);
-  return '<div class="card"><div class="lead">이 문제의 논리 구조를 가지째로 암기합니다. 가지를 탭하면 접히고 펼쳐집니다.</div>'+tree+'</div>';
+ var nodes=mapNodes();
+ var tree="";
+ nodes.forEach(function(n){
+  var c=n.color==="navy"?"":"tc-"+(n.color||"red");
+  var cls="mnode lvl"+n.lvl+(mapSel===n.id?" sel":"");
+  if(n.color==="navy") cls+=" mnavy"; if(n.color==="gold") cls+=" mgold";
+  tree+="<div class='"+cls+"' onclick=\"mapPick('"+n.id+"')\"><span class='"+c+"'>"+esc(n.label)+"</span></div>";
+ });
+ var selNode=nodes.find(function(n){return n.id===mapSel;});
+ var panel= selNode? "<div class='mp-h'>"+esc(selNode.label)+"</div>"+selNode.content
+   : "<div class='pending'>왼쪽 트리에서 목차 노드를 터치하면 여기에 내용이 떠오릅니다.</div>";
+ return "<div class='card'><div class='lead'>목차 하나하나가 노드입니다 — 터치하면 옆 패널에 내용이 떠오릅니다.</div>"
+  +"<div class='mapwrap'><div class='maptree'>"+tree+"</div><div class='mappanel' id='mappanel'>"+panel+"</div></div></div>";
 }
-
-/* ─ AI 상담 ─ */
-function aiSummary(){
-  var gs=issueGroups();
-  return "[교재] 행정쟁송법 사례풀이(공인노무사) · "+U.title+"\n[문제] "+P.head+"\n[발문] "+(P.q[P.q.length-1]||"")
-   +"\n[쟁점] "+gs.map(function(g){return g.b.h;}).join(" / ");
-}
+function mapPick(id){ mapSel=id; render(); var el=document.getElementById("mappanel"); if(el&&window.innerWidth<640) el.scrollIntoView({behavior:"smooth",block:"nearest"}); }
 function aiHTML(){
-  var cfg=window.AI_CONFIG||{};
-  var ready=!!(cfg.endpoint||cfg.apiKey);
-  var h='<div class="card"><div class="lead">이 문제에 대해 궁금한 점을 AI에게 물어보세요.</div>';
-  if(ready){
-    h+='<div id="ai-log" class="ai-log"></div>'
-     +'<textarea id="ai-in" class="stage-inp" rows="2" placeholder="예: 이 문제에서 원고적격이 문제되는 이유가 뭐예요?"></textarea>'
-     +'<div style="text-align:center;margin-top:8px;"><button class="btn btn-gold" onclick="aiSend()">질문하기</button></div>';
-  } else {
-    h+='<p class="ans-p">AI 상담은 준비중입니다. 아래 버튼으로 <b>문제 맥락 + 질문</b>을 복사해 사용 중인 AI(클로드 등)에 붙여넣어 질문할 수 있습니다.</p>'
-     +'<textarea id="ai-in" class="stage-inp" rows="2" placeholder="질문을 적어주세요"></textarea>'
-     +'<div style="text-align:center;margin-top:8px;"><button class="btn btn-navy" onclick="aiCopy()">문제 맥락과 함께 질문 복사</button></div>'
-     +'<div class="hint" id="ai-copied"></div>';
-  }
-  return h+'</div>';
+ return '<div class="card"><div class="lead">이 문제에 대해 AI에게 질문 — 아래 버튼으로 문제 맥락+질문을 복사해 붙여넣으세요.</div>'
+  +'<textarea id="ai-in" class="inp" rows="2" placeholder="질문을 적어주세요"></textarea>'
+  +'<div style="text-align:center;margin-top:8px;"><button class="btn btn-navy" onclick="aiCopy()">문제 맥락과 함께 질문 복사</button></div><div class="hint" id="ai-copied"></div></div>';
 }
 function aiCopy(){
-  var q=$("ai-in").value||"(질문)";
-  var txt=aiSummary()+"\n\n[질문] "+q+"\n\n위 사례문제의 맥락에서 질문에 답해줘. 법답5단체계(대전제→소전제→분별→해결→결론)의 관점에서 설명해줘.";
-  if(navigator.clipboard){ navigator.clipboard.writeText(txt).then(function(){ $("ai-copied").textContent="복사되었습니다 — AI 채팅창에 붙여넣으세요."; }); }
-  else { var ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); $("ai-copied").textContent="복사되었습니다."; }
+ var q=$("ai-in").value||"(질문)";
+ var txt="[문제] "+D.head+"\n[발문] "+D.question+"\n[대전제] "+D.daejeon.concl+"\n[소전제 분별] "+D.sojeon_v2.sift+"\n\n[질문] "+q+"\n\n법답5단체계(대전제→소전제→목차→포섭→결론)의 관점에서 답해줘.";
+ if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){$("ai-copied").textContent="복사되었습니다 — AI 채팅창에 붙여넣으세요.";});}
 }
-function aiSend(){
-  var cfg=window.AI_CONFIG||{}; var q=$("ai-in").value.trim(); if(!q) return;
-  var log=$("ai-log");
-  log.innerHTML+='<div class="ai-u">'+esc(q)+'</div>'; $("ai-in").value="";
-  var body={model:cfg.model||"claude-sonnet-4-6",max_tokens:1000,
-    system:"당신은 1행2필 행정법구조연구소의 행정쟁송법 조교입니다. 법답5단체계(발문→대전제→소전제 전수추출→분별→판례·포섭→결론)에 따라 간결히 답하세요. 다음 문제의 맥락입니다:\n"+aiSummary(),
-    messages:[{role:"user",content:q}]};
-  var url=cfg.endpoint||"https://api.anthropic.com/v1/messages";
-  var hd={"Content-Type":"application/json"};
-  if(cfg.apiKey){ hd["x-api-key"]=cfg.apiKey; hd["anthropic-version"]="2023-06-01"; hd["anthropic-dangerous-direct-browser-access"]="true"; }
-  fetch(url,{method:"POST",headers:hd,body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(d){
-    var t=(d.content||[]).map(function(c){return c.text||"";}).join("") || "(응답 없음)";
-    log.innerHTML+='<div class="ai-a">'+esc(t)+'</div>'; log.scrollTop=log.scrollHeight;
-  }).catch(function(e){ log.innerHTML+='<div class="ai-a">오류: '+esc(String(e))+'</div>'; });
+function oxHTML(){ return '<div class="card"><div class="lead">OX문제</div><div class="pending">OX 뱅크는 정본 검수 후 탑재 예정입니다 (자동 어미 반전 방식은 폐기).</div></div>'; }
+
+function render(){
+ var h="";
+ if(curMenu==="think") h=thinkHTML();
+ else if(curMenu==="fc") h=fcHTML();
+ else if(curMenu==="ox") h=oxHTML();
+ else if(curMenu==="prec") h=precHTML();
+ else if(curMenu==="map") h=mapHTML();
+ else if(curMenu==="ai") h=aiHTML();
+ $("content").innerHTML=h;
+ if(curMenu==="fc") fcMount();
 }
-function memChk(i,v){ if(v) ST.mem["m"+i]=1; else delete ST.mem["m"+i]; save(); }
-
-window.go=go; window.fcFlip=fcFlip; window.fcMark=fcMark; window.fcRestart=fcRestart;
-window.oxPick=oxPick; window.oxNext=oxNext; window.memChk=memChk; window.aiSend=aiSend; window.aiCopy=aiCopy;
-
-var bar=$("tabs"); var th="";
-TABS.forEach(function(t){ th+='<button class="tab" data-k="'+t[0]+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>'; });
-bar.innerHTML=th;
-go("case");
+var th=""; MENUS.forEach(function(m){th+='<button class="tab" data-k="'+m[0]+'" onclick="goMenu(\''+m[0]+'\')">'+m[1]+'</button>';});
+$("tabs").innerHTML=th;
+var sh=""; STEPS.forEach(function(s){sh+='<button class="stab" data-k="'+s[0]+'" onclick="goStep(\''+s[0]+'\')">'+s[1]+'</button>';});
+$("subbar").innerHTML=sh;
+window.goMenu=goMenu; window.goStep=goStep; window.fcFlip=fcFlip; window.fcMark=fcMark; window.aiCopy=aiCopy; window.mapPick=mapPick; window.save=save; window.ST=ST;
+goMenu("think"); goStep("case");
 
 </script>
 </body>
