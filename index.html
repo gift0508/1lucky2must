@@ -271,6 +271,81 @@
   .diag-btn{background:var(--gold);color:#fff;font-weight:700;font-size:13.5px;padding:10px 20px;border-radius:10px;text-decoration:none;white-space:nowrap;transition:transform .15s;flex-shrink:0}
   .diag-btn:hover{transform:translateY(-1px)}
   .diag-note{font-size:11.5px;color:var(--faint);margin-top:8px}
+  /* ── 인라인 진단 퀴즈 ── */
+  .quiz-wrap{background:var(--navy-lift);border:1px solid var(--line-soft);border-radius:14px;padding:18px 20px}
+  .quiz-head{font-size:15.5px;font-weight:700;color:var(--ink)}
+  .quiz-sub{font-size:12.5px;color:var(--muted);margin:4px 0 14px;line-height:1.6}
+  .quiz-sub b{color:var(--gold-deep)}
+  .quiz-prog{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .quiz-bar{flex:1;height:8px;background:var(--navy-0);border-radius:5px;overflow:hidden}
+  .quiz-fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-deep));transition:width .25s;border-radius:5px}
+  .quiz-num{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .quiz-sec{font-size:12px;font-weight:700;color:var(--gold-deep);letter-spacing:.02em;margin:6px 0 10px;padding-top:12px;border-top:1px dashed var(--line-soft)}
+  .quiz-sec:first-of-type{border-top:none;padding-top:0}
+  .qrow{padding:11px 0;border-top:1px solid var(--line-soft)}
+  .qrow:first-of-type{border-top:none}
+  .qs{font-size:13px;line-height:1.55;color:var(--ink);margin-bottom:9px}
+  .qs .qn{font-weight:700;color:var(--gold-deep);margin-right:5px}
+  .ox{display:flex;gap:9px}
+  .oxb{flex:1;text-align:center;font-size:13.5px;font-weight:700;padding:9px 0;border:1.5px solid var(--line-soft);border-radius:9px;cursor:pointer;color:var(--muted);background:var(--navy-1);transition:.12s;user-select:none}
+  .oxb:hover{border-color:var(--gold)}
+  .oxb.o.sel{background:rgba(47,125,79,.1);border-color:#2f7d4f;color:#2f7d4f}
+  .oxb.x.sel{background:rgba(168,90,60,.1);border-color:#A85A3C;color:#A85A3C}
+  .mc-opts{display:flex;flex-direction:column;gap:6px}
+  .mc-opt{display:flex;align-items:flex-start;gap:9px;padding:9px 12px;border:1.5px solid var(--line-soft);border-radius:9px;cursor:pointer;font-size:12.5px;line-height:1.5;background:var(--navy-1);color:var(--ink);transition:.12s}
+  .mc-opt:hover{border-color:var(--gold)}
+  .mc-opt.sel{border-color:var(--gold);background:var(--gold-soft)}
+  .mc-num{width:21px;height:21px;flex-shrink:0;border-radius:50%;border:1.5px solid var(--faint);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--faint)}
+  .mc-opt.sel .mc-num{background:var(--gold);border-color:var(--gold);color:#fff}
+  .quiz-act{display:flex;gap:9px;margin-top:16px}
+  .quiz-prefill{font-size:12.5px;font-weight:700;padding:11px 16px;border-radius:10px;border:1px solid var(--line-soft);background:var(--navy-1);color:var(--ink);cursor:pointer}
+  .quiz-go{flex:1;font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:10px;border:none;background:var(--gold);color:#fff;cursor:pointer;transition:.15s}
+  .quiz-go:disabled{background:var(--faint);opacity:.5;cursor:not-allowed}
+  .quiz-go:not(:disabled):hover{background:var(--gold-deep)}
+  .quiz-result{display:none;margin-top:14px;padding:14px 16px;border-radius:11px;font-size:13px;line-height:1.6}
+  .quiz-result.show{display:block}
+  .quiz-result.pass{background:rgba(47,125,79,.1);border:1px solid #2f7d4f;color:#256641}
+  .quiz-result.fail{background:rgba(168,90,60,.1);border:1px solid #A85A3C;color:#8a4530}
+  .quiz-result .rt{font-size:14.5px;font-weight:700;margin-bottom:4px}
+  .quiz-result b{font-weight:700}
+  /* ── 진단 모달(별도 화면) ── */
+  .qz-modal{position:fixed;inset:0;z-index:1000;display:none;align-items:flex-end;justify-content:center}
+  .qz-modal.on{display:flex}
+  @media(min-width:641px){.qz-modal{align-items:center}}
+  .qz-backdrop{position:absolute;inset:0;background:rgba(20,15,6,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:qzFade .2s ease}
+  .qz-dialog{position:relative;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;
+    background:var(--navy-0);border:1px solid var(--line);border-radius:20px 20px 0 0;overflow:hidden;
+    box-shadow:0 -12px 40px rgba(0,0,0,.28);animation:qzSlide .26s cubic-bezier(.2,.8,.2,1)}
+  @media(min-width:641px){.qz-dialog{border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:qzPop .24s cubic-bezier(.2,.8,.2,1)}}
+  @keyframes qzFade{from{opacity:0}to{opacity:1}}
+  @keyframes qzSlide{from{transform:translateY(30px);opacity:.6}to{transform:translateY(0);opacity:1}}
+  @keyframes qzPop{from{transform:scale(.97);opacity:.4}to{transform:scale(1);opacity:1}}
+  .qz-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px 14px;border-bottom:1px solid var(--line-soft);background:var(--navy-lift)}
+  .qz-title{font-family:'Noto Serif KR',serif;font-size:17px;font-weight:700;color:var(--ink)}
+  .qz-title span{display:block;font-family:'Noto Sans KR',sans-serif;font-size:11.5px;font-weight:400;color:var(--muted);margin-top:2px}
+  .qz-close{flex-shrink:0;width:34px;height:34px;border-radius:9px;border:1px solid var(--line-soft);background:var(--navy-1);color:var(--muted);font-size:20px;line-height:1;cursor:pointer;transition:.12s}
+  .qz-close:hover{border-color:var(--gold);color:var(--gold-deep)}
+  .qz-scroll{overflow-y:auto;padding:16px 20px 8px;scrollbar-width:thin}
+  .qz-foot{display:flex;gap:9px;padding:12px 20px 16px;border-top:1px solid var(--line-soft);background:var(--navy-lift)}
+  .qz-foot .quiz-prefill{flex-shrink:0}
+  .qz-foot .quiz-go{flex:1;margin:0}
+  /* 결과 → 강의로 가기 버튼 */
+  .go-lec-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+  @media(max-width:460px){.go-lec-grid{grid-template-columns:1fr}}
+  .go-lec{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;
+    padding:11px 13px;border-radius:11px;border:1.5px solid var(--line-soft);background:var(--navy-1);
+    color:var(--ink);cursor:pointer;font-family:inherit;transition:.14s}
+  .go-lec:hover{border-color:var(--gold);transform:translateY(-1px)}
+  .go-lec .gl-num{font-family:'Noto Serif KR',serif;font-size:12px;font-weight:700;color:var(--gold-deep)}
+  .go-lec .gl-name{font-size:14px;font-weight:700;line-height:1.3}
+  .go-lec .gl-role{font-size:11px;color:var(--faint);font-weight:400}
+  .go-lec.primary{background:var(--gold);border-color:var(--gold);box-shadow:0 6px 16px var(--gold-soft)}
+  .go-lec.primary .gl-num{color:rgba(255,255,255,.85)}
+  .go-lec.primary .gl-name{color:#fff}
+  .go-lec.primary .gl-role{color:rgba(255,255,255,.85)}
+  .go-lec.primary:hover{background:var(--gold-deep)}
+  .go-lec-hint{font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.5}
+  body.qz-lock{overflow:hidden}
   @media(max-width:640px){.path-box{min-width:130px}.hub-screen{margin-bottom:18px;padding-bottom:18px}}
   .pl-body{background:var(--navy-1);border:1px solid var(--line-soft);border-radius:13px;padding:6px 4px}
   .pl-meta{font-size:12px;color:var(--faint);padding:10px 16px 6px}
@@ -618,7 +693,7 @@
           <div class="diag-t">나는 지금 어느 단계인가</div>
           <div class="diag-s">OX·5지택1로 빠르게 진단 — 결과에 맞는 시작점을 안내합니다.</div>
         </div>
-        <a href="https://gift0508.github.io/howto-admin-law/1%ED%96%892%ED%95%84%206%EB%8B%A8%EA%B3%84%20%ED%95%99%EC%8A%B5%EC%8B%9C%EC%8A%A4%ED%85%9C.html" target="_blank" rel="noopener" class="diag-btn">진단하고 강의 정하기 →</a>
+        <button class="diag-btn" id="qzToggle" onclick="qzModalOpen()">진단하기 →</button>
       </div>
     </div>
 
@@ -796,6 +871,30 @@
     </div>
   </div>
 </footer>
+
+<!-- ── 진단 모달(별도 화면) ── -->
+<div class="qz-modal" id="qzModal" aria-hidden="true">
+  <div class="qz-backdrop" onclick="qzModalClose()"></div>
+  <div class="qz-dialog" role="dialog" aria-modal="true" aria-label="나의 강의 단계 진단">
+    <div class="qz-head">
+      <div class="qz-title">나의 강의 단계 진단<span>OX 10문 · 5지택1 5문 — 결과에 맞는 시작 강의를 정합니다</span></div>
+      <button class="qz-close" onclick="qzModalClose()" aria-label="닫기">×</button>
+    </div>
+    <div class="qz-scroll">
+      <div class="quiz-sub">행정법 실기출로 빠르게 진단합니다 — <b>정답 80% 이상이면 기본강의부터</b>, 미만이면 <b>입문강의부터</b> 시작합니다.</div>
+      <div class="quiz-prog"><div class="quiz-bar"><div class="quiz-fill" id="qzFill"></div></div><span class="quiz-num" id="qzNum">0 / 15 응답</span></div>
+      <div class="quiz-sec">OX 진단 · 10문</div>
+      <div id="qzOx"></div>
+      <div class="quiz-sec">5지택1 진단 · 5문</div>
+      <div id="qzMc"></div>
+      <div class="quiz-result" id="qzResult"></div>
+    </div>
+    <div class="qz-foot">
+      <button class="quiz-prefill" onclick="qzPrefill()">대표 응답 불러오기</button>
+      <button class="quiz-go" id="qzGo" onclick="qzGrade()" disabled>진단하고 강의 정하기 →</button>
+    </div>
+  </div>
+</div>
 
 <script>
   const EXAMS=[
@@ -1114,6 +1213,108 @@
   ).join('');
   document.querySelectorAll('.exam-btn').forEach(b=>b.addEventListener('click',()=>setExam(b.dataset.code)));
   setExam('변시');
+
+  /* ── ② 나의 강의 단계 진단 (행정법 OX 10 + 5지택1 5) ── */
+  const QZ_OX=[{"s": "의무이행재결에는 처분재결과 처분명령재결이 있다.", "a": "O"}, {"s": "무효등확인심판의 경우에는 사정재결을 할 수 없다.", "a": "O"}, {"s": "甲은 X행정처분의 위법을 이유로 국가배상청구소송을 제기할 수 없다.", "a": "X"}, {"s": "취소재결에는 처분취소재결, 처분변경재결 또는 처분변경명령재결이 있다.", "a": "O"}, {"s": "항고소송인 행정처분에 관한 무효확인소송에 있어서 무효확인소송의 보충성이 요구된다.", "a": "X"}, {"s": "위법한 건축허가에 대해 취소소송으로 다투는 도중에 건축공사가 완료된 경우 그 취소를 구할 소의 이익이 인정된다.", "a": "X"}, {"s": "원고가 피고를 잘못 지정한 경우 피고경정은 취소소송과 당사자소송 모두에서 사실심 변론종결에 이르기까지 허용된다.", "a": "O"}, {"s": "X행정처분이 산업재해 요양급여결정을 취소하는 처분인 경우, 甲에게 요양급여청구권이 없다는 내용의 법률관계가 확정된다.", "a": "X"}, {"s": "X행정처분이 부담부행정행위인 경우, 甲은 그 부담의 이행으로서 하게 된 사법상 법률행위의 효력에 대해서 별도로 소송을 제기하여 다툴 수 있다.", "a": "O"}, {"s": "현역입영대상자가 현역병입영통지처분을 받고 현실적으로 입영을 하였다고 하더라도, 입영 이후의 법률관계에 영향을 미치고 있는 현역병입영통지처분의 취소를 구할 소의 이익이 있다.", "a": "O"}];
+  const QZ_MC=[{"q": "행정심판의 재결에 관한 설명으로 옳지 않은 것은? (다툼이 있는 경우 판례에 의함)", "ch": ["행정심판의 재결은 청구인에게 재결서의 정본이 송달되었을 때 효력이 생긴다.", "행정심판위원회는 당사자의 신청을 거부하거나 부작위로 방치한 처분의 이행을 명하는 재결을 할 수 있으며, 이 경우 행정청은 지체 없이 이전의 신청에 대하여 재결의 취지에 따라 처분을 하여야 한다.", "헌법 제107조 제3항은 행정심판의 심리절차에서도 관계인의 충분한 의견진술 및 자료제출과 당사자의 자유로운 변론 보장 등과 같은 대심구조적 사법절차가 준용되어야 한다는 취지이다.", "헌법 제107조 제3항은 사법절차의 심급제에 따른 불복할 권리까지 준용되어야 한다는 취지는 아니므로 행정심판인용재결의 기속력을 규정한 ｢행정심판법｣ 제49조 제1항은 헌법 제107조 제3항에 위배되지 아니한다.", "행정심판위원회는 취소심판의 청구가 이유있다고 인정할 때에는 처분청에게 해당 처분의 취소를 명하는 재결을 할 수 있다."], "a": 4}, {"q": "항고소송에서의 소의 이익(권리보호의 필요)에 관한 설명 중 옳은 것은? (다툼이 있는 경우 판례에 의함)", "ch": ["해임처분 무효확인 또는 취소소송 계속 중 해당 공무원의 임기가 만료되어 해임처분의 무효확인 또는 취소로 지위를 회복할 수 없는 경우 그 무효확인 또는 취소로 해임처분일부터 임기만료일까지 기간에 대한 보수지급을 구할 수 있더라도 해임처분의 무효확인 또는 취소를 구할 법률상 이익이 없다.", "위법한 건축허가에 대해 취소소송으로 다투는 도중에 건축공사가 완료된 경우 그 취소를 구할 소의 이익이 인정된다.", "현역입영대상자가 현역병입영통지처분을 받고 현실적으로 입영을 하였다고 하더라도, 입영 이후의 법률관계에 영향을 미치고 있는 현역병입영통지처분의 취소를 구할 소의 이익이 있다.", "고등학교 졸업은 단지 대학입학자격이나 학력인정으로서의 의미만 있으므로, 고등학교 퇴학처분을 받은 후 고등학교 졸업학력 검정고시에 합격하였다면 고등학교 퇴학처분을 받은 자로서는 퇴학처분의 취소를 구할 소의 이익이 없다.", "항고소송인 행정처분에 관한 무효확인소송에 있어서 무효확인소송의 보충성이 요구된다."], "a": 2}, {"q": "행정소송에서의 피고적격에 관한 설명 중 옳지 않은 것은?(다툼이 있는 경우 판례에 의함)", "ch": ["개별법령에 합의제 행정청의 장을 피고로 한다는 명문규정이 없는 한 합의제 행정청 명의로 한 행정처분의 취소소송의 피고적격자는 합의제 행정청의 장이 아닌 당해 합의제 행정청이다.", "행정처분을 행할 적법한 권한 있는 상급행정청으로부터 내부위임을 받은 데 불과한 하급행정청이 권한 없이 자기의 명의로 행정처분을 한 경우 그 취소소송에서는 실제로 그 처분을 행한 하급행정청이 아니라 그 처분을 행할 적법한 권한 있는 상급행정청을 피고로 하여야 한다.", "수용재결에 불복하여 취소소송을 제기하는 때에는 이의신청을 거친 경우에도 수용재결을 한 중앙토지수용위원회 또는 지방토지수용위원회를 피고로 하여 수용재결의 취소를 구하여야 하고, 다만 이의신청에 대한 재결 자체에 고유한 위법이 있음을 이유로 하는 경우에만 그 이의재결을 한 중앙토지수용위원회를 피고로 하여 이의재결의 취소를 구할 수 있다.", "납세의무부존재확인의 소는 공법상의 법률관계 그 자체를 다투는 소송으로서 당사자소송이라 할 것이므로 과세관청이 아니라 그 법률관계의 한쪽 당사자인 국가·공공단체 그 밖의 권리주체가 피고적격을 가진다.", "원고가 피고를 잘못 지정한 경우 피고경정은 취소소송과 당사자소송 모두에서 사실심 변론종결에 이르기까지 허용된다."], "a": 1}, {"q": "｢행정소송법｣에 의하면, 취소소송은 처분 등이 있음을 안 날부터 90일, 처분 등이 있은 날부터 1년 이내에 제기하여야 한다. 행정심판 청구를 하지 않은 경우, 취소소송의 제소기간에 관한 설명으로 옳지 않은 것은? (다툼이 있는 경우 판례에 의함)", "ch": ["‘처분 등이 있음을 안 날’이란 통지·공고 기타의 방법에 의하여 해당 처분이 있었음을 현실적·구체적으로 안 날을 말한다. 또한 행정처분이 있었다는 사실을 알면 족하고, 구체적으로 그 위법 여부에 대한 판단까지 요하는 것은 아니다.", "제소기간이 도과한 후에 소를 제기한 경우에 있어서 피고 행정청이 이를 다투지 않고 변론에 응하더라도 제소기간에 대한 요건의 흠결은 치유되지 않는다.", "甲은 2022. 8. 26. 지방보훈청장으로부터 ‘재심신체검사 무변동처분 통보서’를 송달받았다. 그런데 甲은 위 통보서를 송달받기 전에 자신의 의무기록에 관한 정보공개를 청구하여 2022. 5. 28. 위 통보서를 포함한 일체의 서류를 교부받은 바 있다. 甲이 위 재심신체검사 무변동처분의 취소를 구하는 소를 제기함에 있어 제소기간의 기산점이 되는 ‘처분 등이 있음을 안 날’은 2022. 8. 26.이다.", "처분서가 처분상대방의 주소지에 송달되는 등 사회통념상 처분이 있음을 처분상대방이 알 수 있는 상태에 놓인 때에는 반증이 없는 한 처분상대방이 처분이 있음을 알았다고 추정할 수 있다.", "특정인에 대한 행정처분을 주소불명 등의 이유로 송달할 수 없어 관보·공보·게시판·일간신등에 공고한 경우에는, 공고가 효력을 발생하는 날에 상대방이 그 행정처분이 있음을 알았다고 보아야 한다."], "a": 4}, {"q": "행정심판에서의 위법ㆍ부당의 기준시점과 재결에 관한 설명으로 옳지 않은 것은? (다툼이 있는 경우 판례에 의함) 燐", "ch": ["취소심판에 있어서 행정처분의 위법·부당 여부는 원칙적으로 처분시를 기준으로 판단하여야 한다.", "무효등확인심판의 경우에는 사정재결을 할 수 없다.", "행정심판위원회는 처분 당시 존재하였거나 행정청에 제출되었던 자료를 기초로 하여야 하며, 재결 당시까지 제출된 자료를 종합하여 처분의 위법·부당 여부를 판단할 수는 없다.", "의무이행재결에는 처분재결과 처분명령재결이 있다.", "취소재결에는 처분취소재결, 처분변경재결 또는 처분변경명령재결이 있다."], "a": 2}];
+  const qzAnsOx={}, qzAnsMc={};
+  function qzRenderOx(){
+    document.getElementById('qzOx').innerHTML=QZ_OX.map((q,i)=>
+      `<div class="qrow"><div class="qs"><span class="qn">${i+1}.</span>${q.s}</div>`
+      +`<div class="ox"><div class="oxb o ${qzAnsOx[i]==='O'?'sel':''}" onclick="qzPickOx(${i},'O')">O · 옳다</div>`
+      +`<div class="oxb x ${qzAnsOx[i]==='X'?'sel':''}" onclick="qzPickOx(${i},'X')">X · 틀리다</div></div></div>`
+    ).join('');
+  }
+  function qzRenderMc(){
+    document.getElementById('qzMc').innerHTML=QZ_MC.map((q,i)=>{
+      const opts=q.ch.map((c,ci)=>`<div class="mc-opt ${qzAnsMc[i]===ci+1?'sel':''}" onclick="qzPickMc(${i},${ci+1})"><span class="mc-num">${ci+1}</span><span>${c}</span></div>`).join('');
+      return `<div class="qrow"><div class="qs"><span class="qn">Q${i+1}.</span>${q.q}</div><div class="mc-opts">${opts}</div></div>`;
+    }).join('');
+  }
+  function qzProg(){
+    const n=Object.keys(qzAnsOx).length+Object.keys(qzAnsMc).length, tot=QZ_OX.length+QZ_MC.length;
+    document.getElementById('qzNum').textContent=n+' / '+tot+' 응답';
+    document.getElementById('qzFill').style.width=(n/tot*100)+'%';
+    document.getElementById('qzGo').disabled=(n<tot);
+  }
+  window.qzPickOx=function(i,v){ qzAnsOx[i]=v; qzRenderOx(); qzProg(); };
+  window.qzPickMc=function(i,v){ qzAnsMc[i]=v; qzRenderMc(); qzProg(); };
+  window.qzPrefill=function(){
+    QZ_OX.forEach((q,i)=>{ qzAnsOx[i]=q.a; });
+    QZ_MC.forEach((q,i)=>{ qzAnsMc[i]=q.a; });
+    qzRenderOx(); qzRenderMc(); qzProg();
+  };
+  const QZ_STAGES=[
+    {short:'HOW TO 행정법 강의', num:'①', role:'개념·사고흐름'},
+    {short:'법답5단체계',        num:'②', role:'법규정·판례 암기'},
+    {short:'답안작성법',         num:'③', role:'목차 세우기'},
+    {short:'실전 사례답안',       num:'④', role:'포섭·해결(실전)'},
+  ];
+  function qzLecButtons(primaryIdx){
+    const btns=QZ_STAGES.map((s,i)=>
+      `<button class="go-lec${i===primaryIdx?' primary':''}" onclick="goLecture('${s.short}')">`
+      +`<span class="gl-num">${s.num}${i===primaryIdx?' · 추천':''}</span>`
+      +`<span class="gl-name">${s.short}</span>`
+      +`<span class="gl-role">${s.role}</span></button>`
+    ).join('');
+    return `<div class="go-lec-grid">${btns}</div>`
+      +`<div class="go-lec-hint">암기가 부족하면 <b>②법답5단체계</b>, 목차·포섭이 약하면 <b>③답안작성법·④실전</b>을 직접 고르세요 — 판단은 본인 몫입니다.</div>`;
+  }
+  window.qzGrade=function(){
+    let correct=0;
+    QZ_OX.forEach((q,i)=>{ if(qzAnsOx[i]===q.a)correct++; });
+    QZ_MC.forEach((q,i)=>{ if(qzAnsMc[i]===q.a)correct++; });
+    const tot=QZ_OX.length+QZ_MC.length, pct=Math.round(correct/tot*100);
+    const box=document.getElementById('qzResult');
+    const pass=pct>=80, primaryIdx=pass?1:0;
+    const head=pass
+      ? `<div class="rt">✅ 정답 ${correct}/${tot} (${pct}%) → 기본강의부터</div>기초는 충분히 잡혀 있습니다. 입문은 건너뛰고 <b>②암기 → ③목차 → ④실전</b> 순으로. 아래에서 시작 강의를 고르세요.`
+      : `<div class="rt">정답 ${correct}/${tot} (${pct}%) → 입문강의부터</div>먼저 뼈대를 세우는 게 빠릅니다. <b>①개념·사고흐름</b>부터 시작하세요.`;
+    box.className='quiz-result show '+(pass?'pass':'fail');
+    box.innerHTML=head+qzLecButtons(primaryIdx);
+    box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  };
+  let qzReady=false;
+  window.qzModalOpen=function(){
+    const m=document.getElementById('qzModal');
+    if(!qzReady){ qzRenderOx(); qzRenderMc(); qzProg(); qzReady=true; }
+    m.classList.add('on'); m.setAttribute('aria-hidden','false');
+    document.body.classList.add('qz-lock');
+    const sc=m.querySelector('.qz-scroll'); if(sc) sc.scrollTop=0;
+  };
+  window.qzModalClose=function(){
+    const m=document.getElementById('qzModal');
+    m.classList.remove('on'); m.setAttribute('aria-hidden','true');
+    document.body.classList.remove('qz-lock');
+  };
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){ const m=document.getElementById('qzModal'); if(m&&m.classList.contains('on')) qzModalClose(); }
+  });
+  /* 결과 → 해당 강의 탭 열고 이동 */
+  window.goLecture=function(shortName){
+    qzModalClose();
+    const sec=document.getElementById('lec');
+    const isOpen=sec&&sec.classList.contains('open');
+    function doTab(){
+      const list=curPlaylists();
+      let idx=list.findIndex(p=>(p.short||p.name)===shortName);
+      if(idx<0) idx=0;
+      renderPl(idx);
+      const pl=document.querySelector('#lec .pl-wrap');
+      if(pl){
+        const navEl=document.querySelector('nav');
+        const navH=navEl?navEl.getBoundingClientRect().height:72;
+        const y=pl.getBoundingClientRect().top+window.pageYOffset-navH-14;
+        window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+      }
+    }
+    if(!isOpen){
+      const chip=document.querySelector('.toc-chip[data-target="lec"]');
+      if(chip){ chip.click(); setTimeout(doTab,180); }
+      else if(sec){ sec.classList.add('open'); setTimeout(doTab,80); }
+      else doTab();
+    } else { doTab(); }
+  };
 
   window.playFree=function(){
     const w=document.getElementById('freeVid');
