@@ -285,7 +285,7 @@
   .set-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:9px;transition:background .15s}
   .set-row:hover{background:rgba(0,0,0,.04)}
   .set-t{flex:1;min-width:0;font-size:14px;font-weight:400}
-  .set-btns{display:flex;gap:8px;flex-shrink:0}
+  .set-btns{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
   .set-btn{font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;text-decoration:none;white-space:nowrap;transition:transform .15s}
   .set-btn.v{background:rgba(0,0,0,.05);color:var(--ink);border:1px solid var(--line-soft)}
   .set-btn.v:hover{transform:translateY(-1px);border-color:var(--line)}
@@ -906,8 +906,15 @@
      url:'https://www.youtube.com/playlist?list=PLF6Aka1omXDDOawLXr8tsMlQZpNJvGicC',
      engineList:'', chapters:true,
      items:[
-            {t:"01 행정소송의 한계·무명항고소송·통치행위 · 4제",v:"",p:"https://smartstore.naver.com/1lucky2must/products/13689763445",e:"engines/nomusa/case/unit01/index.html"},
-            {t:"02 취소소송의 대상 · 31제",v:"",p:"https://smartstore.naver.com/1lucky2must/products/13689768494",e:"engines/nomusa/case/unit02/index.html"},
+            {t:"01 행정소송의 한계·무명항고소송·통치행위 · 4제",v:[
+              {t:"무명항고소송",u:"https://www.youtube.com/shorts/QCzw6yWdIqE"}
+            ],p:"https://smartstore.naver.com/1lucky2must/products/13689763445",e:"engines/nomusa/case/unit01/index.html"},
+            {t:"02 취소소송의 대상 · 31제",v:[
+              {t:"처분",u:"https://www.youtube.com/shorts/9MRZNEQ4jfY"},
+              {t:"거부처분",u:"https://www.youtube.com/shorts/dcDATgtbjGc"},
+              {t:"행정청 행위",u:"https://www.youtube.com/shorts/9MRZNEQ4jfY"},
+              {t:"처분문서",u:"https://www.youtube.com/shorts/1b54trxXcXc"}
+            ],p:"https://smartstore.naver.com/1lucky2must/products/13689768494",e:"engines/nomusa/case/unit02/index.html"},
             {t:"03 취소소송의 원고적격 · 10제",v:"",p:"https://smartstore.naver.com/1lucky2must/products/13689774014",e:"engines/nomusa/case/unit03/index.html"},
             {t:"04 취소소송의 협의의 소익 · 7제",v:"",p:"https://smartstore.naver.com/1lucky2must/products/13689776488",e:"engines/nomusa/case/unit04/index.html"},
             {t:"05 취소소송의 제소기간과 선결문제 · 14제",v:"",p:"https://smartstore.naver.com/1lucky2must/products/13689783483",e:"engines/nomusa/case/unit05/index.html"},
@@ -969,11 +976,18 @@
     }
     // 항목 — 강 목록이면 전체, 아니면 최신 3개
     (showAll?allItems:allItems.slice(0,3)).forEach((it,idx)=>{
-      const hasV=it.v&&it.v!=='#'&&it.v!=='';
       const title=(it.t&&it.t!=='')?it.t:`최신 영상 ${idx+1} <span class="soon">· 준비중</span>`;
-      const vBtn=hasV
-        ? `<a href="${it.v}" target="_blank" rel="noopener" class="set-btn v">▶ 영상</a>`
-        : `<span class="set-btn off">영상 준비중</span>`;
+      let vBtn;
+      if(Array.isArray(it.v)){
+        vBtn=it.v.filter(x=>x&&x.u&&x.u!=='#'&&x.u!=='')
+          .map(x=>`<a href="${x.u}" target="_blank" rel="noopener" class="set-btn v">▶ ${x.t||'영상'}</a>`).join('');
+        if(!vBtn) vBtn=`<span class="set-btn off">영상 준비중</span>`;
+      }else{
+        const hasV=it.v&&it.v!=='#'&&it.v!=='';
+        vBtn=hasV
+          ? `<a href="${it.v}" target="_blank" rel="noopener" class="set-btn v">▶ 영상</a>`
+          : `<span class="set-btn off">영상 준비중</span>`;
+      }
       const hasP=it.p&&it.p!=='#'&&it.p!=='';
       const pBtn=hasP
         ? `<a href="${it.p}" target="_blank" rel="noopener" class="set-btn p">교재 받기</a>`
