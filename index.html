@@ -96,7 +96,6 @@
   .toc-chip.tc-home{--zc:#8A611C;font-weight:700}
   .toc-chip[data-target="lec"]{--zc:#3E6099}
   .toc-chip[data-target="engine"]{--zc:#B0812C}
-  .toc-chip[data-target="book"]{--zc:#4E7A42}
   .toc-chip[data-target="cta"]{--zc:#6A5BA0}
   .toc-n{font-family:'Noto Serif KR',serif;font-weight:700;font-size:12.5px;color:var(--zc)}
   .toc-chip:hover{color:var(--ink);border-color:var(--zc)}
@@ -161,6 +160,8 @@
   .btn-ghost{display:inline-flex;align-items:center;gap:7px;color:var(--gold);font-weight:600;font-size:13.5px;text-decoration:none;border:1px solid var(--line);padding:10px 18px;border-radius:10px;transition:background .2s}
   .btn-ghost:hover{background:var(--gold-soft)}
   .sec-foot{padding-left:50px;margin-top:24px}
+  .bookband{margin-top:22px;padding-top:20px;border-top:1px solid var(--line-soft)}
+  @media(max-width:640px){.bookband{padding-top:16px}}
 
   /* ---------- 강사 소개 ---------- */
   .prof{background:linear-gradient(158deg,#F5EEDD,#EFE6D0);border:1px solid var(--line);position:relative;overflow:hidden}
@@ -249,6 +250,27 @@
   .pl-tab.on{color:#fff;background:var(--gold);border-color:var(--gold);font-weight:700}
   .pl-tab .c{opacity:.7;font-size:11.5px;margin-left:5px}
   .pl-tab.on .c{opacity:.85}
+  .pl-arrow{display:inline-flex;align-items:center;color:var(--faint);font-size:16px;align-self:center;user-select:none}
+  /* 강의 허브 — 세로 3화면 */
+  .hub-screen{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--line-soft)}
+  .hub-lab{font-size:12px;font-weight:700;color:var(--gold-deep);letter-spacing:.02em;margin:0 0 12px}
+  .path4{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+  .path-box{flex:1;min-width:150px;background:var(--navy-1);border:1px solid var(--line-soft);border-radius:13px;padding:13px 15px}
+  .path-box.on{border:2px solid var(--gold)}
+  .path-arrow{display:flex;align-items:center;padding:0 5px;color:var(--faint);font-size:19px}
+  .path-top{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+  .path-num{width:23px;height:23px;border-radius:50%;background:var(--gold-soft);color:var(--gold-deep);font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .path-box.on .path-num{background:var(--gold);color:#fff}
+  .path-role{font-size:11.5px;color:var(--faint)}
+  .path-name{font-size:14.5px;font-weight:700;color:var(--ink)}
+  .path-sub{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .diag-card{background:var(--navy-lift);border:1px solid var(--line-soft);border-radius:14px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .diag-t{font-size:15.5px;font-weight:700;color:var(--ink)}
+  .diag-s{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .diag-btn{background:var(--gold);color:#fff;font-weight:700;font-size:13.5px;padding:10px 20px;border-radius:10px;text-decoration:none;white-space:nowrap;transition:transform .15s;flex-shrink:0}
+  .diag-btn:hover{transform:translateY(-1px)}
+  .diag-note{font-size:11.5px;color:var(--faint);margin-top:8px}
+  @media(max-width:640px){.path-box{min-width:130px}.hub-screen{margin-bottom:18px;padding-bottom:18px}}
   .pl-body{background:var(--navy-1);border:1px solid var(--line-soft);border-radius:13px;padding:6px 4px}
   .pl-meta{font-size:12px;color:var(--faint);padding:10px 16px 6px}
   .pl-meta-txt{display:block}
@@ -481,15 +503,14 @@
         <div class="exam-btns" id="examBtns"></div>
       </div>
       <nav class="toc nav-toc" aria-label="바로가기">
-        <a href="javascript:void(0)" class="toc-chip tc-home active" data-home="1" role="button">압도적 점수</a>
-        <a href="javascript:void(0)" class="toc-chip" data-target="lec" role="button" aria-expanded="false">강의<span class="toc-caret">▾</span></a>
-        <a href="javascript:void(0)" class="toc-chip" data-target="engine" role="button" aria-expanded="false">법답5단체계<span class="toc-caret">▾</span></a>
-        <a href="javascript:void(0)" class="toc-chip" data-target="book" role="button" aria-expanded="false">교재<span class="toc-caret">▾</span></a>
         <a href="javascript:void(0)" class="toc-chip" data-target="cta" role="button" aria-expanded="false">PASSnavi<span class="toc-caret">▾</span></a>
+        <a href="javascript:void(0)" class="toc-chip tc-home active" data-home="1" role="button">오프라인 대면첨삭/비대면 이메일첨삭</a>
+        <a href="javascript:void(0)" class="toc-chip" data-target="lec" role="button" aria-expanded="false">강의<span class="toc-caret">▾</span></a>
+        <a href="javascript:void(0)" class="toc-chip" data-target="engine" role="button" aria-expanded="false">답안작성훈련<span class="toc-caret">▾</span></a>
         <a href="javascript:void(0)" class="toc-chip" data-target="faq" role="button" aria-expanded="false">FAQ<span class="toc-caret">▾</span></a>
       </nav>
     </div>
-    <a href="https://www.youtube.com/watch?v=Z3aVgoOfpXM" target="_blank" rel="noopener" class="nav-cta">법답5단체계 무료특강 보기</a>
+    <a href="https://www.youtube.com/watch?v=Z3aVgoOfpXM" target="_blank" rel="noopener" class="nav-cta">실전답안작성법 무료특강 보기</a>
   </div>
 </nav>
 
@@ -518,7 +539,7 @@
   <!-- 압도적 점수 = 압점 클리닉 (홈 전용) -->
   <section class="sec rev z6 home-only" id="clinic">
     <div class="sec-head">
-      <div class="sec-t">압도적 점수 — 압점(壓點) 클리닉<span class="now-tag" id="tagClinic"></span></div>
+      <div class="sec-t">오프라인 대면첨삭/비대면 이메일첨삭 — 압점(壓點) 클리닉<span class="now-tag" id="tagClinic"></span></div>
       <div class="role">최종 목적지</div>
     </div>
     <p class="sec-sub">방법을 익혔다면, 이제 실제 답안으로 점수를 끌어올릴 차례입니다.<br>오프라인·이메일 첨삭으로 직접 쓴 답안을 봐드립니다.</p>
@@ -550,16 +571,59 @@
     </div>
   </section>
 
-
-
   <!-- Ⅰ. 강의 = 증거 -->
   <section class="sec rev z1 collapsible" id="lec">
     <div class="sec-head">
-      <div class="sec-t">강의 — 논점별 영상 강의<span class="now-tag" id="tagLec"></span></div>
+      <div class="sec-t">강의<span class="now-tag" id="tagLec"></span></div>
       <div class="role">증거 · 무료</div>
     </div>
-    <p class="sec-sub">주제별 무료 영상으로, 답안 목차를 어떻게 잡는지 눈으로 보고 판단하세요.</p>
+    <p class="sec-sub">전체 흐름을 보고 → 내 단계를 진단하고 → 그 단계 강의를 듣습니다.</p>
 
+    <!-- ① 강의 4단계 소개 -->
+    <div class="hub-screen">
+      <div class="hub-lab">① 강의 4단계 — 이렇게 흘러갑니다</div>
+      <div class="path4">
+        <div class="path-box">
+          <div class="path-top"><span class="path-num">1</span><span class="path-role">개념·사고흐름을 익힌다</span></div>
+          <div class="path-name">HOW TO 행정법 강의</div>
+          <div class="path-sub">사례답안·기록형 답안을 쓰는 사고를 세운다</div>
+        </div>
+        <div class="path-arrow">›</div>
+        <div class="path-box">
+          <div class="path-top"><span class="path-num">2</span><span class="path-role">법규정과 법리를 암기한다</span></div>
+          <div class="path-name">법답5단체계</div>
+          <div class="path-sub">답안에 쓸 법규정·필수판례문구를 암기한다</div>
+        </div>
+        <div class="path-arrow">›</div>
+        <div class="path-box">
+          <div class="path-top"><span class="path-num">3</span><span class="path-role">목차세우기 훈련을 한다</span></div>
+          <div class="path-name">답안작성법</div>
+          <div class="path-sub">암기한 뼈대를 답안작성의 목차로 세운다</div>
+        </div>
+        <div class="path-arrow">›</div>
+        <div class="path-box on">
+          <div class="path-top"><span class="path-num">4</span><span class="path-role">실전에 적용한다</span></div>
+          <div class="path-name">실전 사례답안</div>
+          <div class="path-sub">답안작성법에 따라 문제상황을 포섭하여 해결한다</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② 나의 진단 -->
+    <div class="hub-screen">
+      <div class="hub-lab">② 나의 진단</div>
+      <div class="diag-card">
+        <div style="min-width:200px;flex:1">
+          <div class="diag-t">나는 지금 어느 단계인가</div>
+          <div class="diag-s">OX·5지택1로 빠르게 진단 — 결과에 맞는 시작점을 안내합니다.</div>
+        </div>
+        <a href="https://gift0508.github.io/howto-admin-law/1%ED%96%892%ED%95%84%206%EB%8B%A8%EA%B3%84%20%ED%95%99%EC%8A%B5%EC%8B%9C%EC%8A%A4%ED%85%9C.html" target="_blank" rel="noopener" class="diag-btn">자가진단 시작 →</a>
+      </div>
+      <div class="diag-note">자가진단 엔진(PASS:ON)으로 이동 · 끝나면 "돌아가기"로 이 화면에 복귀합니다.</div>
+    </div>
+
+    <!-- ③ 내가 들을 강의 -->
+    <div class="hub-lab">③ 내가 들을 강의</div>
     <!-- 유튜브 재생목록별 강의 -->
     <div class="pl-wrap">
       <div class="pl-lab">주제별 영상학습 <span>· 도우미로 PDF 교재 완비</span></div>
@@ -571,13 +635,15 @@
       </div>
     </div>
 
+    <div class="bookband" id="bookBand"></div>
+
     <div class="sec-foot"><a href="https://www.youtube.com/@%ED%96%89%EC%A0%95%EB%B2%95%EA%B5%AC%EC%A1%B0%EC%97%B0%EA%B5%AC%EC%86%8C" target="_blank" rel="noopener" class="btn-ghost">유튜브 채널 전체 보기 →</a></div>
   </section>
 
   <!-- Ⅱ. 법답5단체계 = 무기 -->
   <section class="sec rev z2 collapsible" id="engine">
     <div class="sec-head">
-      <div class="sec-t">법답5단체계 — 채점자가 보는 답안의 5단 논리<span class="now-tag" id="tagEng"></span></div>
+      <div class="sec-t">답안작성훈련 — 채점자가 보는 답안의 5단필수논리<span class="now-tag" id="tagEng"></span></div>
       <div class="role">차별화 · 핵심</div>
     </div>
     <p class="sec-sub">아는 걸 점수로 바꾸는 건 <b>개념과 문장의 배열순서</b>입니다.</p>
@@ -597,49 +663,6 @@
           <a href="https://gift0508.github.io/howto-admin-law/casetype_engine.html" target="_blank" rel="noopener" class="btn-line btn-basic" id="engBtn">법답5단 실전 학습엔진 열기 →</a>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- Ⅲ. 교재 = 매출 -->
-  <section class="sec rev z3 collapsible" id="book">
-    <div class="sec-head">
-      <div class="sec-t">교재 — 판매처 바로가기<span class="now-tag" id="tagBook"></span></div>
-      <div class="role">판매</div>
-    </div>
-    <p class="sec-sub" aria-hidden="true">&nbsp;</p>
-    <div class="cat-tabs" id="catTabs">
-      <button class="cat-tab" data-cat="howto">HOW TO 행정법 강의</button>
-      <button class="cat-tab" data-cat="sentence">필수 작성문장 (법답5단체계)</button>
-      <button class="cat-tab" data-cat="method">답안작성법</button>
-      <button class="cat-tab on" data-cat="case">실전 사례답안</button>
-    </div>
-    <div class="pod-wrap">
-      <div class="pod-pane" data-p="howto" style="display:none"><div class="pod-empty">HOW TO 행정법 강의 종이책 · 준비중</div></div>
-      <div class="pod-pane" data-p="sentence" style="display:none"><div class="pod-empty">필수 작성문장 (법답5단체계) 종이책 · 준비중</div></div>
-      <div class="pod-pane" data-p="method" style="display:none"><div class="pod-empty">답안작성법 종이책 · 준비중</div></div>
-      <div class="pod-pane" data-p="case">
-        <a href="https://product.kyobobook.co.kr/detail/S000220274014" target="_blank" rel="noopener" class="store-row" data-store="kyobo">
-          <span class="store-ic">POD</span>
-          <span class="store-body"><b>행정쟁송법 사례풀이 (교보문고)</b><span>정가 고정 · 손에 쥐고 필기하는 걸 선호하면 · 교보에서 인쇄·배송</span></span>
-          <span class="store-go">바로가기 →</span>
-        </a>
-      </div>
-    </div>
-
-    <div class="pdf-wrap">
-      <ul class="pdf-list pdf-pane" data-c="howto" style="display:none">
-        <li class="pdf-empty">HOW TO 행정법 강의 PDF · 준비중</li>
-      </ul>
-      <ul class="pdf-list pdf-pane" data-c="sentence" style="display:none">
-        <li class="pdf-empty">필수 작성문장 (법답5단체계) PDF · 준비중</li>
-      </ul>
-      <ul class="pdf-list pdf-pane" data-c="method" style="display:none">
-        <li class="pdf-empty">답안작성법 PDF · 준비중</li>
-      </ul>
-      <ul class="pdf-list pdf-pane" data-c="case">
-        <li class="pdf-head">실전 사례답안 — 행정쟁송법 (노무사) <span>· 최신 판례 추록 반영</span></li>
-        <li class="set-row pl-cat"><span class="set-t"><span class="cat-ic">▤</span> 행정쟁송법 사례풀이 · 전체판 · 118제 · 237쪽</span><span class="set-btns"><span class="set-price">29,900원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689639939" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-sub">묶음 할인</li><li class="set-row"><span class="set-t">취소소송의 소익론 · 02+03+04</span><span class="set-btns"><span class="set-price">10,900원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689858833" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">본안심리의 모든 것 · 07~10</span><span class="set-btns"><span class="set-price">2,700원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689862646" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">본안판결의 모든 것 · 11+12</span><span class="set-btns"><span class="set-price">3,200원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689865978" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-sub">주제별 낱개 · 문제당 253원</li><li class="set-row"><span class="set-t">01 행정소송의 한계·무명항고소송·통치행위 · 4제</span><span class="set-btns"><span class="set-price">1,000원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689763445" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">02 취소소송의 대상 · 31제</span><span class="set-btns"><span class="set-price">7,800원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689768494" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">03 취소소송의 원고적격 · 10제</span><span class="set-btns"><span class="set-price">2,500원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689774014" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">04 취소소송의 협의의 소익 · 7제</span><span class="set-btns"><span class="set-price">1,800원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689776488" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">05 취소소송의 제소기간과 선결문제 · 14제</span><span class="set-btns"><span class="set-price">3,500원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689783483" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">06 취소소송의 임의적 행심전치와 가구제 · 4제</span><span class="set-btns"><span class="set-price">1,000원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689788777" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">07 직권심리·위법판단의 기준시 · 4제</span><span class="set-btns"><span class="set-price">1,000원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689794800" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">08 처분사유의 추가·변경 · 4제</span><span class="set-btns"><span class="set-price">1,000원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689801572" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">09 취소소송상 제3자 보호제도 · 2제</span><span class="set-btns"><span class="set-price">500원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689807861" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">10 소변경과 청구병합 · 2제</span><span class="set-btns"><span class="set-price">500원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689813358" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">11 본안판결의 형식 · 5제</span><span class="set-btns"><span class="set-price">1,300원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689818613" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">12 확정판결의 효력 · 9제</span><span class="set-btns"><span class="set-price">2,300원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689823528" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">13 행정심판 · 7제</span><span class="set-btns"><span class="set-price">1,800원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689829418" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">14 강학상 인가·부관 · 5제</span><span class="set-btns"><span class="set-price">1,300원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689835063" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">15 처분적 법규·구속적 계획 · 2제</span><span class="set-btns"><span class="set-price">500원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689837713" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">16 무효등확인소송 · 3제</span><span class="set-btns"><span class="set-price">800원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689844030" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">17 부작위위법확인소송 · 2제</span><span class="set-btns"><span class="set-price">500원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689849121" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li><li class="set-row"><span class="set-t">18 당사자소송 · 3제</span><span class="set-btns"><span class="set-price">800원</span><a href="https://smartstore.naver.com/1lucky2must/products/13689854761" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li>
-      </ul>
     </div>
   </section>
 
@@ -849,7 +872,7 @@
             {t:"제43강 손해전보제도1: 손해배상제도",v:"",p:"",e:"https://gift0508.github.io/howto-admin-law/ch43_admin_chat.html"},
             {t:"제44강 손해전보제도2: 손실보상제도",v:"",p:"",e:"https://gift0508.github.io/howto-admin-law/ch44_admin_chat.html"}
      ]},
-    {name:'법답5단체계(필수암기사항)', short:'필수 작성문장 (법답5단체계)', kind:'쇼츠', exams:['변시','5급','노무사','감평사'], desc:'구조 만들기 — 반드시 외워둘 뼈대',
+    {name:'법답5단체계(필수암기사항)', short:'법답5단체계', kind:'쇼츠', exams:['변시','5급','노무사','감평사'], desc:'구조 만들기 — 반드시 외워둘 뼈대',
      url:'https://www.youtube.com/playlist?list=PLF6Aka1omXDAOwoWxiFAoCGKQzvU71qGU',
      engineList:'', chapters:true,
      items:[
@@ -946,6 +969,41 @@
     '감평사':'1행2필 개인 이메일반 · 현재 진행 중',
   };
 
+  // 교재 밴드(강의 섹션 하단) — 시험별 전체판·묶음. 낱개 PDF는 각 강의 항목 버튼으로 유지.
+  const BOOKBAND={
+    '노무사':{
+      head:'전체판 · 묶음 — 행정쟁송법 (노무사)', note:'· 최신 판례 추록 반영',
+      pod:{t:'행정쟁송법 사례풀이 (교보문고)', d:'종이책으로 손에 쥐고 필기하는 걸 선호하면 · 교보에서 인쇄·배송', u:'https://product.kyobobook.co.kr/detail/S000220274014'},
+      full:{t:'행정쟁송법 사례풀이 · 전체판 · 118제 · 237쪽', price:'29,900원', u:'https://smartstore.naver.com/1lucky2must/products/13689639939'},
+      bundles:[
+        {t:'취소소송의 소익론 · 02+03+04', price:'10,900원', u:'https://smartstore.naver.com/1lucky2must/products/13689858833'},
+        {t:'본안심리의 모든 것 · 07~10', price:'2,700원', u:'https://smartstore.naver.com/1lucky2must/products/13689862646'},
+        {t:'본안판결의 모든 것 · 11+12', price:'3,200원', u:'https://smartstore.naver.com/1lucky2must/products/13689865978'},
+      ]
+    }
+  };
+  function renderBookBand(code){
+    const el=document.getElementById('bookBand'); if(!el) return;
+    const b=BOOKBAND[code];
+    const lab='<div class="pl-lab">교재 <span>· 전체판 · 묶음 할인</span></div>';
+    if(!b){ el.innerHTML=lab+'<div class="pod-empty">전체판·묶음 교재 · 준비중</div>'; return; }
+    let h=lab+'<p class="pl-desc">논점별로 보다가, 다 필요하면 전체판으로 · 묶어서 더 싸게.</p>';
+    if(b.pod){
+      h+=`<div class="pod-wrap"><a href="${b.pod.u}" target="_blank" rel="noopener" class="store-row" data-store="kyobo"><span class="store-ic">POD</span><span class="store-body"><b>${b.pod.t}</b><span>${b.pod.d}</span></span><span class="store-go">바로가기 →</span></a></div>`;
+    }
+    h+='<ul class="pdf-list">';
+    if(b.head){ h+=`<li class="pdf-head">${b.head} <span>${b.note||''}</span></li>`; }
+    if(b.full){
+      h+=`<li class="set-row pl-cat"><span class="set-t"><span class="cat-ic">▤</span> ${b.full.t}</span><span class="set-btns"><span class="set-price">${b.full.price}</span><a href="${b.full.u}" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li>`;
+    }
+    if(b.bundles&&b.bundles.length){
+      h+='<li class="set-sub">묶음 할인</li>';
+      b.bundles.forEach(x=>{ h+=`<li class="set-row"><span class="set-t">${x.t}</span><span class="set-btns"><span class="set-price">${x.price}</span><a href="${x.u}" target="_blank" rel="noopener" class="set-btn p">받기</a></span></li>`; });
+    }
+    h+='</ul>';
+    el.innerHTML=h;
+  }
+
   const $=id=>document.getElementById(id);
   const tabsEl=$('plTabs'), listEl=$('plList'), metaEl=$('plMeta');
 
@@ -1014,7 +1072,7 @@
     const list=curPlaylists();
     tabsEl.innerHTML=list.map((p,i)=>
       `<button class="pl-tab" data-i="${i}">${p.short||p.name}</button>`
-    ).join('');
+    ).join('<span class="pl-arrow" aria-hidden="true">›</span>');
     tabsEl.querySelectorAll('.pl-tab').forEach(t=>t.addEventListener('click',()=>renderPl(+t.dataset.i)));
     renderPl(0);
   }
@@ -1029,6 +1087,7 @@
     });
     $('engBtn').setAttribute('href', ENGINE[code]);
     renderSchedule(code);
+    renderBookBand(code);
     renderTabs();
   }
 
@@ -1130,20 +1189,5 @@
 
 
 
-
-
-<script>
-(function(){
-  var tabs=document.getElementById("catTabs");
-  if(!tabs) return;
-  function show(cat){
-    tabs.querySelectorAll(".cat-tab").forEach(function(t){t.classList.toggle("on",t.getAttribute("data-cat")===cat);});
-    document.querySelectorAll(".pod-pane").forEach(function(p){p.style.display=(p.getAttribute("data-p")===cat)?"block":"none";});
-    document.querySelectorAll(".pdf-pane").forEach(function(p){p.style.display=(p.getAttribute("data-c")===cat)?"block":"none";});
-  }
-  tabs.addEventListener("click",function(e){var b=e.target.closest(".cat-tab");if(b)show(b.getAttribute("data-cat"));});
-  show("case");
-})();
-</script>
 </body>
 </html>
