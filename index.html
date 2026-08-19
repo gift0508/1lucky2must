@@ -253,7 +253,8 @@
   .pl-arrow{display:inline-flex;align-items:center;color:var(--faint);font-size:16px;align-self:center;user-select:none}
   /* 강의 허브 — 세로 3화면 */
   .hub-screen{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--line-soft)}
-  .hub-lab{font-size:12px;font-weight:700;color:var(--gold-deep);letter-spacing:.02em;margin:0 0 12px}
+  .hub-lab{font-size:16.5px;font-weight:700;color:var(--gold-deep);letter-spacing:.01em;margin:0 0 14px}
+  .hub-tag{color:var(--ink);font-weight:700}
   .path4{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
   .path-box{flex:1;min-width:150px;background:var(--navy-1);border:1px solid var(--line-soft);border-radius:13px;padding:13px 15px}
   .path-box.on{border:2px solid var(--gold)}
@@ -581,7 +582,7 @@
 
     <!-- ① 강의 4단계 소개 -->
     <div class="hub-screen">
-      <div class="hub-lab">① 강의 4단계 — 이렇게 흘러갑니다</div>
+      <div class="hub-lab">① 강의 4단계 <span class="hub-tag">— 합격경로</span></div>
       <div class="path4">
         <div class="path-box">
           <div class="path-top"><span class="path-num">1</span><span class="path-role">개념·사고흐름을 익힌다</span></div>
@@ -611,7 +612,7 @@
 
     <!-- ② 나의 진단 -->
     <div class="hub-screen">
-      <div class="hub-lab">② 나의 진단</div>
+      <div class="hub-lab">② 나의 강의 단계 진단 <span class="hub-tag">— 뭘 듣지?</span></div>
       <div class="diag-card">
         <div style="min-width:200px;flex:1">
           <div class="diag-t">나는 지금 어느 단계인가</div>
@@ -622,7 +623,7 @@
     </div>
 
     <!-- ③ 내가 들을 강의 -->
-    <div class="hub-lab">③ 내가 들을 강의</div>
+    <div class="hub-lab">③ 내가 들을 강의 <span class="hub-tag">— 후딱 듣고 답안작성훈련!</span></div>
     <!-- 유튜브 재생목록별 강의 -->
     <div class="pl-wrap">
       <div class="pl-lab">주제별 영상학습 <span>· 도우미로 PDF 교재 완비</span></div>
