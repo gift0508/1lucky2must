@@ -965,7 +965,7 @@ border-radius:999px;padding:4px 12px;font-size:.7rem;cursor:pointer;font-family:
   <section id="s2">
     <div class="matrix-head">
       <div>
-        <div class="step-tag">STEP ② 합격경로 한눈에 보기</div>
+        <div class="step-tag">STEP ② 현재 진행되는 학습</div>
         <p class="lede" id="rmLede">칸을 누르면 그 칸의 객관식 학습 레이어가 열립니다. 5분야 × 6단계(입문특강·기본이론·사례풀이강의·판례특강강의·핵지총특강·기출특강)를 분야별로 독립 진행합니다 · 전체학습계획 밖 특강은 맨 오른쪽 「특강」 칸에서 골라 듣습니다.</p>
       </div>
       <div class="legend">
@@ -4248,7 +4248,7 @@ function applyTrackChrome(track){
   S("profDesc", `${track} 행정법을 사례형 답안 중심으로 준비하는 과정입니다. 9개 분야를 기본강의 → 답안작성강의 → 사례풀이강의 → 판례특강강의 순서로 진행합니다.`);
   S("profDiag", `수강신청에서 분야마다 시작 단계를 정하면 전체학습계획에 그대로 반영됩니다.`);
   T("rmTitle", two?"나의 28칸 전체학습계획":"나의 32칸 전체학습계획");
-  S("rmLede", `칸을 누르면 그 강의의 공부 화면이 열립니다.`);
+  S("rmLede", `칸을 클릭하면 바로 밑에 학습소개가 나옵니다.`);
   T("fbTag", two?"파이널 · 자신의 선택":"특강 · 자율수행"); var _fb=document.querySelector(".finalbar"); if(_fb) _fb.style.display=two?"none":"";
   S("fbTitle", two?`28칸(핵심·문풀·파이널·특강)을 마친 뒤 — 파이널은 스스로 여는 단계입니다`:`32칸(기본·문풀·핵심·기출실전)을 마친 뒤 — 특강은 스스로 여는 단계입니다`);
   S("fbSub", two?`파이널은 28칸 안에 배치되지 않습니다. 핵심·문풀·파이널·특강를 통과하면 <b>전범위를 압축하는 파이널</b>이 열리고, 원하는 시점에 <b>스스로 선택</b>해 들어갑니다. 실전 채점·모의와 연결되는 지점입니다.`:`특강은 합격경로상에 없는 별도의 과정입니다. 시험 직전 자신의 약점을 없애는 과정입니다.`);
@@ -4306,7 +4306,7 @@ function startTour(){
   after(t+=2800,()=>{setProfile('B');});
   // ② 전체학습계획
   after(t+=1400,()=>{hlOff("pB");nodeOn(2);go("grid");hlOn("s2");
-    narr("STEP ② 합격경로 한눈에 보기","진단이 <b>전체학습계획을 재배열</b>했습니다. 면제 칸(빗금)과 취약 분야의 압축 재수강 칸이 생기고, 모든 칸에 날짜가 박힙니다. 전체학습계획은 이제 매일 아침 \u2018오늘\u2019을 낳습니다.");});
+    narr("STEP ② 현재 진행되는 학습","진단이 <b>전체학습계획을 재배열</b>했습니다. 면제 칸(빗금)과 취약 분야의 압축 재수강 칸이 생기고, 모든 칸에 날짜가 박힙니다. 전체학습계획은 이제 매일 아침 \u2018오늘\u2019을 낳습니다.");});
   // ③ 일일 과업
   after(t+=3600,()=>{hlOff("s2");nodeOn(3);go("s3");hlOn("s3");
     narr("STEP ③ 강의별 해소","전체학습계획의 현재 칸이 <b>해소 총량</b>으로 내려왔습니다. 총량과 기한은 시스템이 지키고, 오늘 몇 문을 소화할지는 학생이 정합니다.");});
@@ -8067,7 +8067,7 @@ window.nmPubClose=function(){ const m=document.getElementById("nmPubPop"); if(m)
    · 수강생 학습도구는 배정된 강의까지만 열리므로 「실제」는 「계획」을 넘지 않음 ═══ */
 (function(){
   const S4=document.getElementById("s4"); if(!S4) return;
-  S4.innerHTML='<h2>📈 내 페이스 점검</h2><p class="lede">일정을 짠 날부터 오늘까지 실제로 공부한 기록으로 내 속도를 점검하고, 밀렸으면 일정을 내게 맞게 다시 짭니다.</p>'+
+  S4.innerHTML='<h2>📈 내 페이스 점검</h2><p class="lede">내 학습속도에 맞춰 맞춤형 학습일정을 재구성한다.</p>'+
     '<div class="panel" id="ccPace"></div>'+
     '<div style="display:none"><h3 id="weekTitle"></h3><div id="weekSub"></div><div id="bars"></div><button id="rebtn"></button><div id="log"></div><div id="logEmpty"></div><p id="s4lede"></p></div>';
   (function(){ const st=document.createElement("style"); st.textContent=
@@ -8154,7 +8154,7 @@ window.nmPubClose=function(){ const m=document.getElementById("nmPubPop"); if(m)
     const box=document.getElementById("ccPace"); if(!box) return;
     if(typeof user==="undefined"||!user){ box.innerHTML=""; return; }
     const t=TRACK, D=ccPaceData(t), md=function(iso){ return ccMD(ccParse(iso)); };
-    if(!D){ box.innerHTML='<div class="sub">하루 수강량을 정하면 그날부터 내 속도를 점검합니다 — 위 「📅 나의 수강 계획」에서 하루 수강량을 정해 주세요.</div>'; return; }
+    if(!D){ box.innerHTML='<div class="sub">먼저 하루 수강강의수를 정하면 그날부터 내 진도를 점검합니다. 「📅 나의 수강 계획」에서 하루 수강강의수를 정해 주세요.</div>'; return; }
     const c=ccPlanCalc(t), T=ccISO(ccToday());
     let ex=null; try{ ex=ccExamDate(t,ccToday()); }catch(e){}
     const head='<h3>'+(ccIsDual()?E(t)+' · ':'')+'일정 짠 날 '+md(D.pl.start)+' ~ 오늘 '+md(T)+'</h3>';
@@ -8223,9 +8223,9 @@ window.nmPubClose=function(){ const m=document.getElementById("nmPubPop"); if(m)
   const box=document.querySelector("#s3 .today"); if(!box) return;
   box.innerHTML='<div class="panel"><h3>진행 중인 강의</h3><div class="sub">오늘할당된학습하기와 같은 목록입니다</div><div id="ccTodayL"></div>'+
       '</div>'+
-    '<div class="panel"><h3>분야별 누적수강현황</h3><div class="sub">들은 강의 / 들을 강의(담은 강의)</div><div id="ccAccL"></div><div id="ccAccT" style="margin-top:10px;font-weight:700"></div></div>'+
+    '<div class="panel"><h3>분야별 누적수강현황</h3><div class="sub">난 얼마나 들었지?</div><div id="ccAccL"></div><div id="ccAccT" style="margin-top:10px;font-weight:700"></div></div>'+
     '<div style="display:none"><h3 id="todayTitle"></h3><div id="lectures"></div><b id="todayDigest"></b><div id="accumSub"></div><div id="accum"></div><span id="accumTotLabel"></span><b id="accumTotal"></b><span id="todayAdd"></span></div>';
-  const lede=document.getElementById("s3lede"); if(lede) lede.textContent="오늘 들을 강의와 복습할 강의, 분야별로 지금까지 들은 강의를 한눈에 봅니다.";
+  const lede=document.getElementById("s3lede"); if(lede) lede.textContent="✅ 오늘할당된학습하기를 클릭하여 학습하세요";
   const st=document.createElement("style"); st.textContent=
     '.cctl{display:grid;grid-template-columns:96px 1fr;gap:6px 10px;align-items:baseline;margin-top:10px;font-size:14.5px;line-height:1.6}.cctl .k{font-weight:800;color:var(--gold)}.cctl .k small{display:block;font-weight:500;font-size:11.5px;color:var(--mute,#8a8f99)}'+
     '.cctl .v b{font-weight:800}.cctl .none{color:var(--mute,#8a8f99)}.cctl .rw{display:contents}'+
@@ -8237,7 +8237,7 @@ window.nmPubClose=function(){ const m=document.getElementById("nmPubPop"); if(m)
   window.ccTodayRender=function(){
     const L=document.getElementById("ccTodayL"), A=document.getElementById("ccAccL"), AT=document.getElementById("ccAccT"); if(!L||!A) return;
     if(typeof user==="undefined"||!user){ L.innerHTML=""; A.innerHTML=""; if(AT) AT.textContent=""; return; }
-    const ld=document.getElementById("s3lede"); if(ld) ld.textContent="오늘 들을 강의와 복습할 강의, 분야별로 지금까지 들은 강의를 한눈에 봅니다 · 공부는 아래 ✅ 오늘할당된학습하기에서 합니다.";
+    const ld=document.getElementById("s3lede"); if(ld) ld.textContent="✅ 오늘할당된학습하기를 클릭하여 학습하세요";
     /* 왼쪽: 오늘 · 복습 */
     let S=null; try{ S=ccMissionStack(); }catch(e){}
     const dual=typeof ccIsDual==="function"&&ccIsDual();
