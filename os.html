@@ -3308,6 +3308,10 @@ function ccFlat(t,pl){
    · 하루 수강량만큼, 듣는 순서대로, 아직 배정 안 된 강의를 배정
    · 신규 강의가 아직 공개 전이면: '다른 분야로 채우기'(fill) — 건너뛰고 뒤 강의로 채움 / '복습만 하고 대기'(wait) — 거기서 멈춤
    · 이전 방식(시작일 + 날수 × 하루 수강량)으로 쓰던 계획은 처음 한 번 장부로 옮김 */
+/* 행정법 듣는 날 달력(pl.cal): from=시작일 · dow=듣는 요일 · on/off=날짜별 예외 — 없으면 매일 */
+function ccCalOn(pl,d){ const c=pl&&pl.cal; if(!c) return true; const iso=ccISO(d); if(c.from&&iso<c.from) return false; if(c.off&&c.off[iso]) return false; if(c.on&&c.on[iso]) return true; return !c.dow||!!c.dow[d.getDay()]; }
+function ccCalNext(pl,d){ let x=d; for(let k=0;k<800&&!ccCalOn(pl,x);k++) x=ccAddDays(x,1); return x; }
+window.ccCalOn=ccCalOn; window.ccCalNext=ccCalNext;
 function ccDayFill(t,pl,f,iso){
   const A=pl.asg; let n=0;
   f.forEach(function(o){ if(A[o.key]===iso) n++; });
@@ -3339,7 +3343,7 @@ function ccPlanSync(t,noWrite){
   let d=ccAddDays(ccParse(pl.sync||ccISO(ccAddDays(ccParse(pl.start),-1))),1);
   if(d>today) d=today;   /* 오늘은 매번 다시 채움 — 그사이 공개된 신규 강의·바뀐 담김 반영 */
   const st=ccParse(pl.start);
-  for(;d<=today;d=ccAddDays(d,1)){ if(d<st) continue; if(ccDayFill(t,pl,f,ccISO(d))) changed=true; }
+  for(;d<=today;d=ccAddDays(d,1)){ if(d<st) continue; if(!ccCalOn(pl,d)) continue; if(ccDayFill(t,pl,f,ccISO(d))) changed=true; }
   if(pl.sync!==T){ pl.sync=T; changed=true; }
   if(changed&&!noWrite) ccPlanWrite(t,pl);
   return pl;
@@ -3364,12 +3368,13 @@ function ccPlanCalc(t){
   let todayN=0;
   f.forEach(function(o){ const a=A[o.key]; if(a&&a<T) r.pos++; if(a===T) todayN++; });
   r.today=todayN;
-  let day=todayN<per?today:ccAddDays(today,1), cap=todayN<per?per-todayN:per, firstWait=null;
+  const onT=ccCalOn(pl,today)&&T>=(pl.start||T);
+  let day=(onT&&todayN<per)?today:ccCalNext(pl,ccAddDays(today,1)), cap=(onT&&todayN<per)?per-todayN:per, firstWait=null;
   const when={};
   f.forEach(function(o){
     if(A[o.key]){ when[o.key]=ccParse(A[o.key]); return; }
     if(!ccAvail(t,o)){ r.pending++; if(!firstWait) firstWait=o; }
-    if(cap<=0){ day=ccAddDays(day,1); cap=per; }
+    if(cap<=0){ day=ccCalNext(pl,ccAddDays(day,1)); cap=per; }
     when[o.key]=day; cap--;
   });
   f.forEach(function(o){ const w=when[o.key]; if(!lo[o.si]||w<lo[o.si]) lo[o.si]=w; if(!hi[o.si]||w>hi[o.si]) hi[o.si]=w; if(!r.end||w>r.end) r.end=w; });
@@ -3377,7 +3382,7 @@ function ccPlanCalc(t){
   r.days=Math.ceil(total/per);
   r.left=Math.max(0,Math.ceil((total-r.pos)/per));
   if(r.end) r.endTxt=ccYMD(r.end)+(r.pending?" (공개 일정에 따라)":"");
-  if(todayN<per&&firstWait&&(total-r.pos-todayN)>0){
+  if(onT&&todayN<per&&firstWait&&(total-r.pos-todayN)>0){
     const anyAvail=f.some(function(o){ return !A[o.key]&&ccAvail(t,o); });
     if(pl.fill==="wait"||!anyAvail) r.wait={n:todayN, next:ccLecName(t,firstWait.l,firstWait.si,firstWait.i,firstWait.src)};
   }
@@ -11619,6 +11624,108 @@ var qrcode = function() {
       var a=document.createElement("button"); a.className="mini dtadd"; a.type="button"; a.textContent="＋ 이 학생 자료 추가"; a.title="이 학생의 개인 QR에 함께 열리는 자료(개인 논증사슬 지도 등)를 올립니다";
       a.onclick=function(){ ccDtAddFor(+m[1]); }; q.parentNode.insertBefore(a,q); }); }
   new MutationObserver(deco).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+<style>
+#ccCal{flex:0 1 330px;min-width:270px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:13px}
+#ccCal h3{margin:0 0 2px;font-size:15px;display:flex;align-items:center;gap:6px}
+#ccCal h3 span{flex:1}
+#ccCal h3 button{font:inherit;background:transparent;color:inherit;border:1px solid var(--line);border-radius:7px;padding:1px 9px;cursor:pointer}
+#ccCal .cs{opacity:.75;font-size:12px;margin:2px 0 6px}
+#ccCal .cg{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+#ccCal .cg i{font-style:normal;font-size:11px;opacity:.6;padding:2px 0}
+#ccCal .cd{border:1px solid transparent;border-radius:7px;padding:3px 0 2px;min-height:36px;background:transparent;color:inherit;font:inherit;font-size:12px;line-height:1.15;cursor:pointer}
+#ccCal .cd small{display:block;font-size:10px;font-weight:800;min-height:11px}
+#ccCal .cd.on{border-color:var(--gold);background:rgba(232,185,71,.12)}
+#ccCal .cd.on small{color:var(--gold)}
+#ccCal .cd small.rv{font-weight:600;font-size:9.5px;color:#7db8f0;min-height:10px}
+#ccCal .cd.on small.rv{color:#7db8f0}
+#ccCal .cd.past{opacity:.5;cursor:default}
+#ccCal .cd.tod{outline:2px solid var(--gold);outline-offset:1px;font-weight:800}
+#ccCal .cd.x{visibility:hidden}
+#ccCal .cf{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+#ccCal .cf input{font:inherit;font-size:12px;padding:4px 6px;border-radius:7px;border:1px solid var(--line);background:transparent;color:inherit}
+#ccCal .cf input[type=number]{width:58px}
+#ccCal .cw{display:flex;gap:3px}
+#ccCal .cw button{font:inherit;font-size:12px;width:28px;height:26px;border-radius:7px;border:1px solid var(--line);background:transparent;color:inherit;cursor:pointer;padding:0}
+#ccCal .cw button.on{background:var(--gold);color:#16202b;border-color:var(--gold);font-weight:800}
+#ccCal .go{font:inherit;font-weight:800;font-size:12.5px;padding:6px 12px;border-radius:8px;border:0;background:var(--gold);color:#16202b;cursor:pointer}
+#ccCal .cr{margin-top:6px;font-size:12px}
+</style>
+<script>
+/* ═══ 📅 행정법 강의수강 플랜 달력 ═══
+   수강생마다 「언제부터 · 며칠 동안 · 무슨 요일에」 행정법을 듣는지 스스로 정한다(다른 과목을 듣는 날은 비움).
+   · 플랜 짜기: 기간 안의 「행정법 듣는 날」 수로 남은 강의를 나눠 하루 수강강의수를 자동으로 정함
+   · 날짜를 누르면 그 날만 듣는 날 ↔ 쉬는 날로 바꿈 · 배정과 밀림 판정은 듣는 날만 셈 (convert.py의 ccCalOn) */
+(function(){
+  var VIEW=null, DOW=null, DN=["일","월","화","수","목","금","토"];
+  function ok(){ return typeof user!=="undefined"&&user&&typeof ccPlanSync==="function"&&typeof TRACK!=="undefined"; }
+  function proj(t){
+    var pl=ccPlanSync(t,true), f=ccFlat(t,pl), per=pl.per||0, A=pl.asg||{}, today=ccToday(), T=ccISO(today), cnt={}, todayN=0, end=null;
+    f.forEach(function(o){ var a=A[o.key]; if(a){ cnt[a]=(cnt[a]||0)+1; if(a===T) todayN++; } });
+    if(per){ var onT=ccCalOn(pl,today)&&T>=(pl.start||T), day=(onT&&todayN<per)?today:ccCalNext(pl,ccAddDays(today,1)), cap=(onT&&todayN<per)?per-todayN:per;
+      f.forEach(function(o){ if(A[o.key]) return; if(cap<=0){ day=ccCalNext(pl,ccAddDays(day,1)); cap=per; } var k=ccISO(day); cnt[k]=(cnt[k]||0)+1; cap--; end=day; }); }
+    return {pl:pl,cnt:cnt,total:f.length,end:end,T:T,today:today};
+  }
+  function box(){ var b=document.getElementById("ccCal"); if(b) return b; var p=document.querySelector("#s1 .profiles"); if(!p) return null;
+    b=document.createElement("div"); b.id="ccCal"; p.appendChild(b); return b; }
+  window.ccCalRender=function(){
+    if(!ok()) return; var b=box(); if(!b) return;
+    var t=TRACK, P=proj(t), pl=P.pl, cal=pl.cal||null;
+    if(!VIEW) VIEW=new Date(P.today.getFullYear(),P.today.getMonth(),1);
+    if(!DOW) DOW=(cal&&cal.dow)?cal.dow.slice():[1,1,1,1,1,1,1];
+    var y=VIEW.getFullYear(), m=VIEW.getMonth(), first=new Date(y,m,1), n=new Date(y,m+1,0).getDate();
+    var h='<h3><span>📅 행정법 강의수강 플랜</span><button type="button" onclick="ccCalMove(-1)" aria-label="이전 달">‹</button><b style="font-size:13px">'+y+'. '+(m+1)+'</b><button type="button" onclick="ccCalMove(1)" aria-label="다음 달">›</button></h3>'+
+      '<div class="cs">날짜를 누르면 듣는 날 ↔ 쉬는 날 · 복습은 들은 날의 2 · 6 · 14일 뒤에 그대로 뜹니다</div><div class="cg">'+DN.map(function(d){ return '<i>'+d+'</i>'; }).join("");
+    for(var k=0;k<first.getDay();k++) h+='<span class="cd x"></span>';
+    for(var d=1;d<=n;d++){ var dt=new Date(y,m,d), iso=ccISO(dt), past=iso<P.T, c=P.cnt[iso]||0, on=past?c>0:(pl.per?ccCalOn(pl,dt)&&(c>0||iso===P.T):false);
+      var rv=0; [2,6,14].forEach(function(g){ rv+=P.cnt[ccISO(ccAddDays(dt,-g))]||0; });
+      h+='<button type="button" class="cd'+(on?' on':'')+(past?' past':'')+(iso===P.T?' tod':'')+'"'+(past?' disabled':' onclick="ccCalTog(\''+iso+'\')"')+'>'+d+'<small>'+(c?c+'강':'')+'</small><small class="rv">'+(rv&&!past?'복습 '+rv:'')+'</small></button>'; }
+    h+='</div>';
+    var from=(cal&&cal.from&&cal.from>=P.T)?cal.from:P.T, days=(cal&&cal.days)||30;
+    h+='<div class="cf"><input type="date" id="ccCalFrom" value="'+from+'" min="'+P.T+'" aria-label="시작일">부터 <input type="number" id="ccCalDays" min="1" max="730" value="'+days+'" aria-label="기간">일간</div>'+
+      '<div class="cf"><span class="cw">'+[1,2,3,4,5,6,0].map(function(i){ return '<button type="button" class="'+(DOW[i]?'on':'')+'" onclick="ccCalDow('+i+')">'+DN[i]+'</button>'; }).join("")+'</span><button type="button" class="go" onclick="ccCalApply()">플랜 짜기</button></div>';
+    h+='<div class="cr">'+(pl.per?('하루 <b>'+pl.per+'강</b> · 담은 강의 '+P.total+'강'+(P.end?' · 완료 예정 <b>'+ccYMD(P.end)+'</b>':'')):(P.total?'시작일 · 기간 · 요일을 정하고 「플랜 짜기」를 누르세요':'먼저 강의선택에서 들을 강의를 담아 주세요'))+'</div>';
+    b.innerHTML=h;
+  };
+  window.ccCalMove=function(k){ if(!VIEW) return; VIEW=new Date(VIEW.getFullYear(),VIEW.getMonth()+k,1); ccCalRender(); };
+  window.ccCalDow=function(i){ if(!DOW) return; DOW[i]=DOW[i]?0:1; var f=document.getElementById("ccCalFrom"), d=document.getElementById("ccCalDays"), fv=f&&f.value, dv=d&&d.value; ccCalRender();
+    f=document.getElementById("ccCalFrom"); d=document.getElementById("ccCalDays"); if(f&&fv) f.value=fv; if(d&&dv) d.value=dv; };
+  function clearToday(pl){ var T=ccISO(ccToday()); if(pl.asg) Object.keys(pl.asg).forEach(function(k){ if(pl.asg[k]===T) delete pl.asg[k]; }); pl.sync=ccISO(ccAddDays(ccToday(),-1)); }
+  function after(t){ try{ ccPlanSync(t); }catch(e){} try{ ccPlanBar(); }catch(e){ ccCalRender(); } try{ if(window.ccPaceRender) ccPaceRender(); }catch(e){} }
+  window.ccCalApply=function(){
+    if(!ok()) return; var t=TRACK, pl=ccPlanSync(t,true), today=ccToday(), T=ccISO(today);
+    var from=(document.getElementById("ccCalFrom")||{}).value||T, days=parseInt((document.getElementById("ccCalDays")||{}).value,10)||0;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||from<T) from=T;
+    if(days<1){ toast("기간(며칠 동안)을 넣어 주세요"); return; }
+    if(!DOW.some(function(x){ return x; })){ toast("행정법 듣는 요일을 하나 이상 골라 주세요"); return; }
+    var f=ccFlat(t,pl), A=pl.asg||{}, left=0; f.forEach(function(o){ var a=A[o.key]; if(!(a&&a<T)) left++; });
+    if(!f.length){ toast("먼저 강의선택에서 들을 강의를 담아 주세요"); return; }
+    if(!left){ toast("담은 강의를 모두 들었습니다"); return; }
+    var old=pl.cal||{}, cal={from:from,days:days,dow:DOW.slice(),on:{},off:{}}, st=ccParse(from), n=0;
+    for(var k=0;k<days;k++){ var d=ccAddDays(st,k), iso=ccISO(d); if(old.on&&old.on[iso]) cal.on[iso]=1; if(old.off&&old.off[iso]) cal.off[iso]=1; }
+    var tmp={cal:cal}; for(var k2=0;k2<days;k2++) if(ccCalOn(tmp,ccAddDays(st,k2))) n++;
+    if(!n){ toast("그 기간에 고른 요일이 없습니다 — 기간이나 요일을 바꿔 주세요"); return; }
+    var need=Math.ceil(left/n), per=Math.max(1,Math.min(CC_PER_MAX,need));
+    pl.cal=cal; pl.per=per; pl.asg=pl.asg||{}; clearToday(pl); if(!pl.start||!Object.keys(pl.asg).length) pl.start=from>T?from:T; delete pl.pace;
+    ccPlanWrite(t,pl); VIEW=new Date(st.getFullYear(),st.getMonth(),1); after(t);
+    var c=ccPlanCalc(t);
+    toast(need>CC_PER_MAX ? ("하루 최대 "+CC_PER_MAX+"강이라 "+days+"일 안에는 다 듣지 못합니다 — 완료 예정 "+(c.endTxt||"")+" · 기간을 늘리거나 요일을 더 골라 주세요")
+                          : ("행정법 듣는 날 "+n+"일 · 하루 "+per+"강"+(c.endTxt?" · 완료 예정 "+c.endTxt:"")));
+  };
+  window.ccCalTog=function(iso){
+    if(!ok()) return; var t=TRACK, pl=ccPlanSync(t,true), T=ccISO(ccToday()); if(iso<T) return;
+    if(!pl.per){ toast("먼저 「플랜 짜기」로 플랜을 만들어 주세요"); return; }
+    var cal=pl.cal=pl.cal||{from:null,days:null,dow:[1,1,1,1,1,1,1],on:{},off:{}}; cal.on=cal.on||{}; cal.off=cal.off||{};
+    var d=ccParse(iso), was=ccCalOn(pl,d);
+    if(was){ delete cal.on[iso]; cal.off[iso]=1; } else { delete cal.off[iso]; cal.on[iso]=1; if(cal.from&&iso<cal.from) cal.from=iso; if(pl.start&&iso<pl.start) pl.start=iso; }
+    clearToday(pl); ccPlanWrite(t,pl); after(t);
+    toast(ccMD(d)+(was?" — 쉬는 날로 바꿨습니다":" — 행정법 듣는 날로 바꿨습니다"));
+  };
+  /* 계획 막대가 다시 그려질 때마다 달력도 같이 */
+  function hook(){ if(typeof window.ccPlanBar!=="function"||window.ccPlanBar.__cal) return false;
+    var o=window.ccPlanBar, w=function(){ var r=o.apply(this,arguments); try{ ccCalRender(); }catch(e){} return r; }; w.__cal=1; window.ccPlanBar=w; return true; }
+  if(!hook()) document.addEventListener("DOMContentLoaded",hook);
 })();
 </script>
 <style>
