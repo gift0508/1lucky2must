@@ -950,7 +950,7 @@ border-radius:999px;padding:4px 12px;font-size:.7rem;cursor:pointer;font-family:
 <button class="homebtn" onclick="showHome()">← 홈으로</button>
 <!-- ① -->
   <section id="s1">
-    <div class="step-tag">STEP ① 나의 수강신청</div>
+    <div class="step-tag">STEP ① 합격을 향해 뛰는 나</div>
     <div class="profiles">
       <div class="pcard on">
         <h3 id="profName">행정법 1차 · 직장 병행</h3>
@@ -965,7 +965,7 @@ border-radius:999px;padding:4px 12px;font-size:.7rem;cursor:pointer;font-family:
   <section id="s2">
     <div class="matrix-head">
       <div>
-        <div class="step-tag">STEP ② 합격경로 한눈에 보기 — 분야별 독립 진행 · 통과한 분야만 다음 칸으로</div>
+        <div class="step-tag">STEP ② 합격경로 한눈에 보기</div>
         <p class="lede" id="rmLede">칸을 누르면 그 칸의 객관식 학습 레이어가 열립니다. 5분야 × 6단계(입문특강·기본이론·사례풀이강의·판례특강강의·핵지총특강·기출특강)를 분야별로 독립 진행합니다 · 전체학습계획 밖 특강은 맨 오른쪽 「특강」 칸에서 골라 듣습니다.</p>
       </div>
       <div class="legend">
@@ -2991,9 +2991,9 @@ function ccPathSummary(){
   const wait=diag.filter(function(l){ return !CC_DIAG[l]; });
   const T=function(id,v){ const el=document.getElementById(id); if(el) el.innerHTML=v; };
   T("profName","행정법 "+TRACK+" · "+(user.type||"행정법 학습OS"));
-  T("profDesc","수험 단계 — <b>"+(user.exp2||"미입력")+"</b>. 분야마다 처음부터 따라가거나, 이미 공부한 단계를 건너뛰고 원하는 단계부터 시작합니다. 건너뛴 단계도 <b>면제 · 수강 가능</b>으로 열려 있어 언제든 들을 수 있습니다.");
+  T("profDesc","수험 단계 — <b>"+(user.exp2||"미입력")+"</b>");
   T("profDiag", CC_PATH_SET
-    ? ("수강신청 — "+(start.length?"<b>처음부터</b> "+start.join("·"):"")+(start.length&&diag.length?" · ":"")+(diag.length?"<b>진단</b> "+diag.join("·"):"")+(wait.length?" · <b style=\"color:#ffb347\">진단 대기 "+wait.length+"분야</b> (자가진단에서 진행)":"")+(skip.length?" · <b>선택 안 함</b> "+skip.join("·"):""))
+    ? (start.length===laws.length ? "수강신청 — <b>처음부터</b>" : "수강신청 — "+(start.length?"<b>처음부터</b> "+start.join("·"):"")+(start.length&&diag.length?" · ":"")+(diag.length?"<b>진단</b> "+diag.join("·"):"")+(wait.length?" · <b style=\"color:#ffb347\">진단 대기 "+wait.length+"분야</b> (자가진단에서 진행)":"")+(skip.length?" · <b>선택 안 함</b> "+skip.join("·"):""))
     : "아직 수강신청을 하지 않았습니다 — <b>수강신청</b>을 눌러 주세요");
   if(ccIsDual()){ const el=document.getElementById("profDiag"); if(el) el.innerHTML="<b>["+TRACK+" 전체학습계획]</b> "+el.innerHTML; }
 }
@@ -3448,7 +3448,7 @@ function ccPlanBar(){
     '<label class="pbv">하루 수강량 <select id="ccPerSel" onchange="ccPlanSetPer(TRACK,+this.value)">'+opts+'</select></label>'+res+
     '<button class="mini" onclick="openEngine(\'match\')">🎯 강의 고르기</button>'+
     (function(){ const ms=c.per?ccPlanMissed(TRACK):[]; return ms.length?ccMissedHTML(TRACK,ms,c.per,false):""; })()+
-    '<div class="pbn">하루 수강량은 직접 정합니다 · 바꾸면 오늘부터 다시 계산됩니다 · '+(window.CC_CAT_NOTE||"강의 수는 가상 편성(확정 전)입니다")+'</div>';
+    '<div class="pbn">하루 수강량은 직접 정합니다 · 바꾸면 오늘부터 다시 계산됩니다</div>';
 }
 function ccPlanSetPer(t,v){
   v=Math.max(0,Math.min(CC_PER_MAX,parseInt(v,10)||0));
@@ -4248,7 +4248,7 @@ function applyTrackChrome(track){
   S("profDesc", `${track} 행정법을 사례형 답안 중심으로 준비하는 과정입니다. 9개 분야를 기본강의 → 답안작성강의 → 사례풀이강의 → 판례특강강의 순서로 진행합니다.`);
   S("profDiag", `수강신청에서 분야마다 시작 단계를 정하면 전체학습계획에 그대로 반영됩니다.`);
   T("rmTitle", two?"나의 28칸 전체학습계획":"나의 32칸 전체학습계획");
-  S("rmLede", `칸을 누르면 그 칸의 사례형 학습 레이어가 열립니다. 9개 분야 × 4단계(기본강의·답안작성강의·사례풀이강의·판례특강강의)를 분야별로 독립 진행합니다.`);
+  S("rmLede", `칸을 누르면 그 강의의 공부 화면이 열립니다.`);
   T("fbTag", two?"파이널 · 자신의 선택":"특강 · 자율수행"); var _fb=document.querySelector(".finalbar"); if(_fb) _fb.style.display=two?"none":"";
   S("fbTitle", two?`28칸(핵심·문풀·파이널·특강)을 마친 뒤 — 파이널은 스스로 여는 단계입니다`:`32칸(기본·문풀·핵심·기출실전)을 마친 뒤 — 특강은 스스로 여는 단계입니다`);
   S("fbSub", two?`파이널은 28칸 안에 배치되지 않습니다. 핵심·문풀·파이널·특강를 통과하면 <b>전범위를 압축하는 파이널</b>이 열리고, 원하는 시점에 <b>스스로 선택</b>해 들어갑니다. 실전 채점·모의와 연결되는 지점입니다.`:`특강은 합격경로상에 없는 별도의 과정입니다. 시험 직전 자신의 약점을 없애는 과정입니다.`);
@@ -4353,7 +4353,7 @@ window.CC_EXAM="행정법";
 window.CC_BOOKREF={"행정소송의 개관과 한계": [["제1장", "ok"], ["제2장", "ok"], ["제3장", "ok"]], "취소소송 · 소제기의 적법성": [["제4장", "ok"], ["제5장", "ok"], ["제6장", "ok"], ["제7장", "ok"], ["제8장", "ok"], ["제8-1장", "add"], ["제9장", "ok"], ["제9-1장", "add"], ["제10장", "ok"], ["제11장", "ok"], ["제12장", "ok"], ["제12-1장", "add"]], "취소소송 · 본안의 심리": [["제13장", "ok"], ["제14장", "ok"], ["제15장", "ok"], ["제16장", "ok"], ["제17장", "ok"]], "취소소송 · 본안의 위법성판단": [["제18장", "ok"], ["제19장", "ok"], ["제20장", "ok"], ["제21장", "ok"], ["제22장", "ok"], ["제23장", "ok"], ["제24장", "ok"], ["제25장", "ok"], ["제26장", "ok"], ["제27장", "ok"], ["제28장", "ok"], ["제29장", "ok"], ["제30장", "ok"], ["제31장", "ok"], ["제32장", "ok"], ["제33장", "ok"]], "취소소송 · 판결": [["제34장", "ok"], ["제35장", "ok"]], "기타 항고소송": [["제36장", "ok"], ["제37장", "ok"]], "당사자소송": [["제38장", "ok"]], "객관소송": [["제39장", "ok"]], "실효성확보 · 손해전보": [["제40장", "ok"], ["제41장", "ok"], ["제42장", "ok"], ["제43장", "ok"], ["제44장", "ok"]]};
 window.ccBookRef=function(l,i){ try{ var a=(window.CC_BOOKREF||{})[l]; return (a&&a[i])?{ch:a[i][0],st:a[i][1]}:null; }catch(e){ return null; } };
 window.CC_NUMBERING="강";
-window.CC_CAT_NOTE="강의 수는 1행2필 강의 편성 기준입니다 (26년 대비 · 27년 대비)";
+window.CC_CAT_NOTE="";
 window.CC_DIAG_OFF=true;
 /* 강사 (1행2필 강의 편성) */
 window.CC_PROF={"1차":{"노동법Ⅰ":"김희향","노동법Ⅱ":"김희향","민법":"김동진","사회보험법":"이윤형","경영학개론":"이근필"}};
