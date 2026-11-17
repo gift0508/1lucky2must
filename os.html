@@ -11367,5 +11367,117 @@ var qrcode = function() {
   try{ CC_EXAM_DATES["노무사"]=CC_EXAM_DATES["노무사"]||[]; CC_EXAM_DATES["감정평가사"]=CC_EXAM_DATES["감정평가사"]||[]; }catch(e){}
 })();
 </script>
+<style>
+#ccErrBtn{position:fixed;left:0;bottom:22px;z-index:85;display:none;align-items:center;gap:6px;padding:9px 14px 9px 11px;border:none;border-radius:0 999px 999px 0;
+  background:#fff;color:#0D1F3C;font-family:'Noto Sans KR',system-ui,sans-serif;font-weight:800;font-size:.8rem;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+#ccErrBtn.on{display:inline-flex}
+#ccErrBtn b{background:#e86a5a;color:#fff;border-radius:999px;padding:1px 7px;font-size:.7rem}
+#ccErrModal{position:fixed;inset:0;z-index:9990;display:none;align-items:flex-start;justify-content:center;background:rgba(5,12,26,.72);padding:24px 12px;overflow:auto}
+#ccErrModal.open{display:flex}
+#ccErrModal .ecard{width:100%;max-width:680px;background:#fff;color:#1b2434;border-radius:16px;padding:22px 20px 18px;font-family:'Noto Sans KR',system-ui,sans-serif;line-height:1.65}
+#ccErrModal h3{margin:0 0 4px;font-size:1.1rem;color:#0D1F3C}
+#ccErrModal .esub{font-size:.8rem;color:#5b6577;margin-bottom:14px}
+#ccErrModal h4{margin:16px 0 6px;font-size:.9rem;color:#0D1F3C;border-bottom:2px solid #C9A227;padding-bottom:4px}
+#ccErrModal .erow{border:1px solid #dfe3ea;border-radius:10px;padding:10px 12px;margin:8px 0;font-size:.86rem}
+#ccErrModal .eloc{font-weight:800;color:#0D1F3C;margin-bottom:4px}
+#ccErrModal .ex{color:#b3372b;text-decoration:line-through;word-break:break-word}
+#ccErrModal .eo{color:#136b3a;font-weight:800;word-break:break-word}
+#ccErrModal .enote{color:#5b6577;font-size:.8rem;margin-top:4px;white-space:pre-wrap}
+#ccErrModal .eclose{float:right;border:1px solid #cfd5df;background:#fff;border-radius:999px;padding:4px 12px;cursor:pointer;font:inherit;font-size:.8rem}
+#ccErrPanel input,#ccErrPanel select,#ccErrPanel textarea{width:100%;box-sizing:border-box;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);color:inherit;border-radius:8px;padding:8px;font:inherit;margin:3px 0}
+#ccErrPanel .eg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#ccErrPanel .erow{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0;font-size:.86rem}
+</style>
+<button id="ccErrBtn" onclick="ccErrOpen()">📕 교재 정오표</button>
+<div id="ccErrModal" onclick="if(event.target===this)ccErrClose()"><div class="ecard" id="ccErrBody"></div></div>
+<script>
+/* ═══ 교재 정오표 — 출간된 교재의 오류를 사이트에서 밝히고, 수강생이 자기 교재에 직접 고쳐 적도록 안내 (서버: cc_settings.errata) ═══
+   · 수강생: 화면 왼쪽 아래 「📕 교재 정오표」 → 교재별 · 장별 목록 (새 항목이 생기면 빨간 숫자)
+   · 관리자: 관리자 대시보드 「📕 교재 정오표」에서 항목 추가 · 삭제 */
+(function(){
+  var E=function(x){ return String(x==null?"":x).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+  var S=function(){ return window.ccSb||null; };
+  var BOOKS=["기본이론서","답안작성법","사례집","판례집"], KEY="cc_errata_seen", L=[];
+  function chn(c){ var m=String(c||"").match(/(\d+)(?:-(\d+))?/); return m?(+m[1])*10+(+(m[2]||0)):9999; }
+  function sorted(){ return L.slice().sort(function(a,b){ return BOOKS.indexOf(a.book)-BOOKS.indexOf(b.book)||chn(a.ch)-chn(b.ch)||(a.id||0)-(b.id||0); }); }
+  async function load(){
+    var sb=S(); if(!sb) return false;
+    try{ var r=await sb.from("cc_settings").select("value").eq("key","errata").maybeSingle(); if(r.error) throw r.error;
+      var v=r.data&&r.data.value; v=typeof v==="string"?JSON.parse(v||"[]"):(v||[]); L=Array.isArray(v)?v:[]; return true;
+    }catch(e){ console.warn(e); return false; }
+  }
+  function seen(){ try{ return +(localStorage.getItem(KEY)||0); }catch(e){ return 0; } }
+  function badge(){ var b=document.getElementById("ccErrBtn"); if(!b) return;
+    var s=seen(), n=L.filter(function(x){ return (x.id||0)>s; }).length;
+    b.innerHTML="📕 교재 정오표"+(n?" <b>"+n+"</b>":""); }
+  function rowHtml(x){
+    return '<div class="eloc">'+E(x.ch||"")+(x.loc?" · "+E(x.loc):"")+'</div>'+
+      '<div><span class="ex">'+E(x.wrong)+'</span> → <span class="eo">'+E(x.right)+'</span></div>'+
+      (x.note?'<div class="enote">'+E(x.note)+'</div>':'')+(x.date?'<div class="enote">등록 '+E(x.date)+'</div>':''); }
+  window.ccErrOpen=async function(){
+    var m=document.getElementById("ccErrModal"), b=document.getElementById("ccErrBody"); if(!m||!b) return;
+    m.classList.add("open"); b.innerHTML='<h3>📕 교재 정오표</h3><div class="esub">불러오는 중…</div>';
+    var ok=await load();
+    var h='<button class="eclose" onclick="ccErrClose()">닫기</button><h3>📕 교재 정오표</h3>'+
+      '<div class="esub">이미 출간된 교재에서 확인된 오류입니다. 가지고 계신 교재의 해당 부분을 직접 고쳐 적어 주세요. 사이트의 학습도구에는 바른 내용이 반영되어 있습니다.</div>';
+    if(!ok) h+='<div class="esub">정오표를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</div>';
+    else if(!L.length) h+='<div class="esub">현재 등록된 정정 사항이 없습니다.</div>';
+    else { var cur=""; sorted().forEach(function(x){ if(x.book!==cur){ cur=x.book; h+='<h4>'+E(cur)+'</h4>'; } h+='<div class="erow">'+rowHtml(x)+'</div>'; }); }
+    b.innerHTML=h;
+    if(ok){ try{ localStorage.setItem(KEY,String(L.reduce(function(a,x){ return Math.max(a,x.id||0); },0))); }catch(e){} badge(); }
+  };
+  window.ccErrClose=function(){ var m=document.getElementById("ccErrModal"); if(m) m.classList.remove("open"); };
+  /* 로그인한 수강생에게만 단추 표시 */
+  var loaded=false;
+  function vis(){ var u=document.getElementById("userchip"), b=document.getElementById("ccErrBtn"); if(!b) return;
+    var on=!!(u&&u.style.display!=="none")&&!window.adminAuthed; b.classList.toggle("on",on);
+    if(on&&!loaded&&S()){ loaded=true; load().then(function(ok){ if(ok) badge(); else loaded=false; }); } }
+  setInterval(vis,1500); setTimeout(vis,800);
+
+  /* ── 관리자: 항목 추가 · 삭제 ── */
+  function panel(){
+    var pn=document.getElementById("ccErrPanel"); if(pn) return pn;
+    var after=document.getElementById("ccQnaPanel")||document.querySelector("#adminView .awrap .topbar"); if(!after) return null;
+    pn=document.createElement("div"); pn.className="panel"; pn.id="ccErrPanel"; pn.style.marginTop="18px"; after.after(pn); return pn;
+  }
+  function adraw(msg){
+    var pn=panel(); if(!pn) return;
+    var h='<h3>📕 교재 정오표 <small style="font-size:.75em;font-weight:500">등록 '+L.length+'건</small></h3>'+
+      '<div class="sub">출간된 교재의 오류를 등록하면 수강생 화면 왼쪽 아래 「📕 교재 정오표」에 바로 나타납니다.</div>'+
+      '<div class="eg"><select id="erBook">'+BOOKS.map(function(k){ return '<option>'+k+'</option>'; }).join("")+'</select>'+
+      '<input id="erCh" maxlength="40" placeholder="장 (예: 제44장 손실보상)"></div>'+
+      '<input id="erLoc" maxlength="80" placeholder="위치 (예: ④ 행정소송 · 2곳 / 123쪽)">'+
+      '<input id="erWrong" maxlength="300" placeholder="교재에 적힌 표현 (틀린 부분)">'+
+      '<input id="erRight" maxlength="300" placeholder="바른 표현">'+
+      '<textarea id="erNote" maxlength="600" placeholder="설명 (선택)" style="min-height:54px"></textarea>'+
+      '<div style="margin:6px 0"><button class="mini" onclick="ccErrAdd()">정정 사항 등록</button> <button class="mini" onclick="ccErrAdmin()">새로 고침</button> <span class="sub">'+E(msg||"")+'</span></div>';
+    sorted().forEach(function(x){ h+='<div class="erow"><b>'+E(x.book)+' · '+E(x.ch||"")+(x.loc?" · "+E(x.loc):"")+'</b><br>'+E(x.wrong)+' → <b>'+E(x.right)+'</b>'+
+      (x.note?'<br><span class="sub">'+E(x.note)+'</span>':'')+'<div style="margin-top:4px"><button class="mini" onclick="ccErrDel('+(+x.id||0)+')">삭제</button></div></div>'; });
+    pn.innerHTML=h;
+  }
+  async function save(){ var sb=S(); if(!sb) return "서버에 연결되지 않았습니다";
+    var r=await sb.from("cc_settings").upsert([{key:"errata",value:JSON.stringify(L),updated_at:new Date().toISOString()}],{onConflict:"key"});
+    return r.error?(window.ccErr?ccErr(r.error):r.error.message):""; }
+  window.ccErrAdmin=async function(){ if(!panel()) return; var ok=await load(); adraw(ok?"":"정오표를 불러오지 못했습니다"); };
+  window.ccErrAdd=async function(){
+    var g=function(i){ var e=document.getElementById(i); return e?(e.value||"").trim():""; };
+    var x={book:g("erBook"),ch:g("erCh"),loc:g("erLoc"),wrong:g("erWrong"),right:g("erRight"),note:g("erNote")};
+    if(!x.ch||!x.wrong||!x.right){ alert("장 · 교재에 적힌 표현 · 바른 표현을 모두 적어 주세요."); return; }
+    if(!(await load())){ alert("정오표를 불러오지 못해 등록하지 않았습니다. 다시 시도해 주세요."); return; }
+    var d=new Date(); x.date=d.getFullYear()+"."+(d.getMonth()+1)+"."+d.getDate();
+    x.id=L.reduce(function(a,y){ return Math.max(a,y.id||0); },0)+1; L.push(x);
+    var er=await save(); if(er){ L.pop(); alert("등록하지 못했습니다 — "+er); return; }
+    try{ toast("정정 사항을 등록했습니다"); }catch(e){} adraw();
+  };
+  window.ccErrDel=async function(id){
+    if(!confirm("이 정정 사항을 삭제할까요?")) return;
+    if(!(await load())){ alert("정오표를 불러오지 못해 삭제하지 않았습니다."); return; }
+    var old=L; L=L.filter(function(x){ return (x.id||0)!==id; });
+    var er=await save(); if(er){ L=old; alert("삭제하지 못했습니다 — "+er); return; }
+    adraw();
+  };
+  try{ var q=window.ccQnaAdmin; window.ccQnaAdmin=function(){ var r=q?q.apply(this,arguments):null; try{ Promise.resolve(r).then(function(){ ccErrAdmin(); }); }catch(e){} return r; }; }catch(e){}
+})();
+</script>
 </body>
 </html>
