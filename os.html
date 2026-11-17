@@ -6095,7 +6095,7 @@ function qupParse(text,def){
     const it={n:out.length+1,track:trk,subject:sj,stage:st,lec:lec,qtype:qupType(g("유형"),trk),case_text:null,question:"",choices:null,answer:null,explanation:null,keywords:null,model_answer:null,
       chapter:null,topic:null,logic:null,grid:null,advice:null,rewrite:null,src:def.src||null,err:[]};
     if(!sj) it.err.push("분야"); if(!st) it.err.push("단계"); if(!lec) it.err.push("강의");
-    if(ccCase(trk)){
+    if(ccCase(trk)&&it.qtype!=="5지택일"&&it.qtype!=="콤보형"){
       it.qtype=it.qtype==="필수암기"?"필수암기":"주관식";
       const cs=g("사례")||g("사례지문"), mq=g("물음");
       it.question=[cs,mq?("【물음】\n"+mq):""].filter(Boolean).join("\n\n")||g("문제")||g("발문");
@@ -6202,7 +6202,7 @@ function qupPreview(){
     '<div class="qupwrap"><table class="quptbl"><thead><tr><th>#</th><th>분야 · 단계 · 강의</th><th>유형</th><th>내용(앞부분)</th><th>배점표</th><th>상태</th></tr></thead><tbody>'+
     R.map(function(r){ const gl=r.grid?r.grid.split("\n").filter(function(l){ return /\|/.test(l); }).length:0;
       return '<tr class="'+(r.err.length?'bad':'')+'"><td>'+r.n+'</td><td>'+qupEsc((r.subject||"?")+" · "+(r.stage||"?")+" · "+(r.lec||"?")+"강")+'</td><td>'+qupEsc(r.qtype==="콤보형"?"선다형":(r.qtype||"?"))+'</td><td>'+qupEsc(String(r.topic?("["+r.topic+"] "):"")+String(r.question||"").replace(/\s+/g," ").slice(0,60))+'</td>'+
-        '<td>'+(ccCase(r.track)?(gl?gl+'줄':'—'):(r.choices?r.choices.length+'지 · 정답 '+qupEsc(r.answer||"?"):(r.answer?"정답 "+qupEsc(r.answer):"")))+'</td>'+
+        '<td>'+((ccCase(r.track)&&!r.choices)?(gl?gl+'줄':'—'):(r.choices?r.choices.length+'지 · 정답 '+qupEsc(r.answer||"?"):(r.answer?"정답 "+qupEsc(r.answer):"")))+'</td>'+
         '<td>'+(r.err.length?'<span class="qupbad">빠짐: '+qupEsc(r.err.join(", "))+'</span>':'<span class="qupok">✓</span>')+(r.warn?'<div class="qupwarn">'+qupEsc(r.warn)+'</div>':'')+'</td></tr>'; }).join("")+'</tbody></table></div>'+
     (ok.length?'<div class="qupact"><label style="font-size:.84rem"><input type="radio" name="qupMode" value="add" checked> 기존 문항 뒤에 <b>추가</b></label>'+
       '<label style="font-size:.84rem"><input type="radio" name="qupMode" value="replace"> 같은 강의·같은 유형의 기존 문항을 지우고 <b>바꾸기</b></label>'+
