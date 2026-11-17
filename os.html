@@ -11,6 +11,7 @@ window.CC={
   key:"sb_publishable_ftmRCd79ptIpD6v4wgGXFg_T84zX53R",
   domain:"1h2p.local",          /* 아이디 → 내부 로그인 주소(메일 발송 없음) */
   adminCode:"1h2p",
+  site:"https://1lucky2must.com/os.html",   /* 수강생에게 안내하는 접속 주소 — index.html로 교체하면 https://1lucky2must.com 으로 고칩니다 */
   ns:"adm__",                          /* 이 기기 저장 공간 구분 (같은 github.io 주소의 다른 사이트와 섞이지 않게) */
   /* 수강생별로 서버에 저장하는 학습 진도 */
   syncExact:["cc_state","cc_learnlog","cc_sum_v1","cc_note_v1","cc_memo_prog","cc_qb_res","cc_qb_hist","cc_case_stage","cc_combo_v1","cc_case3_v1","1h2p_gp_learner_progress","1h2p_gp_history","iq_db_v1","iq_meta_v1","ilhaeng2pil_track_bexam_v1","1h2p_learner_progress"],
@@ -743,7 +744,7 @@ border-radius:999px;padding:4px 12px;font-size:.7rem;cursor:pointer;font-family:
   <div class="gatecard">
     <div class="gbrand">1행2필 아카데미 · 행정법 학습OS</div>
     <div class="gsub">바른관리 | 단기합격 · 수강생 로그인</div>
-    <div style="font-size:10.5px;color:#8a8578;margin-top:4px;letter-spacing:.5px">BUILD v2026-10-19 · 행정법 빌드 1 · 서버 careclass-nomusa</div>
+    <div style="font-size:10.5px;color:#8a8578;margin-top:4px;letter-spacing:.5px">BUILD v2026-10-19 · 행정법 빌드 1 · 서버 1h2p-adminlaw</div>
     <div id="gLogin">
       <label class="gl2">아이디</label>
       <input id="fId" type="text" placeholder="발급받은 아이디" maxlength="60" autocomplete="username" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')document.getElementById('fPw').focus()">
@@ -944,7 +945,6 @@ border-radius:999px;padding:4px 12px;font-size:.7rem;cursor:pointer;font-family:
       <div class="seatgrid" id="seatgrid"></div>
       <div class="crfoot">지금 함께 공부 중 <b id="crCnt">0</b>명 <span class="crlog" id="crLog"></span></div>
     </div>
-    <div class="bookshelf" id="bookShelf"></div>
     <p class="hero-sub">위 메뉴에서 오늘 할 일을 시작하세요. 무엇부터 할지 모르겠다면 <button class="hero-hint" onclick="openEngine('schedule')">📅 수강신청</button>부터.</p>
   </div>
 </div>
@@ -1842,9 +1842,9 @@ function ccRenderApps(){
 }
 function ccNewPw(){ const c="abcdefghjkmnpqrstuvwxyz23456789"; const a=new Uint32Array(8); crypto.getRandomValues(a); let s=""; for(let i=0;i<a.length;i++) s+=c[a[i]%c.length]; return s; }
 function ccSmsText(name,id,pw,kind,tk){
-  return "[1행2필 행정법 행정법 학습OS]\n"+name+"님, "+(kind==="재발급"?"비밀번호를 다시 발급해 드립니다.":(kind==="복귀"?"재신청이 확인되어 행정법 학습OS에 다시 등록해 드립니다. 이전 학습 기록을 그대로 이어서 쓰실 수 있습니다.":"결제가 확인되어 행정법 학습OS 계정을 발급해 드립니다."))+
+  return "[1행2필 아카데미 행정법 학습OS]\n"+name+"님, "+(kind==="재발급"?"비밀번호를 다시 발급해 드립니다.":(kind==="복귀"?"재신청이 확인되어 행정법 학습OS에 다시 등록해 드립니다. 이전 학습 기록을 그대로 이어서 쓰실 수 있습니다.":"결제가 확인되어 행정법 학습OS 계정을 발급해 드립니다."))+
     "\n\n아이디: "+id+"\n임시 비밀번호: "+pw+(tk>0?"\n실전답안첨삭 이용권: "+tk+"회":"")+
-    "\n\n1행2필 홈페이지 행정법 학습OS 화면에서 로그인한 뒤 비밀번호를 직접 바꿔 주세요.";
+    "\n\n접속 주소: "+CC.site+"\n로그인한 뒤 비밀번호를 직접 바꿔 주세요.";
 }
 function ccShowIssued(target,name,phone,id,pw,kind,tk){
   const box=document.getElementById(target); if(!box) return;
@@ -2137,7 +2137,7 @@ const CC_WD_REASONS=["합격","재신청 안 함 (1행2필 통보)","자진 퇴�
 const CC_KEEP_DAYS=365;
 function ccYmdK(d){ if(!d) return "—"; const x=(d instanceof Date)?d:new Date(String(d).length===10?d+"T00:00:00":d); return x.getFullYear()+"년 "+(x.getMonth()+1)+"월 "+x.getDate()+"일"; }
 function ccWdText(name,reason,purge){
-  return "[1행2필 행정법 행정법 학습OS]\n"+name+"님, 행정법 학습OS 수강이 종료되었습니다 (사유: "+reason+").\n\n"+
+  return "[1행2필 아카데미 행정법 학습OS]\n"+name+"님, 행정법 학습OS 수강이 종료되었습니다 (사유: "+reason+").\n\n"+
     "그동안의 학습 기록(진도·답안·채팅)은 "+ccYmdK(purge)+"에 삭제됩니다.\n"+
     "다시 수강하시려면 행정법 학습OS 화면에서 [행정법 학습OS 신청하기]로 재신청해 주세요 — 삭제일 전에 재신청하시면 기록을 이어서 쓰실 수 있습니다.";
 }
@@ -2536,7 +2536,7 @@ async function ccChatExport(){
     try{ const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(body)); hash=Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join(""); }catch(e){}
     const now=new Date();
     const text=[
-      "1행2필 행정법 행정법 학습OS — 채팅 기록",
+      "1행2필 아카데미 행정법 학습OS — 채팅 기록",
       "==================================================",
       "내려받은 시각 : "+ccTs(now)+" (이 컴퓨터 시각 기준, 한국 표준시)",
       "내려받은 관리자 : "+adm,
@@ -4598,7 +4598,7 @@ window.ccExamDate=function(t,today){
       const body=document.getElementById("pathBody"); if(!body) return r;
       const subs=body.querySelectorAll(".upsub"); if(subs[1]) subs[1].style.display="none";
       const btn=body.querySelector(".pbtns .gbtn"); if(btn) btn.textContent="이대로 정하기";
-      if(ccTracks().indexOf("변시")>=0){
+      if((CC_OPT["변시"]||[]).length&&ccTracks().indexOf("변시")>=0){
         const secs=[].slice.call(body.querySelectorAll(".psec")), sec=secs.find(function(s){ return /^변시/.test((s.querySelector(".psech")||{}).textContent||""); });
         if(sec){ const cur=nmOpt2Chosen(); const d=document.createElement("div"); d.className="nmopt"; d.id="nmOpt2Box";
           d.innerHTML='<b>변시 선택과목 <span style="color:#c0392b">(필수)</span></b> '+CC_OPT["변시"].map(function(o){ return '<label style="display:inline-flex;flex-direction:row;align-items:center;gap:5px;margin:0 14px 0 0;cursor:pointer;font-size:14px;font-weight:600;color:inherit"><input type="radio" style="margin:0;width:auto" name="nmOpt2r" value="'+o+'"'+(o===cur?' checked':'')+'> '+o+'</label>'; }).join("")+
@@ -8644,7 +8644,7 @@ window.CC_IP_TOOLS={"민법":[1,2,3,4,5,6],"노동법Ⅰ":[1,2,3,4,5],"노동법
   };
 })();
 </script>
-<style>.bookshelf{margin:18px auto 6px;max-width:980px;text-align:left}.bookshelf h3{font-size:1rem;margin:0 0 4px;color:var(--gold)}.bookshelf .bsub{font-size:.82rem;color:var(--sub);margin:0 0 10px}.bookshelf .bgrp{font-size:.8rem;color:var(--sub);margin:12px 0 6px;font-weight:700}.bookshelf .brow{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}.bookshelf .bk{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--navy2)}.bookshelf .bk b{display:block;font-size:.92rem;color:var(--ink)}.bookshelf .bk small{display:block;font-size:.76rem;color:var(--sub);margin:3px 0 8px}.bookshelf .bk a,.bookshelf .bk span.wait{display:inline-block;font-size:.78rem;padding:4px 10px;border-radius:999px;margin-right:6px}.bookshelf .bk a{background:var(--gold);color:#0d1f3c;font-weight:700;text-decoration:none}.bookshelf .bk span.wait{border:1px dashed var(--line);color:var(--mute)}</style>
+<style>#bookModal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);align-items:flex-start;justify-content:center;overflow:auto;padding:5vh 12px}#bookModal.open{display:flex}#bookModal .bmbox{position:relative;width:min(760px,96vw);background:var(--navy);border:1px solid var(--line);border-radius:14px;padding:18px 18px 14px}#bookModal .bmx{position:absolute;top:10px;right:12px;border:0;background:transparent;color:var(--sub);font-size:1.3rem;cursor:pointer}#bookModal .bmclose{display:block;margin:14px auto 0;padding:7px 22px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;font:inherit}.bookshelf{margin:0;text-align:left}.bookshelf h3{font-size:1rem;margin:0 0 4px;color:var(--gold)}.bookshelf .bsub{font-size:.82rem;color:var(--sub);margin:0 0 10px}.bookshelf .bgrp{font-size:.8rem;color:var(--sub);margin:12px 0 6px;font-weight:700}.bookshelf .brow{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}.bookshelf .bk{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--navy2)}.bookshelf .bk b{display:block;font-size:.92rem;color:var(--ink)}.bookshelf .bk small{display:block;font-size:.76rem;color:var(--sub);margin:3px 0 8px}.bookshelf .bk a,.bookshelf .bk span.wait{display:inline-block;font-size:.78rem;padding:4px 10px;border-radius:999px;margin-right:6px}.bookshelf .bk a{background:var(--gold);color:#0d1f3c;font-weight:700;text-decoration:none}.bookshelf .bk span.wait{border:1px dashed var(--line);color:var(--mute)}</style>
 <script>
 /* ═══ 교재 판매 칸 — 책이 나오면 아래 목록의 pod(교보문고) · pdf(스마트스토어) 주소만 채우면 구매 단추가 생깁니다 ═══ */
 window.CC_BOOKS=[
@@ -8665,7 +8665,16 @@ window.ccBooksDraw=function(){ var el=document.getElementById("bookShelf"); if(!
       var btn=(b.pod?"<a href=\""+E(b.pod)+"\" target=\"_blank\" rel=\"noopener\">종이책</a>":"")+(b.pdf?"<a href=\""+E(b.pdf)+"\" target=\"_blank\" rel=\"noopener\">PDF</a>":"");
       return "<div class=\"bk\"><b>"+E(b.n)+"</b><small>"+E(b.d)+"</small>"+(btn||"<span class=\"wait\">"+E(b.st==="출간"?"구매 주소 등록 전":b.st)+"</span>")+"</div>"; }).join("")+"</div>"; }).join("");
 };
-try{ ccBooksDraw(); }catch(e){}
+window.ccOpenBooks=function(){ var m=document.getElementById("bookModal");
+  if(!m){ m=document.createElement("div"); m.id="bookModal"; m.innerHTML="<div class=\"bmbox\"><button class=\"bmx\" onclick=\"ccCloseBooks()\" aria-label=\"닫기\">×</button><div class=\"bookshelf\" id=\"bookShelf\"></div><button class=\"bmclose\" onclick=\"ccCloseBooks()\">닫기</button></div>";
+    m.addEventListener("click",function(e){ if(e.target===m) ccCloseBooks(); }); document.body.appendChild(m); }
+  ccBooksDraw(); m.classList.add("open"); };
+window.ccCloseBooks=function(){ var m=document.getElementById("bookModal"); if(m) m.classList.remove("open"); };
+/* 메뉴의 「📂 내 공부기록」 옆에 「📚 교재」 단추 — 메뉴가 다시 그려져도 따라 붙음 */
+(function(){ var add=function(){ var em=document.getElementById("engmenu"); if(!em||em.querySelector("[data-book]")) return; var rec=em.querySelector("[data-rec]"); if(!rec) return;
+    rec.insertAdjacentHTML("afterend","<button class=\"mini\" data-book=\"1\" onclick=\"ccOpenBooks()\">📚 교재</button>"); };
+  var start=function(){ add(); var em=document.getElementById("engmenu"); if(em&&window.MutationObserver) new MutationObserver(add).observe(em,{childList:true}); setInterval(add,1500); };
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",start); else start(); })();
 </script>
 <script>
 /* ═══ 행정법판 마무리 설정 ═══ */
