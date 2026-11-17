@@ -11229,7 +11229,7 @@ var qrcode = function() {
         '<button class="mini" onclick="ccDtToggle('+s.id+')">'+(s.open?'배부 끝내기':'다시 배부하기')+'</button>'+
         '<button class="mini" onclick="ccDtDelS('+s.id+')">회차 지우기</button></div>';
       h+='<div class="sub">공통 자료 '+cm.length+'개</div>'+cm.map(function(x){ return '<div class="dtf"><span class="dtk">공통</span><b>'+E(x.label)+'</b><a href="'+E(fileUrl(x.path))+'" target="_blank" rel="noopener" class="mini" style="text-decoration:none">열기</a><button class="mini" onclick="ccDtDelF('+x.id+')">지우기</button></div>'; }).join("");
-      h+='<div class="sub" style="margin-top:8px">개인 첨삭 '+ps.length+'명</div>'+ps.map(function(x){ return '<div class="dtf"><span class="dtk">개인</span><b>'+E(x.student||"-")+'</b><span class="sub" style="margin:0">'+E(x.label)+'</span><button class="mini" onclick="ccDtQr(\'f\','+x.id+')">📱 QR</button><a href="'+E(fileUrl(x.path))+'" target="_blank" rel="noopener" class="mini" style="text-decoration:none">열기</a><button class="mini" onclick="ccDtDelF('+x.id+')">지우기</button></div>'; }).join("");
+      h+='<div class="sub" style="margin-top:8px">개인 첨삭 '+(function(){ var o={}; ps.forEach(function(x){ o[x.student||("#"+x.id)]=1; }); return Object.keys(o).length; })()+'명 · 자료 '+ps.length+'개</div>'+ps.map(function(x){ return '<div class="dtf"><span class="dtk">개인</span><b>'+E(x.student||"-")+'</b><span class="sub" style="margin:0">'+E(x.label)+'</span><button class="mini" onclick="ccDtQr(\'f\','+x.id+')">📱 QR</button><a href="'+E(fileUrl(x.path))+'" target="_blank" rel="noopener" class="mini" style="text-decoration:none">열기</a><button class="mini" onclick="ccDtDelF('+x.id+')">지우기</button></div>'; }).join("");
       h+='</div>';
     });
     h+='<input type="file" id="dtFile" multiple style="display:none" onchange="ccDtUpload(this)">';
@@ -11288,7 +11288,7 @@ var qrcode = function() {
     window.addEventListener("afterprint",done); setTimeout(function(){ try{ window.print(); }catch(e){} setTimeout(done,1500); },80); }
   window.ccDtPrintOne=function(){ if(!D.qr) return; doPrint('<h2>'+E(D.qr.title)+'</h2><div class="pc" style="width:auto;border:0">'+qrSvg(D.qr.url,8)+'<small>'+E(D.qr.url)+'</small></div>'); };
   window.ccDtPrintAll=function(sid){
-    var s=findS(sid); if(!s) return; var ps=(D.files[sid]||[]).filter(function(x){ return x.kind==="personal"; });
+    var s=findS(sid); if(!s) return; var seen={}, ps=(D.files[sid]||[]).filter(function(x){ if(x.kind!=="personal") return false; var k=x.student||("#"+x.id); if(seen[k]) return false; seen[k]=1; return true; });
     doPrint('<h2>'+E(s.title)+' — 개인 첨삭 QR ('+ps.length+'명) · 잘라서 나눠 주세요</h2>'+ps.map(function(x){ return '<div class="pc"><b>'+E(x.student||"-")+'</b>'+qrSvg(linkOf(x.token),4)+'<small>'+E(s.title)+'</small></div>'; }).join(""));
   };
   /* 관리자 대시보드에 여는 단추 */
@@ -11579,6 +11579,46 @@ var qrcode = function() {
     e.preventDefault(); show(a.getAttribute("href")||"",nameOf(a));
   },true);
   window.ccDtShow=show;
+})();
+</script>
+<script>
+/* 베리답안특강 관리자: 개인 줄마다 「＋ 이 학생 자료 추가」 — 같은 학생 이름으로 올려서 그 학생의 개인 QR 하나에 함께 열리게 한다
+   (첨삭 답안 PDF + 개인 논증사슬 지도 등) */
+(function(){
+  var TARGET=null;
+  function inp(){ var i=document.getElementById("dtFileFor"); if(i) return i;
+    i=document.createElement("input"); i.type="file"; i.id="dtFileFor"; i.multiple=true; i.style.display="none"; i.onchange=function(){ up(i); }; document.body.appendChild(i); return i; }
+  function rnd(){ var a=new Uint8Array(16); crypto.getRandomValues(a); return Array.prototype.map.call(a,function(b){ return ("0"+b.toString(16)).slice(-2); }).join(""); }
+  window.ccDtAddFor=function(id){ TARGET=id; var i=inp(); i.value=""; i.click(); };
+  async function up(i){
+    var files=[].slice.call(i.files||[]), sb=window.ccSb; if(!files.length||!TARGET||!sb) return;
+    var ok=0, bad=[];
+    try{
+      var r0=await sb.from("cc_dt_files").select("id,session_id,student,kind").eq("id",TARGET).single(); if(r0.error) throw r0.error;
+      var base=r0.data; if(base.kind!=="personal"||!base.student) throw new Error("학생 이름이 없는 줄입니다");
+      for(var k=0;k<files.length;k++){
+        var f=files[k], nm=f.name.replace(/\.[^.]+$/,"").trim().slice(0,120)||"자료", ext=(/\.([A-Za-z0-9]{1,8})$/.exec(f.name)||["","bin"])[1].toLowerCase();
+        if(f.size>20*1024*1024){ bad.push(f.name+" (20MB 초과)"); continue; }
+        var path=base.session_id+"/"+rnd()+"."+ext;
+        try{
+          var u=await sb.storage.from("dt-files").upload(path,f,{contentType:f.type||"application/octet-stream",upsert:false}); if(u.error) throw u.error;
+          var r=await sb.from("cc_dt_files").insert({session_id:base.session_id,kind:"personal",label:nm,path:path,student:base.student});
+          if(r.error){ try{ await sb.storage.from("dt-files").remove([path]); }catch(e){} throw r.error; }
+          ok++;
+        }catch(e){ bad.push(f.name+" ("+(e.message||e)+")"); }
+      }
+    }catch(e){ bad.push(e.message||String(e)); }
+    try{ toast(ok+"개 올렸습니다"+(bad.length?" · 실패 "+bad.length+"개":"")); }catch(e){}
+    if(bad.length) alert("올리지 못했습니다:\n"+bad.join("\n"));
+    try{ if(window.ccOpenDt) ccOpenDt(); }catch(e){}
+  }
+  function deco(){ var b=document.getElementById("dtBody"); if(!b) return;
+    [].forEach.call(b.querySelectorAll(".dtf"),function(row){ if(row.querySelector(".dtadd")) return;
+      var q=row.querySelector('button[onclick^="ccDtQr(\'f\',"]'); if(!q) return;
+      var m=/ccDtQr\('f',(\d+)\)/.exec(q.getAttribute("onclick")||""); if(!m) return;
+      var a=document.createElement("button"); a.className="mini dtadd"; a.type="button"; a.textContent="＋ 이 학생 자료 추가"; a.title="이 학생의 개인 QR에 함께 열리는 자료(개인 논증사슬 지도 등)를 올립니다";
+      a.onclick=function(){ ccDtAddFor(+m[1]); }; q.parentNode.insertBefore(a,q); }); }
+  new MutationObserver(deco).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
 <style>
