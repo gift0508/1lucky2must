@@ -11475,6 +11475,17 @@ var qrcode = function() {
       }catch(e){ g("qcS").disabled=false; m.textContent="저장하지 못했습니다 — "+(window.ccErr?ccErr(e):(e.message||e)); }
     };
   };
+  /* 노무사 · 감정평가사 화면: 제목 · 머리말에 「5급공채」 대신 자기 수험종류 이름을 보여 줌 (자료는 5급공채와 함께 쓰지만 이름은 자기 것으로)
+     · 제목 · 머리말 · 칩 같은 짧은 안내 글자만 바꾸고, 문제 · 답안 · 채팅 · 관리자 화면의 글은 건드리지 않음 */
+  (function(){
+    var WL='h1,h2,h3,h4,header,.top,.hd,.chip,.brand,.data-counter,.kicker,.lede,.badge,.ubadge,.tstat,.pbt,.pbv,.upsub,.sub,.stnote,.et,#profName,#profDesc,#profDiag,#ddayLabel,#rmTitle,#s1lede,#engtitle,#pairlabel,#narrBox';
+    var EX='#adminView,#ccPrevBar,[data-pt],select,option,textarea,input,#chat,#cbody,#ccErrModal,#qeModal,#qaModal,#qcModal,#caseText,#qBox,#leftCase,#leftCaseBody,#loadModal,#vList,#s2,#s3,#s4,.case,.q,#q-card,#e-card,#rs,.cmsg,.ans,.model';
+    function fix(doc,name){ if(!doc||!doc.body) return; var els; try{ els=doc.querySelectorAll(WL); }catch(e){ return; }
+      for(var i=0;i<els.length;i++){ var el=els[i]; if(el.closest(EX)) continue;
+        var w=doc.createTreeWalker(el,4,null), n; while((n=w.nextNode())){ var v=n.nodeValue; if(v&&v.length<=90&&v.indexOf("5급공채")>=0&&v.indexOf("변시+5급공채")<0){ var pe=n.parentNode; if(pe&&pe.closest&&pe.closest(EX)) continue; n.nodeValue=v.replace(/5급공채/g,name); } } } }
+    setInterval(function(){ try{ var ex=ccExam(); if(ex!=="노무사"&&ex!=="감정평가사") return; var name=CC_EXAM_LABEL[ex]||ex;
+      fix(document,name); var fr=document.querySelectorAll("iframe"); for(var i=0;i<fr.length;i++){ try{ fix(fr[i].contentDocument,name); }catch(e){} } }catch(e){} },700);
+  })();
   /* 관리자 미리보기: 수험종류 4가지 화면 전환 */
   function prevBar(){ try{ var b=document.getElementById("ccPrevBar"); if(!b) return; var g=b.querySelector(".gold"); if(!g) return;
     b.querySelectorAll("[data-pt]").forEach(function(x){ x.remove(); });
