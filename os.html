@@ -11763,6 +11763,86 @@ var qrcode = function() {
 })();
 </script>
 <style>
+#stModal{position:fixed;inset:0;z-index:9990;background:rgba(5,12,24,.72);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 12px}
+#stModal.open{display:flex}
+#stModal .stbox{position:relative;width:min(760px,100%);background:#12202f;color:#e8eef6;border:1px solid #2f4257;border-radius:14px;padding:20px 20px 16px}
+#stModal h3{margin:0 0 4px;font-size:18px}
+#stModal .sub{font-size:12.5px;color:#9fb0c3;margin-bottom:10px}
+#stModal .stx{position:absolute;right:12px;top:10px;background:transparent;border:0;color:#9fb0c3;font-size:22px;cursor:pointer}
+#stModal .stf{display:grid;gap:8px;border:1px solid #2f4257;border-radius:11px;padding:12px;margin:10px 0 14px}
+#stModal .stf select,#stModal .stf input,#stModal .stf textarea{font:inherit;font-size:14px;width:100%;padding:8px 10px;border-radius:8px;border:1px solid #2f4257;background:#0b1522;color:#e8eef6;box-sizing:border-box}
+#stModal .stf textarea{min-height:140px;resize:vertical;line-height:1.6}
+#stModal .stgo{font:inherit;font-weight:800;padding:8px 16px;border-radius:9px;border:0;background:#e8b947;color:#16202b;cursor:pointer}
+#stModal .stmini{font:inherit;font-size:12px;padding:4px 10px;border-radius:7px;border:1px solid #4a6079;background:transparent;color:#e8eef6;cursor:pointer;margin-left:6px}
+#stModal .sti{border:1px solid #2f4257;border-radius:11px;padding:12px 14px;margin-bottom:10px}
+#stModal .sti.wait{border-style:dashed;opacity:.85}
+#stModal .sti .sh{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:4px}
+#stModal .sti .ex{font-size:11.5px;font-weight:800;color:#16202b;background:#e8b947;border-radius:20px;padding:1px 9px}
+#stModal .sti .wt{font-size:11.5px;color:#f0b25a;border:1px dashed #f0b25a;border-radius:20px;padding:0 8px}
+#stModal .sti b{font-size:15px}
+#stModal .sti .nm{font-size:12.5px;color:#9fb0c3}
+#stModal .sti .dt{font-size:11.5px;color:#9fb0c3;margin-left:auto}
+#stModal .sti .bd{white-space:pre-wrap;line-height:1.7;font-size:14px;margin-top:6px;word-break:break-word}
+</style>
+<script>
+/* ═══ 💬 이용의 이유 — 합격기 · 수강기 익명 게시판 (시험의 종류 · 제목 · 내용) ═══
+   · 이름 칸은 글쓴이가 직접 적음(익명 가능 · 계정 이름은 쓰지 않음) · 관리자도 전달받은 글을 올릴 수 있음(바로 게시) · 수강생이 쓰면 「확인 대기」 → 관리자가 [게시]하면 모두에게 보임
+   · 서버: cc_stories (게시된 글은 누구나 읽음 · 쓰기는 활동 중 수강생 · 게시/내리기는 관리자 · 지우기는 본인/관리자) */
+(function(){
+  var E=function(x){ return String(x==null?"":x).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+  var EXAMS=["변호사시험","5급공채","공인노무사","감정평가사","기타"], L=[], ME=null;
+  function sb(){ return window.ccSb||null; }
+  function adm(){ try{ return !!(window.ccIsAdminUser&&ccIsAdminUser()); }catch(e){ return false; } }
+  function tst(m){ try{ toast(m); }catch(e){} }
+  function modal(){ var m=document.getElementById("stModal"); if(m) return m;
+    m=document.createElement("div"); m.id="stModal"; m.innerHTML='<div class="stbox"><button class="stx" onclick="ccCloseStory()" aria-label="닫기">×</button><div id="stBody"></div></div>';
+    m.addEventListener("click",function(e){ if(e.target===m) ccCloseStory(); }); document.body.appendChild(m); return m; }
+  window.ccCloseStory=function(){ var m=document.getElementById("stModal"); if(m) m.classList.remove("open"); };
+  window.ccOpenStory=async function(){ var m=modal(); m.classList.add("open"); document.getElementById("stBody").innerHTML='<h3>💬 이용의 이유</h3><div class="sub">불러오는 중…</div>'; await load(); };
+  async function load(){
+    var s=sb(), b=document.getElementById("stBody"); if(!b) return;
+    try{ if(!s) throw new Error("서버에 연결하지 못했습니다");
+      try{ var u=await s.auth.getUser(); ME=(u&&u.data&&u.data.user&&u.data.user.id)||null; }catch(e){ ME=null; }
+      var r=await s.from("cc_stories").select("id,user_id,name,exam,title,body,approved,created_at").order("created_at",{ascending:false}).limit(300); if(r.error) throw r.error;
+      L=r.data||[]; draw();
+    }catch(e){ b.innerHTML='<h3>💬 이용의 이유</h3><div class="sub">불러오지 못했습니다 — '+E((e&&e.message)||e)+'</div>'; }
+  }
+  function draw(){
+    var b=document.getElementById("stBody"); if(!b) return; var A=adm();
+    var def=""; try{ var t=(typeof user!=="undefined"&&user&&user.track)||""; def=({"변시":"변호사시험","5급공채":"5급공채","노무사":"공인노무사","감정평가사":"감정평가사"})[t]||""; }catch(e){}
+    var h='<h3>💬 이용의 이유</h3><div class="sub">합격기 · 수강기를 남기는 곳입니다. 이름은 직접 적은 대로만 나옵니다 (익명 가능).</div>';
+    if(ME) h+='<div class="stf"><select id="stExam" aria-label="시험의 종류">'+EXAMS.map(function(x){ return '<option'+(x===def?' selected':'')+'>'+x+'</option>'; }).join("")+'</select>'+
+      '<input id="stName" maxlength="60" placeholder="이름 — 익명으로 적어도 됩니다 (예: 기○○ (변시합격, 현직변호사 3년차))"><input id="stTitle" maxlength="100" placeholder="제목"><textarea id="stText" maxlength="8000" placeholder="내용 — 어떻게 공부했고 무엇이 도움이 되었는지 적어 주세요"></textarea>'+
+      '<div><button class="stgo" onclick="ccStorySend()">올리기</button> <span class="sub" style="margin-left:6px">'+(A?'전달받은 글을 대신 올립니다 · 바로 게시됩니다':'선생님 확인 후 게시됩니다')+'</span></div></div>';
+    if(!L.length) h+='<div class="sub">아직 올라온 글이 없습니다.</div>';
+    L.forEach(function(x){ var mine=ME&&x.user_id===ME, d=new Date(x.created_at);
+      h+='<div class="sti'+(x.approved?'':' wait')+'"><div class="sh"><span class="ex">'+E(x.exam)+'</span><b>'+E(x.title)+'</b><span class="nm">'+E(x.name||"익명")+'</span>'+(x.approved?'':'<span class="wt">확인 대기'+(mine&&!A?' · 내 글':'')+'</span>')+
+        '<span class="dt">'+d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()+'</span></div><div class="bd">'+E(x.body)+'</div>'+
+        ((A||mine)?'<div style="margin-top:8px;text-align:right">'+(A?'<button class="stmini" onclick="ccStoryPub('+x.id+','+(!x.approved)+')">'+(x.approved?'게시 내리기':'게시하기')+'</button>':'')+'<button class="stmini" onclick="ccStoryDel('+x.id+')">지우기</button></div>':'')+'</div>'; });
+    b.innerHTML=h;
+  }
+  window.ccStorySend=async function(){
+    var ex=(document.getElementById("stExam")||{}).value||"", ti=((document.getElementById("stTitle")||{}).value||"").trim(), bo=((document.getElementById("stText")||{}).value||"").trim();
+    var nm=((document.getElementById("stName")||{}).value||"").trim()||"익명", A=adm();
+    if(!ti){ tst("제목을 적어 주세요"); return; } if(bo.length<10){ tst("내용을 조금 더 적어 주세요"); return; }
+    var r=await sb().from("cc_stories").insert(A?{name:nm,exam:ex,title:ti,body:bo,approved:true,approved_at:new Date().toISOString()}:{name:nm,exam:ex,title:ti,body:bo}); if(r.error){ alert("올리지 못했습니다 — "+r.error.message); return; }
+    tst(A?"올리고 게시했습니다":"올렸습니다 — 선생님 확인 후 게시됩니다"); load();
+  };
+  window.ccStoryPub=async function(id,on){ var r=await sb().from("cc_stories").update({approved:!!on,approved_at:on?new Date().toISOString():null}).eq("id",id); if(r.error){ alert(r.error.message); return; } tst(on?"게시했습니다":"게시를 내렸습니다"); load(); };
+  window.ccStoryDel=async function(id){ if(!confirm("이 글을 지웁니다. 되돌릴 수 없습니다. 지울까요?")) return; var r=await sb().from("cc_stories").delete().eq("id",id); if(r.error){ alert(r.error.message); return; } tst("지웠습니다"); load(); };
+  /* 메뉴의 「📚 교재」 옆에 「💬 이용의 이유」 단추 */
+  var add=function(){ var em=document.getElementById("engmenu"); if(!em||em.querySelector("[data-story]")) return; var bk=em.querySelector("[data-book]"); if(!bk) return;
+    bk.insertAdjacentHTML("afterend",'<span class="fa" style="opacity:.45">|</span><button class="mini" data-story="1" onclick="ccOpenStory()">💬 이용의 이유</button>'); };
+  /* 아랫줄이 6칸이 되어도 3단으로 넘어가지 않게: 격자를 옆으로 한 칸 늘리고, 아랫줄 첫 단추를 항상 첫 칸에서 시작시킨다 */
+  var st=document.createElement("style"); st.textContent="@media (min-width:900px){#engmenu{grid-template-columns:repeat(5,auto min-content) auto!important}}"; document.head.appendChild(st);
+  var row2=function(){ var em=document.getElementById("engmenu"), br=em&&em.querySelector(".engbr"); if(!br) return; var first=null;
+    for(var n=br.nextElementSibling;n;n=n.nextElementSibling){ if(n.style.gridColumnStart) n.style.gridColumnStart=""; if(!first&&n.classList.contains("mini")&&getComputedStyle(n).display!=="none") first=n; }
+    if(first) first.style.gridColumnStart="1"; };
+  var start=function(){ add(); row2(); setInterval(function(){ add(); row2(); },1500); };
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",start); else start();
+})();
+</script>
+<style>
 #ccErrBtn{position:fixed;left:0;bottom:22px;z-index:85;display:none;align-items:center;gap:6px;padding:9px 14px 9px 11px;border:none;border-radius:0 999px 999px 0;
   background:#fff;color:#0D1F3C;font-family:'Noto Sans KR',system-ui,sans-serif;font-weight:800;font-size:.8rem;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35)}
 #ccErrBtn.on{display:inline-flex}
