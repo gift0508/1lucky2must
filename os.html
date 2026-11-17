@@ -888,8 +888,8 @@ border-radius:999px;padding:4px 12px;font-size:.7rem;cursor:pointer;font-family:
         <div class="atable" id="bySchool"></div>
       </div>
       <div class="panel">
-        <h3>응시 경험별 분석</h3>
-        <div class="sub">1차·변시 응시 경험 단위의 진도·접속 비교</div>
+        <h3>수험 단계별 분석</h3>
+        <div class="sub">수험 단계 단위의 진도·접속 비교</div>
         <div class="atable" id="byYear"></div>
       </div>
     </div>
@@ -1555,17 +1555,20 @@ function openUpgrade(feat){
     <label>전화번호</label><input id="upPhone" type="tel" placeholder="010-0000-0000" maxlength="13">
     <label>수험 유형</label>
     <select id="upSchool"><option>전업 수험</option><option>직장 병행</option></select>
-    <label>5급공채 응시 경험</label>
-    <select id="upExp1"><option>처음</option><option>응시해 봄</option><option>합격·면제</option></select>
-    <label>변시 응시 경험</label>
-    <select id="upExp2"><option>처음</option><option>응시해 봄</option></select>
-    <label>행정법 학습OS 과정</label>
-    <select id="upTrack"><option value="변시" selected>변호사시험</option><option value="5급공채">5급공채</option><option value="노무사">노무사</option><option value="감정평가사">감정평가사</option></select>
+    <label>수험 종류</label>
+    <select id="upTrack" onchange="ccUpStage()"><option value="변시" selected>변호사시험</option><option value="5급공채">5급공채</option><option value="노무사">노무사</option><option value="감정평가사">감정평가사</option></select>
+    <label>수험 단계</label>
+    <select id="upStage"></select>
     <label>사용할 아이디</label><input id="upId" type="text" placeholder="영문 소문자·숫자 4~12자" maxlength="12" autocapitalize="off" spellcheck="false">
     <div class="uperr" id="uperr"></div>
     <button class="btn gbtn" id="upSend" onclick="submitUpgrade()">행정법 학습OS 신청하기 →</button>`;
+  ccUpStage();
   document.getElementById("upmodal").classList.add("open");
 }
+/* 수험 종류별 수험 단계 */
+window.CC_EXAM_STAGE={"변시":["1년차","2~3년차","4~5년차"],"5급공채":["초시","2차 응시 다수"],"노무사":["1차 준비","1차 합격 · 2차 유예","1차 · 2차 동차 준비"],"감정평가사":["1차 준비","1차 합격 · 2차 유예","1차 · 2차 동차 준비"]};
+window.CC_EXAM_EXPD=["2~3년차","4~5년차","2차 응시 다수","1차 합격 · 2차 유예","응시해 봄","합격·면제"];
+function ccUpStage(){ const t=document.getElementById("upTrack"), s=document.getElementById("upStage"); if(!t||!s) return; s.innerHTML=(CC_EXAM_STAGE[t.value]||[]).map(function(x){ return "<option>"+x+"</option>"; }).join(""); }
 function upgDoneView(){
   return `
     <h3>신청이 접수되었습니다</h3>
@@ -1592,8 +1595,8 @@ async function submitUpgrade(){
   err.textContent="접수 중…";
   try{
     const r=await sb.from("cc_applications").insert({name:nm,phone:phone,exam_type:document.getElementById("upSchool").value,
-      exp1:document.getElementById("upExp1").value,exp2:document.getElementById("upExp2").value,
-      round:"1차 "+document.getElementById("upExp1").value+" · 변시 "+document.getElementById("upExp2").value,
+      exp1:"",exp2:document.getElementById("upStage").value,
+      round:((window.CC_EXAM_LABEL||{})[document.getElementById("upTrack").value]||"")+" · "+document.getElementById("upStage").value,
       track:document.getElementById("upTrack").value,login_id:id});
     if(r.error) throw r.error;
     upgApplied=true;
@@ -1833,13 +1836,13 @@ function ccRenderApps(){
   const wait=ccApps.filter(function(a){ return a.status==="대기"; }).length;
   const k=document.getElementById("akApps"); if(k) k.textContent=wait;
   if(!rows.length){ el.innerHTML='<div class="sub" style="padding:10px 4px">'+(all?"신청 내역이 없습니다.":"처리를 기다리는 신청이 없습니다.")+'</div>'; return; }
-  el.innerHTML='<div class="ccrow head"><span>신청일</span><span>성명</span><span>전화번호</span><span>유형 · 응시 경험</span><span>과정</span><span>희망 아이디</span><span>상태</span><span></span></div>'+
+  el.innerHTML='<div class="ccrow head"><span>신청일</span><span>성명</span><span>전화번호</span><span>유형 · 수험 단계</span><span>과정</span><span>희망 아이디</span><span>상태</span><span></span></div>'+
     rows.map(function(a){
       const act=a.status==="대기"
         ?'<span class="ccacts"><button class="mini" style="border-color:var(--gold);color:var(--gold)" onclick="ccIssue('+a.id+')">결제 확인 · 계정 발급</button><button class="mini" onclick="ccCancelApp('+a.id+')">취소</button></span>'
         :'<span class="ccacts" style="color:var(--mute);font-size:.7rem">'+(a.status==="발급완료"?"발급 "+ccDate(a.issued_at):"")+'</span>';
       const stc=a.status==="대기"?"color:var(--gold)":(a.status==="발급완료"?"color:#5ec98f":"color:var(--mute)");
-      return '<div class="ccrow"><span>'+ccDate(a.created_at)+'</span><span class="nm2">'+ccEsc(a.name)+'</span><span>'+ccEsc(a.phone)+'</span><span>'+ccEsc(a.exam_type||"")+' · '+ccEsc((a.exp1||a.exp2)?("1차 "+(a.exp1||"—")+" / 변시 "+(a.exp2||"—")):(a.round||""))+'</span><span>'+ccEsc(a.track||"")+'</span><span>'+ccEsc(a.login_id)+'</span><span style="'+stc+';font-weight:700">'+ccEsc(a.status)+'</span>'+act+'</div>';
+      return '<div class="ccrow"><span>'+ccDate(a.created_at)+'</span><span class="nm2">'+ccEsc(a.name)+'</span><span>'+ccEsc(a.phone)+'</span><span>'+ccEsc(a.exam_type||"")+' · '+ccEsc(a.exp2||a.round||"")+'</span><span>'+ccEsc(a.track||"")+'</span><span>'+ccEsc(a.login_id)+'</span><span style="'+stc+';font-weight:700">'+ccEsc(a.status)+'</span>'+act+'</div>';
     }).join("");
 }
 function ccNewPw(){ const c="abcdefghjkmnpqrstuvwxyz23456789"; const a=new Uint32Array(8); crypto.getRandomValues(a); let s=""; for(let i=0;i<a.length;i++) s+=c[a[i]%c.length]; return s; }
@@ -1916,7 +1919,7 @@ function renderAdmin(){
     else if(pf.must_change_pw&&!pf.last_seen){ stt="new"; stl="첫 로그인 전"; }
     else if(idle==null||idle>=2){ stt="warn"; stl="미접속 "+(idle==null?"":idle+"일"); }
     const pth=(t&&t.pset&&t.path)?t.path:null;
-    const yy=(pf.exp1||pf.exp2)?("1차 "+(pf.exp1||"—")+" · 변시 "+(pf.exp2||"—")):(pf.round||"—");
+    const yy=pf.exp2||pf.round||"—";
     return {n:pf.name||pf.login_id, s:((window.CC_EXAM_LABEL||{})[pf.track]||pf.exam_type||"—"), y:yy, path:pth, cells:passed+"/"+totCells, passed:passed,
             pos:pos, diag:!!t, last:ccLastStr(pf.last_seen), idle:idle, st:stt, stl:stl, pf:pf};
   });
@@ -1979,7 +1982,7 @@ function renderAdmin(){
    }).join(""):EMPTY;
   // 명부
   document.getElementById("roster").innerHTML=list.length?
-   `<div class="arow2 head"><span>성명</span><span>수험 유형</span><span>응시 경험</span><span>통과 칸</span><span>마지막 접속</span><span>상태</span></div>`+
+   `<div class="arow2 head"><span>성명</span><span>수험 종류</span><span>수험 단계</span><span>통과 칸</span><span>마지막 접속</span><span>상태</span></div>`+
    list.map(function(x,i){ return `<div class="arow2 click" onclick="openStudent(${i})">
      <span class="nm2">${ccEsc(x.n)}</span><span>${ccEsc(x.s)}</span><span>${ccEsc(x.y)}</span>
      <span>${x.cells}</span><span>${x.last}</span>
@@ -2964,7 +2967,7 @@ window.CC_STAGE_DESC={
          "파이널":"최단기 집중상기하기를 통한 답안작성능력 회복 단계","특강":"중요논의주제들을 익혀 타인보다 뒤떨어짐 방지 단계"}
 };
 function ccExpFor(track){ const u=user||{}; return ccCase(track)?(u.exp2||""):(u.exp1||""); }
-function ccPathDefault(){ const e=ccExpFor(TRACK); return (e==="응시해 봄"||e==="합격·면제")?"diag":"start"; }
+function ccPathDefault(){ const e=ccExpFor(TRACK); return (CC_EXAM_EXPD.indexOf(e)>=0)?"diag":"start"; }
 function ccPathBadge(subj){
   const p=CC_PATH[subj]; if(!p) return "";
   if(p==="start") return '<small class="pbadge start">처음부터</small>';
@@ -2990,7 +2993,7 @@ function ccPathSummary(){
   const wait=diag.filter(function(l){ return !CC_DIAG[l]; });
   const T=function(id,v){ const el=document.getElementById(id); if(el) el.innerHTML=v; };
   T("profName","행정법 "+TRACK+" · "+(user.type||"행정법 학습OS"));
-  T("profDesc","응시 경험 — 1차 <b>"+(user.exp1||"미입력")+"</b> · 변시 <b>"+(user.exp2||"미입력")+"</b>. 분야마다 처음부터 따라가거나, 이미 공부한 단계를 건너뛰고 원하는 단계부터 시작합니다. 건너뛴 단계도 <b>면제 · 수강 가능</b>으로 열려 있어 언제든 들을 수 있습니다.");
+  T("profDesc","수험 단계 — <b>"+(user.exp2||"미입력")+"</b>. 분야마다 처음부터 따라가거나, 이미 공부한 단계를 건너뛰고 원하는 단계부터 시작합니다. 건너뛴 단계도 <b>면제 · 수강 가능</b>으로 열려 있어 언제든 들을 수 있습니다.");
   T("profDiag", CC_PATH_SET
     ? ("수강신청 — "+(start.length?"<b>처음부터</b> "+start.join("·"):"")+(start.length&&diag.length?" · ":"")+(diag.length?"<b>진단</b> "+diag.join("·"):"")+(wait.length?" · <b style=\"color:#ffb347\">진단 대기 "+wait.length+"분야</b> (자가진단에서 진행)":"")+(skip.length?" · <b>선택 안 함</b> "+skip.join("·"):""))
     : "아직 수강신청을 하지 않았습니다 — <b>수강신청</b>을 눌러 주세요");
@@ -3027,7 +3030,7 @@ function ccPathModal(ctx){
   window.__ccPathCtx=ctx||"edit";
   const tracks=ccTracks(), pick={};
   tracks.forEach(function(t){
-    const sv=ccTrackSaved(t), path=sv.path||{}, e=ccExpFor(t), def=(e==="응시해 봄"||e==="합격·면제")?"diag":"start";
+    const sv=ccTrackSaved(t), path=sv.path||{}, e=ccExpFor(t), def=(CC_EXAM_EXPD.indexOf(e)>=0)?"diag":"start";
     pick[t]={}; CC_LAWS[t].forEach(function(l){ pick[t][l]=path[l]||def; });
   });
   window.__ccPick=pick;
@@ -3041,7 +3044,7 @@ function ccPathModal(ctx){
         '<button class="pbtn'+(pick[t][l]==="diag"?" on":"")+'" data-t="'+t+'" data-s="'+l+'" data-v="diag" onclick="ccPathPick(this)">진단 받기'+(dg[l]?" ✓":"")+'</button>'+
         '<button class="pbtn'+(pick[t][l]==="skip"?" on":"")+'" data-t="'+t+'" data-s="'+l+'" data-v="skip" onclick="ccPathPick(this)" title="이 분야는 강의를 듣지 않음">선택 안 함</button></div>';
     }).join("");
-    return '<div class="psec"><div class="psech">'+t+' · '+CC_LAWS[t].length+'분야 <small>'+t+' 응시 경험 <b>'+(ccExpFor(t)||"미입력")+'</b> 기준</small>'+
+    return '<div class="psec"><div class="psech">'+t+' · '+CC_LAWS[t].length+'분야 <small>수험 단계 <b>'+(ccExpFor(t)||"미입력")+'</b> 기준</small>'+
       '<span class="pall"><button class="mini" onclick="ccPathAll(\''+t+'\',\'start\')">모두 처음부터</button><button class="mini" onclick="ccPathAll(\''+t+'\',\'diag\')">모두 진단</button></span></div>'+
       '<div class="prows">'+rows+'</div></div>';
   }).join("");
