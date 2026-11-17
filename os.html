@@ -11627,6 +11627,11 @@ var qrcode = function() {
 })();
 </script>
 <style>
+#s1 .profiles{align-items:stretch}
+#s1 .profiles .ccleft{flex:1;min-width:260px;display:flex;flex-direction:column;gap:12px}
+#s1 .profiles .ccleft .pcard{flex:1;min-width:0;cursor:default}
+#s1 .profiles .ccleft .ccbtns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#s1 .profiles .ccleft .ccbtns .realbtn{margin:0}
 #ccCal{flex:0 1 330px;min-width:270px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:13px}
 #ccCal h3{margin:0 0 2px;font-size:15px;display:flex;align-items:center;gap:6px}
 #ccCal h3 span{flex:1}
@@ -11669,8 +11674,14 @@ var qrcode = function() {
   }
   function box(){ var b=document.getElementById("ccCal"); if(b) return b; var p=document.querySelector("#s1 .profiles"); if(!p) return null;
     b=document.createElement("div"); b.id="ccCal"; p.appendChild(b); return b; }
+  /* 왼쪽 = 카드 + 수강신청 단추(카드 바로 아래) 를 한 기둥으로 묶어, 그 기둥의 높이를 오른쪽 달력과 맞춘다 */
+  function lift(){ var s1=document.getElementById("s1"), pf=s1&&s1.querySelector(".profiles"), card=pf&&pf.querySelector(".pcard"); if(!card||pf.querySelector(".ccleft")) return;
+    var col=document.createElement("div"); col.className="ccleft"; pf.insertBefore(col,card); col.appendChild(card);
+    var w=document.createElement("div"); w.className="ccbtns";
+    [].slice.call(s1.children).forEach(function(n){ if(n.classList&&(n.classList.contains("realbtn")||n.classList.contains("fa"))) w.appendChild(n); });
+    if(w.children.length) col.appendChild(w); }
   window.ccCalRender=function(){
-    if(!ok()) return; var b=box(); if(!b) return;
+    if(!ok()) return; var b=box(); if(!b) return; try{ lift(); }catch(e){}
     var t=TRACK, P=proj(t), pl=P.pl, cal=pl.cal||null;
     if(!VIEW) VIEW=new Date(P.today.getFullYear(),P.today.getMonth(),1);
     if(!DOW) DOW=(cal&&cal.dow)?cal.dow.slice():[1,1,1,1,1,1,1];
