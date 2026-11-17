@@ -11342,6 +11342,14 @@ var qrcode = function() {
     if(ccExam()!=="감정평가사") return rows;
     return (rows||[]).map(function(q){ if(q&&q.subject===KR&&+q.lec===KR_LEC){ var c={}; for(var k in q) c[k]=q[k]; c.subject=A; c.lec=1; return c; } return q; });
   };
+  /* 관리자 미리보기: 수험종류 4가지 화면 전환 */
+  function prevBar(){ try{ var b=document.getElementById("ccPrevBar"); if(!b) return; var g=b.querySelector(".gold"); if(!g) return;
+    b.querySelectorAll("[data-pt]").forEach(function(x){ x.remove(); });
+    var N={"변시":"변시","5급공채":"5급공채","노무사":"노무사","감정평가사":"감평사"}, cur=ccExam()||"변시";
+    CC_EXAMS.forEach(function(ex){ var n=document.createElement("button"); n.className="mini"+(ex===cur?" on":""); n.setAttribute("data-pt",ex); n.textContent=N[ex]+" 화면"; n.onclick=function(){ ccPrevTrack(ex); }; b.insertBefore(n,g); });
+    b.style.flexWrap="wrap"; }catch(e){} }
+  var _ap=ccAdminPreview; ccAdminPreview=function(track){ var r=_ap.call(this,CC_EXAMS.indexOf(track)>=0?track:"변시"); prevBar(); try{ if(r&&r.then) r.then(prevBar); }catch(e){} return r; }; window.ccAdminPreview=ccAdminPreview;
+  ccPrevTrack=function(t){ ccAdminPreview(t); }; window.ccPrevTrack=ccPrevTrack;
   /* 시험일: 수험종류별 (비어 있으면 예시값) */
   var _ed=window.ccExamDate;
   window.ccExamDate=function(t,today){
