@@ -11310,16 +11310,18 @@ var qrcode = function() {
 /* ═══ 수험종류 4가지 (2026-11-17) ═══
    회원의 수험종류: 변시 · 5급공채 · 노무사 · 감정평가사
    · 노무사 · 감정평가사는 5급공채와 같은 강의 · 학습도구를 쓰고 수험종류마다 시험범위 밖의 분야만 가립니다.
-   · 노무사: 본안의 위법성판단 · 객관소송 · 민중소송 · 기관소송 · 실효성확보 · 각론 제외
+   · 노무사: 본안의 위법성판단 · 객관소송 · 민중소송 · 기관소송 · 실효성확보 제외, 각론은 허가(부관) · 인가 · 처분적 법규 · 구속적 계획 · 부당이득 · 국가배상 · 형사소송 일곱 강의만
    · 감정평가사: 객관소송 · 민중소송 · 기관소송 제외(실효성확보 · 손해전보는 포함), 각론은 토지보상관계 · 공물이용관계 · 부당이득반환청구소송 · 국가배상청구소송 네 강의만 */
 (function(){
-  var BASE="변시", KR="각론", KRL=[6,7,9,10], A="각론 · 토지보상 · 공물 · 관련청구소송";   /* 감정평가사의 각론 = 각론 6강(토지보상관계) · 7강(공물이용관계) · 9강(부당이득반환청구소송) · 10강(국가배상청구소송) */
+  var BASE="변시", KR="각론";
   window.CC_EXAMS=["변시","5급공채","노무사","감정평가사"];
   window.CC_EXAM_LABEL={"변시":"변호사시험","5급공채":"5급공채","노무사":"노무사","감정평가사":"감정평가사"};
+  /* drop = 보이지 않는 분야 · kr = 각론 중에서 보이는 강의 번호 · name = 그 강의들을 묶어 보여 주는 분야 이름 */
   window.CC_EXAM_SCOPE={
-    "노무사":{drop:["취소소송 · 본안의 위법성판단","객관소송","민중소송","기관소송","실효성확보 · 손해전보","각론"]},
-    "감정평가사":{drop:["객관소송","민중소송","기관소송","각론"],add:true}
+    "노무사":{drop:["취소소송 · 본안의 위법성판단","객관소송","민중소송","기관소송","실효성확보 · 손해전보","각론"],kr:[1,2,3,4,9,10,11],name:"각론 · 개별행정작용 · 관련청구소송"},
+    "감정평가사":{drop:["객관소송","민중소송","기관소송","각론"],kr:[6,7,9,10],name:"각론 · 토지보상 · 공물 · 관련청구소송"}
   };
+  function SC(){ return CC_EXAM_SCOPE[ccExam()]||null; }
   window.ccExam=function(){ try{ var t=user&&user.track; return CC_EXAMS.indexOf(t)>=0?t:""; }catch(e){ return ""; } };
   /* 노무사 · 감정평가사는 5급공채와 같은 강의 · 학습도구를 쓰고(2차 주관식), 시험범위 밖 분야만 가림 — 변시 전용인 선택형은 보이지 않음 */
   var P0=null, TS=["변시","5급공채"];
@@ -11331,7 +11333,7 @@ var qrcode = function() {
       if(s){
         CC_LAWS[B]=CC_LAWS[B].filter(function(l){ return s.drop.indexOf(l)<0; });
         s.drop.forEach(function(l){ delete CC_CATALOG[B][l]; });
-        if(s.add){ CC_LAWS[B].push(A); CC_CATALOG[B][A]=[0,KRL.length,KRL.length,KRL.length]; }
+        if(s.kr){ CC_LAWS[B].push(s.name); CC_CATALOG[B][s.name]=[0,s.kr.length,s.kr.length,s.kr.length]; }
       }
       window.CC_LAWS=CC_LAWS;
       try{ document.body.setAttribute("data-exam",ccExam()); }catch(e){}
@@ -11342,10 +11344,10 @@ var qrcode = function() {
   var _au=applyUser; applyUser=function(u){ try{ user=u; scope(); CC_QB={}; CC_QB_P={}; }catch(e){} return _au.apply(this,arguments); }; window.applyUser=applyUser;
   /* 감정평가사의 각론 1~4강 = 각론 6 · 7 · 9 · 10강과 같은 강의명 · 영상 · 학습도구 */
   ["ccLecTitle","ccLecUrl"].forEach(function(n){ var f=window[n]; if(typeof f!=="function") return;
-    window[n]=function(t,l,si,i,src){ if(l===A){ l=KR; i=(KRL[+i||0]||KRL[0])-1; } return f(t,l,si,i,src); }; });
+    window[n]=function(t,l,si,i,src){ var c=SC(); if(c&&c.kr&&l===c.name){ l=KR; i=(c.kr[+i||0]||c.kr[0])-1; } return f(t,l,si,i,src); }; });
   window.ccExamRows=function(rows){
-    if(ccExam()!=="감정평가사") return rows;
-    return (rows||[]).map(function(q){ var x=q&&q.subject===KR&&q.stage!=="기본강의"?KRL.indexOf(+q.lec):-1; if(x>=0){ var c={}; for(var k in q) c[k]=q[k]; c.subject=A; c.lec=x+1; return c; } return q; });
+    var c=SC(); if(!c||!c.kr) return rows;
+    return (rows||[]).map(function(q){ var x=q&&q.subject===KR&&q.stage!=="기본강의"?c.kr.indexOf(+q.lec):-1; if(x>=0){ var o={}; for(var k in q) o[k]=q[k]; o.subject=c.name; o.lec=x+1; return o; } return q; });
   };
   /* 🔘 실전선택형 — 변호사시험 화면에만 · 행정법 선택형(5지선다) 문항을 진도별로 푸는 엔진 */
   try{ var st=document.createElement("style"); st.textContent='body:not([data-exam="변시"]) #engmenu [data-sel]{display:none!important}#heroMe #hmOut{font:inherit;font-size:14px;font-weight:700;padding:6px 12px;border:1px solid var(--line,#cfd5df);border-radius:8px;background:transparent;color:inherit;cursor:pointer}#heroMe #hmOut:hover{border-color:var(--gold,#C9A227);color:var(--gold,#C9A227)}'; document.head.appendChild(st); }catch(e){}
