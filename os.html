@@ -6229,15 +6229,15 @@ async function qupSave(){
       g.forEach(function(r,i){ r.sort=base+i+1; });
     }
     const cols=["track","subject","stage","lec","qtype","case_text","question","choices","answer","explanation","keywords","model_answer","chapter","topic","logic","grid","advice","rewrite","sort","src"];
-    const ids=[];
+    const ids=[]; QUP.cnt={};
     for(let i=0;i<ok.length;i+=200){
       const chunk=ok.slice(i,i+200).map(function(r){ const o={}; cols.forEach(function(c){ o[c]=(r[c]===""||r[c]===undefined)?null:r[c]; }); return o; });
       const both=(document.getElementById("qupBoth")||{checked:true}).checked; const tw=chunk.filter(function(o){ return both&&o.track==="변시"&&o.qtype!=="5지택일"&&o.qtype!=="콤보형"; }).map(function(o){ return Object.assign({},o,{track:"5급공채"}); });
-      const ins=await sb.from("cc_questions").insert(chunk.concat(tw)).select("id"); if(ins.error) throw ins.error;
+      const ins=await sb.from("cc_questions").insert(chunk.concat(tw)).select("id"); if(ins.error) throw ins.error; chunk.concat(tw).forEach(function(o){ QUP.cnt[o.track]=(QUP.cnt[o.track]||0)+1; });
       (ins.data||[]).forEach(function(x){ ids.push(x.id); });
     }
     QUP.last=ids;
-    if(done) done.innerHTML='<div class="sub qupok" style="margin-top:10px">✓ '+ids.length+'문항을 문제 은행에 저장했습니다'+(removed?' (기존 '+removed+'문항을 바꿈)':'')+' — 변시에 저장했고, 선택형이 아닌 자료는 5급공채에도 함께 넣었습니다 '+
+    if(done) done.innerHTML='<div class="sub qupok" style="margin-top:10px">✓ '+ids.length+'문항을 문제 은행에 저장했습니다'+(removed?' (기존 '+removed+'문항을 바꿈)':'')+' — 저장한 곳: '+Object.keys(QUP.cnt||{}).map(function(k){ return k+' '+QUP.cnt[k]+'문항'; }).join(' · ')+' '+
       '<button class="mini" onclick="qupUndo()">↩ 방금 올린 '+ids.length+'문항 지우기</button></div>';
     try{ toast(ids.length+"문항을 저장했습니다"); }catch(e){}
     try{ ccQBRefresh(); }catch(e){}
