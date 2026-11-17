@@ -11350,7 +11350,7 @@ var qrcode = function() {
     return (rows||[]).map(function(q){ var x=q&&q.subject===KR&&q.stage!=="기본강의"?c.kr.indexOf(+q.lec):-1; if(x>=0){ var o={}; for(var k in q) o[k]=q[k]; o.subject=c.name; o.lec=x+1; return o; } return q; });
   };
   /* 🔘 실전선택형 — 변호사시험 화면에만 · 행정법 선택형(5지선다) 문항을 진도별로 푸는 엔진 */
-  try{ var st=document.createElement("style"); st.textContent='body:not([data-exam="변시"]) #engmenu [data-sel]{display:none!important}#heroMe #hmOut{font:inherit;font-size:14px;font-weight:700;padding:6px 12px;border:1px solid var(--line,#cfd5df);border-radius:8px;background:transparent;color:inherit;cursor:pointer}#heroMe #hmOut:hover{border-color:var(--gold,#C9A227);color:var(--gold,#C9A227)}'; document.head.appendChild(st); }catch(e){}
+  try{ var st=document.createElement("style"); st.textContent='body:not([data-exam="변시"]) #engmenu [data-sel]{display:none!important}#heroMe #hmOut{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:14px;font-weight:800;padding:6px 14px;border:1.5px solid #d9695c;border-radius:8px;background:rgba(217,105,92,.10);color:#d9695c;cursor:pointer;transition:.15s;letter-spacing:0}#heroMe #hmOut:hover{background:#d9695c;color:#fff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(217,105,92,.35)}'; document.head.appendChild(st); }catch(e){}
   window.ccOpenSel=function(){
     if(ccExam()!=="변시"){ try{ toast("실전선택형은 변호사시험 과정에서 씁니다"); }catch(e){} return; }
     window.qbSelTrack=TRACK; window.qbSubjLock=null; window.qbJump=null; window.qbMode=null;
@@ -11359,7 +11359,7 @@ var qrcode = function() {
   };
   /* 로그아웃은 홈 「💬 오늘의 합격조언」 옆 — 나가기 전에 조언을 한 번 더 보게 */
   setInterval(function(){ try{ var top=document.getElementById("hmTop"); if(!top||document.getElementById("hmOut")) return;
-    var b=document.createElement("button"); b.id="hmOut"; b.type="button"; b.textContent="로그아웃"; b.onclick=function(){ logout(); }; top.appendChild(b); }catch(e){} },700);
+    var b=document.createElement("button"); b.id="hmOut"; b.type="button"; b.innerHTML="<span aria-hidden=\"true\">⏻</span> 로그아웃"; b.onclick=function(){ logout(); }; top.appendChild(b); }catch(e){} },700);
   /* ✏️ 학습도구 화면에서 바로 수정 (관리자) — 엔진의 「해설 수정」 → 문항 수정 창 → 저장하면 서버 문항이 바뀌고 그 자리 화면도 갱신 */
   window.ccEditHere=function(id,cb){ if(!window.adminAuthed||typeof qxEdit!=="function") return; window.__qeCb={id:id,cb:cb}; qxEdit(id); };
   (function(){ var _s=window.qxSave; if(typeof _s!=="function") return;
@@ -11492,8 +11492,9 @@ var qrcode = function() {
   function prevBar(){ try{ var b=document.getElementById("ccPrevBar"); if(!b) return; var g=b.querySelector(".gold"); if(!g) return;
     b.querySelectorAll("[data-pt]").forEach(function(x){ x.remove(); });
     var N={"변시":"변시","5급공채":"5급공채","노무사":"노무사","감정평가사":"감평사"}, cur=ccExam()||"변시";
-    CC_EXAMS.forEach(function(ex){ var n=document.createElement("button"); n.className="mini"+(ex===cur?" on":""); n.setAttribute("data-pt",ex); n.textContent=N[ex]+" 화면"; n.onclick=function(){ ccPrevTrack(ex); }; b.insertBefore(n,g); });
-    b.style.flexWrap="wrap"; }catch(e){} }
+    CC_EXAMS.forEach(function(ex){ var n=document.createElement("button"); n.className="mini"+(ex===cur?" on":""); n.setAttribute("data-pt",ex); n.textContent=N[ex]; n.onclick=function(){ ccPrevTrack(ex); }; b.insertBefore(n,g); });
+    b.style.flexWrap="nowrap"; var sp=b.querySelector("span"); if(sp) sp.innerHTML="👀 <b>미리보기</b>"; g.textContent="🖥 대시보드"; }catch(e){} }
+  try{ var ps=document.createElement("style"); ps.textContent='#ccPrevBar{flex-wrap:nowrap!important;gap:6px!important;padding:5px 7px 5px 14px!important;font-size:12px!important;color:#dfe6f3!important;white-space:nowrap;overflow-x:auto;scrollbar-width:none}#ccPrevBar::-webkit-scrollbar{display:none}#ccPrevBar>span{color:#dfe6f3;margin-right:4px}#ccPrevBar>span b{color:#e8b93c}#ccPrevBar .mini{flex:none;padding:4px 11px!important;font-size:12px!important;line-height:1.4;border-radius:999px!important;background:transparent!important;color:#dfe6f3!important;border:1px solid rgba(255,255,255,.28)!important;font-weight:600}#ccPrevBar .mini:hover{border-color:#e8b93c!important;color:#e8b93c!important}#ccPrevBar .mini.on{background:#e8b93c!important;color:#0D1F3C!important;border-color:#e8b93c!important;font-weight:800}#ccPrevBar .mini.gold{background:transparent!important;color:#e8b93c!important;border-color:#e8b93c!important;font-weight:700;margin-left:6px}'; document.head.appendChild(ps); }catch(e){}
   var _ap=ccAdminPreview; ccAdminPreview=function(track){ var r=_ap.call(this,CC_EXAMS.indexOf(track)>=0?track:"변시"); prevBar(); try{ if(r&&r.then) r.then(prevBar); }catch(e){} return r; }; window.ccAdminPreview=ccAdminPreview;
   ccPrevTrack=function(t){ ccAdminPreview(t); }; window.ccPrevTrack=ccPrevTrack;
   /* 시험일: 수험종류별 (비어 있으면 예시값) */
