@@ -3673,7 +3673,7 @@ async function ccQBFetch(cols,track){
     const r=await q.range(from,from+PAGE-1);
     if(r.error) throw r.error;
     const d=r.data||[]; let added=0;
-    for(let i=0;i<d.length;i++){ const x=d[i], id=x&&x.id; if(id!=null){ if(seen[id]) continue; seen[id]=1; } out.push(x); added++; }
+    for(let i=0;i<d.length;i++){ const x=d[i], id=x&&x.id; if(id!=null){ if(seen[id]) continue; seen[id]=1; } if(x&&x.subject==="전범위기출") continue; out.push(x); added++; }
     if(d.length<PAGE||!added) break; from+=PAGE;   /* 같은 문항이 다시 오면(페이지 나눔 미지원) 멈춤 */
   }
   return out;
