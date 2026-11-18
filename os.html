@@ -12265,7 +12265,18 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
   function pdfList(b){ var st=stOf(b), g=gk(b), S=subjOf(g==="*"?"변시":g);   /* PDF는 목차(분야)별 낱권 */
     return S.map(function(sj){ return {sj:sj,u:pickU([g+"|"+sj+"|"+st,"*|"+sj+"|"+st],"naver")}; }); }
   try{ (window.CC_BOOKS||[]).forEach(function(b){ if(b.g==="공통"&&stOf(b)==="기본강의"){ b.n="How to 행정법 강의"; b.d="기본강의 교재 · 기본이론서 · 전 시험 공통"; } b.pod=""; b.pdf=""; }); }catch(e){}
-  window.ccBookPdf=function(i){ var el=document.getElementById("bkPdf"+i); if(el) el.style.display=(el.style.display==="none"?"":"none"); };
+  /* PDF 단추 → 목차별 낱권 PDF 목록이 아래에서 주르륵 올라오는 창 */
+  window.ccBookPdf=function(i){ var b=(window.CC_BOOKS||[])[i]; if(!b) return; var P=pdfList(b), n=P.filter(function(x){ return x.u; }).length;
+    var m=document.getElementById("bkSheet");
+    if(!m){ m=document.createElement("div"); m.id="bkSheet";
+      var st=document.createElement("style"); st.textContent="#bkSheet{position:fixed;inset:0;z-index:100000;background:rgba(5,10,25,.55);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}#bkSheet.on{opacity:1;pointer-events:auto}#bkSheet .sh{width:min(560px,100%);max-height:82vh;overflow:auto;background:var(--navy,#16204a);color:var(--ink,#eef);border:1px solid var(--line,#334);border-bottom:0;border-radius:16px 16px 0 0;padding:14px 16px 18px;transform:translateY(100%);transition:transform .28s ease-out}#bkSheet.on .sh{transform:translateY(0)}#bkSheet .hd{display:flex;align-items:center;gap:8px;margin-bottom:4px}#bkSheet .hd b{font-size:1rem;color:var(--gold,#c9a14a)}#bkSheet .hd button{margin-left:auto;border:0;background:none;color:inherit;font-size:1.3rem;cursor:pointer}#bkSheet .sub{font-size:.8rem;opacity:.75;margin:0 0 10px}#bkSheet .it{display:flex;align-items:center;gap:8px;padding:9px 4px;border-top:1px solid rgba(255,255,255,.1);font-size:.9rem}#bkSheet .it span{flex:1}#bkSheet .it a{background:var(--gold,#c9a14a);color:#0d1f3c;font-weight:700;text-decoration:none;border-radius:999px;padding:4px 12px;font-size:.8rem}#bkSheet .it i{font-style:normal;font-size:.78rem;opacity:.55;border:1px dashed rgba(255,255,255,.3);border-radius:999px;padding:3px 10px}";
+      document.head.appendChild(st);
+      m.addEventListener("click",function(e){ if(e.target===m) ccBookPdfClose(); }); document.body.appendChild(m); }
+    m.innerHTML='<div class="sh"><div class="hd"><b>📄 '+E(b.n)+' · PDF</b><button onclick="ccBookPdfClose()" aria-label="닫기">×</button></div>'+
+      '<p class="sub">PDF는 목차(분야)별 낱권으로 판매합니다 · 네이버 스마트스토어 · '+(n?('지금 '+n+'권 판매 중 / 전체 '+P.length+'권'):'아직 판매 중인 낱권이 없습니다')+'</p>'+
+      P.map(function(x,k){ return '<div class="it"><span>'+(k+1)+'. '+E(x.sj)+'</span>'+(x.u?'<a href="'+E(x.u)+'" target="_blank" rel="noopener">PDF 구매</a>':'<i>준비 중</i>')+'</div>'; }).join("")+'</div>';
+    requestAnimationFrame(function(){ m.classList.add("on"); }); };
+  window.ccBookPdfClose=function(){ var m=document.getElementById("bkSheet"); if(m) m.classList.remove("on"); };
   window.ccBooksDraw=function(){ var el=document.getElementById("bookShelf"); if(!el) return;
     if(window.CC_BOOK_LINKS==null){ el.innerHTML='<h3>📚 교재</h3><p class="bsub">불러오는 중…</p>'; window.ccBookLinksGet().then(function(){ window.ccBooksDraw(); }); return; }
     var B=window.CC_BOOKS||[], G=[]; B.forEach(function(b){ if(G.indexOf(b.g)<0) G.push(b.g); });
@@ -12273,8 +12284,8 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
       return '<div class="bgrp">'+E(g)+'</div><div class="brow">'+B.map(function(b,i){ if(b.g!==g) return "";
         var ky=paperOf(b), P=pdfList(b), n=P.filter(function(x){ return x.u; }).length;
         var btn=(ky?'<a href="'+E(ky)+'" target="_blank" rel="noopener" title="교보문고">종이책</a>':'<span class="wait">종이책 준비 중</span>')+
-                (n?'<a href="javascript:void 0" onclick="ccBookPdf('+i+')" title="목차별 PDF 목록">PDF ▾ <small style="display:inline;margin:0;color:inherit">'+n+'/'+P.length+'</small></a>':'<span class="wait">PDF 준비 중</span>');
-        var list=n?'<div id="bkPdf'+i+'" style="display:none;margin-top:8px;font-size:.8rem;line-height:1.9">'+P.map(function(x){ return x.u?'<div>📄 <a href="'+E(x.u)+'" target="_blank" rel="noopener" style="background:none;color:var(--gold);padding:0;margin:0;font-weight:600;text-decoration:underline">'+E(x.sj)+'</a></div>':'<div style="opacity:.55">📄 '+E(x.sj)+' · 준비 중</div>'; }).join("")+'</div>':'';
+                '<a href="javascript:void 0" onclick="ccBookPdf('+i+')" title="목차별 낱권 PDF 목록"'+(n?'':' style="opacity:.6"')+'>PDF <small style="display:inline;margin:0;color:inherit">'+n+'/'+P.length+'</small></a>';
+        var list='';
         return '<div class="bk"><b>'+E(b.n)+'</b><small>'+E(b.d)+'</small>'+btn+list+'</div>'; }).join("")+'</div>'; }).join(""); };
   window.ccBooksRefresh=function(){ try{ var m=document.getElementById("bookModal"); if(m&&m.classList.contains("open")) window.ccBooksDraw(); }catch(e){} };
   function E(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
