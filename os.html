@@ -12048,6 +12048,18 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",start); else start();
 })();
 </script>
+<script>
+/* 관리자용 「👥 수강생 목록」 띠가 수강생 화면에 남지 않게 한다.
+   (관리자 미리보기 뒤 같은 창에서 로그아웃 → 수강생 계정으로 로그인하면, 앞서 그려 둔 띠가 지워지지 않고 남아 보이던 문제)
+   관리자 로그인 + 미리보기 중이 아니면 띠를 곧바로 지운다. */
+(function(){
+  function sweep(){ try{ if(window.adminAuthed&&window.ccPreview) return; var p=document.getElementById("ccAdmStu"); if(p) p.remove(); }catch(e){} }
+  ["adminLogout","logout","applyUser","ccAdminBack"].forEach(function(n){ try{ var f=window[n]; if(typeof f!=="function") return;
+    window[n]=function(){ var r=f.apply(this,arguments); try{ sweep(); if(r&&typeof r.then==="function") r.then(sweep,sweep); }catch(e){} return r; }; }catch(e){} });
+  try{ applyUser=window.applyUser; }catch(e){} try{ logout=window.logout; }catch(e){} try{ adminLogout=window.adminLogout; }catch(e){}
+  setInterval(sweep,700);
+})();
+</script>
 <style>
 #ccErrBtn{position:fixed;left:0;bottom:22px;z-index:85;display:none;align-items:center;gap:6px;padding:9px 14px 9px 11px;border:none;border-radius:0 999px 999px 0;
   background:#fff;color:#0D1F3C;font-family:'Noto Sans KR',system-ui,sans-serif;font-weight:800;font-size:.8rem;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35)}
