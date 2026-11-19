@@ -6740,6 +6740,7 @@ function closeEngine(){
     return h;
   }
   function sec(title,n,body){ return '<details open style="margin:10px 0;border:1px solid var(--line);border-radius:10px;padding:8px 12px"><summary style="cursor:pointer;font-weight:800">'+title+' <small style="color:var(--mute);font-weight:400">'+n+'개</small></summary><div style="margin-top:8px">'+body+'</div></details>'; }
+  window.qxGyOpen=function(i){ const x=(window.__qxGY||[])[i]; if(!x) return; const w=window.open("","_blank"); if(!w){ try{ toast("새 창을 열 수 없습니다 — 팝업 차단을 풀어 주세요"); }catch(e){} return; } w.document.open(); w.document.write(x.html); w.document.close(); };
   window.qxView=async function(lec){
     const s=QX.sel; if(!s.t) return;
     let ov=document.getElementById("qxModal");
@@ -6766,7 +6767,9 @@ function closeEngine(){
       (x.grid?'<div style="font-weight:800;margin-top:8px">매칭채점표</div><div style="white-space:pre-wrap;font-size:.84rem">'+E(x.grid)+'</div>':'')+
       (x.logic?'<div style="margin-top:6px;font-size:.84rem"><b>핵심논리</b> '+E(x.logic)+'</div>':'')+(x.keywords?'<div style="font-size:.84rem"><b>키워드</b> '+E(x.keywords)+'</div>':'')+'</div>'; }).join(""));
     Object.keys(by).forEach(function(k){ if(["요약","카드","필수암기","OX","5지택일","콤보형","주관식"].indexOf(k)<0) h+=sec(k,by[k].length,by[k].map(function(x){ return qxEB(x)+'<div style="white-space:pre-wrap;padding:4px 0;border-top:1px solid rgba(127,127,127,.15)">'+E(x.question)+'</div>'; }).join("")); });
-    if(!R.length) h+='<div class="empty-log" style="margin-top:12px">이 강의에는 아직 콘텐츠가 없습니다</div>';
+    let GY=[]; try{ const g=await sb.from("cc_gyoan").select("id,tpl,title,html,updated_at").eq("subject",s.l).eq("stage",s.s).eq("lec",lec).order("tpl"); GY=(g&&g.data)||[]; }catch(e){}
+    if(GY.length){ window.__qxGY=GY; h+=sec("🎞️ 동적교안",GY.length,GY.map(function(x,i){ return '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0;border-top:1px solid rgba(127,127,127,.15)"><span style="flex:1;min-width:0">'+E(x.tpl||"강의 전체")+' <small style="color:var(--mute)">· '+E(x.title||"")+'</small></span><button class="mini" onclick="qxGyOpen('+i+')">▶ 열기</button></div>'; }).join("")); }
+    if(!R.length&&!GY.length) h+='<div class="empty-log" style="margin-top:12px">이 강의에는 아직 콘텐츠가 없습니다</div>';
     ov.firstChild.innerHTML=h; ov.scrollTop=0;
   };
   /* 문제 은행 현황을 새로 그릴 때 탐색기도 함께 */
