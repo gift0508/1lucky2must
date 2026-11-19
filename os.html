@@ -11337,7 +11337,10 @@ var qrcode = function() {
   /* drop = 보이지 않는 분야 · kr = 각론 중에서 보이는 강의 번호 · name = 그 강의들을 묶어 보여 주는 분야 이름 */
   window.CC_EXAM_SCOPE={
     "노무사":{drop:["취소소송 · 본안의 위법성판단","객관소송","민중소송","기관소송","실효성확보 · 손해전보","각론"],kr:[1,12,2,3,4,9,10,11],krs:{"답안작성강의":[1, 17, 18, 2, 3, 4, 5, 6, 7, 8, 9, 14, 15, 16]},name:"각론 · 개별행정작용 · 관련청구소송"},
-    "감정평가사":{drop:["객관소송","민중소송","기관소송","각론"],kr:[6,7,9,10],krs:{"답안작성강의":[11, 12, 14, 15]},name:"각론 · 토지보상 · 공물 · 관련청구소송"}
+    "감정평가사":{drop:["객관소송","민중소송","기관소송","각론"],kr:[6,7,9,10],krs:{"답안작성강의":[11, 12, 14, 15]},name:"각론 · 토지보상 · 공물 · 관련청구소송",
+      /* 감평사 전용 사례풀이 목차 — 기본강의 · 답안작성강의는 5급공채와 같고, 사례풀이강의부터는 감평 사례발문(감정평가법 · 토지보상법)으로 따로 감
+         [기본, 답안작성, 사례풀이, 판례특강] · 문제 1개 = 강의 1개 */
+      caseOwn:true, extra:{"보상법규 · 감정평가법":[0,0,13,0],"보상법규 · 토지보상법":[0,0,17,0]}}
   };
   function SC(){ return CC_EXAM_SCOPE[ccExam()]||null; }
   window.ccExam=function(){ try{ var t=user&&user.track; return CC_EXAMS.indexOf(t)>=0?t:""; }catch(e){ return ""; } };
@@ -11352,6 +11355,8 @@ var qrcode = function() {
         CC_LAWS[B]=CC_LAWS[B].filter(function(l){ return s.drop.indexOf(l)<0; });
         s.drop.forEach(function(l){ delete CC_CATALOG[B][l]; });
         if(s.kr){ CC_LAWS[B].push(s.name); CC_CATALOG[B][s.name]=[0,(s.krs&&s.krs["답안작성강의"]||s.kr).length,s.kr.length,s.kr.length]; }
+        if(s.caseOwn) Object.keys(CC_CATALOG[B]).forEach(function(l){ var a=CC_CATALOG[B][l]; if(a&&a.length>2) a[2]=0; });
+        if(s.extra) Object.keys(s.extra).forEach(function(l){ CC_LAWS[B].push(l); CC_CATALOG[B][l]=s.extra[l].slice(); });
       }
       window.CC_LAWS=CC_LAWS;
       try{ document.body.setAttribute("data-exam",ccExam()); }catch(e){}
@@ -12449,7 +12454,10 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
   };
   /* ── 🎞️ 동적교안 올리기 (관리자 화면에서 바로) ── */
   var GY=[];
-  function gySubs(){ var L=(window.NM_BASE2||[]).slice(); try{ (GY||[]).forEach(function(x){ if(L.indexOf(x.subject)<0) L.push(x.subject); }); }catch(e){} return L; }
+  function gyExtra(){ var L=[]; try{ var S=window.CC_EXAM_SCOPE||{}; Object.keys(S).forEach(function(e){ var x=S[e]&&S[e].extra; if(x) Object.keys(x).forEach(function(l){ if(L.indexOf(l)<0) L.push(l); }); }); }catch(e){} return L; }
+  /* 문항 올리기(.txt)에서도 감평사 전용 분야를 고를 수 있게 */
+  try{ if(typeof window.qupLaws==="function"&&!window.qupLaws.__ex){ var _ql=window.qupLaws; window.qupLaws=function(t){ var a=_ql(t); gyExtra().forEach(function(l){ if(a.indexOf(l)<0) a.push(l); }); return a; }; window.qupLaws.__ex=1; } }catch(e){}
+  function gySubs(){ var L=(window.NM_BASE2||[]).slice().concat(gyExtra()); try{ (GY||[]).forEach(function(x){ if(L.indexOf(x.subject)<0) L.push(x.subject); }); }catch(e){} return L; }
   function gyStages(){ return ((window.CC_STAGES||{})["변시"]||["기본강의","답안작성강의","사례풀이강의","판례특강강의"]).slice(); }
   window.ccAdmGy=async function(){
     var pn=apanel("ccGYPanel","🎞️ 동적교안 올리기","강의(답안 틀)마다 동적교안 HTML 파일을 올립니다. 단계 · 분야 · 강의 번호를 고르면 그 강의의 답안 틀이 나옵니다 — 답안 틀 하나에 교안 하나입니다. 답안 틀이 없는 강의(기본강의 등)는 「강의 전체」로 올립니다. 같은 자리에 다시 올리면 새 파일로 바뀝니다."); if(!pn||!window.ccSb) return;
@@ -12460,7 +12468,7 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
       '<select id="gyaSj" onchange="ccAdmGyTpl()">'+gySubs().map(function(x){ return '<option>'+E(x)+'</option>'; }).join("")+'</select>'+
       '<input id="gyaLec" type="number" min="1" value="1" style="flex:0 0 80px" onchange="ccAdmGyTpl()" title="강의 번호"> 강'+
       '<select id="gyaTpl" style="flex:2 1 260px;min-width:0"><option value="">강의 전체</option></select>'+
-      '<label class="mini" style="cursor:pointer">📤 HTML 파일 올리기<input type="file" accept=".html,.htm,text/html" style="display:none" onchange="ccAdmGyUp(this)"></label><span id="gyaMsg" style="opacity:.85"></span></div>'+
+      '<label class="mini" style="cursor:pointer">📤 HTML 파일 올리기<input type="file" multiple accept=".html,.htm,text/html" style="display:none" onchange="ccAdmGyUp(this)"></label><span id="gyaMsg" style="opacity:.85"></span></div>'+
       '<div style="opacity:.7;margin-top:6px">올라온 교안 '+GY.length+'개</div>'+
       (GY.length?GY.map(function(x){ return '<div class="ccadmr"><b>'+E(x.stage)+' · '+E(x.subject)+' '+(+x.lec)+'강<small>'+E(x.tpl||"강의 전체")+' · '+E(x.title||"")+' · '+when(x.updated_at)+'</small></b><button class="mini" onclick="ccAdmGyDel('+x.id+')">삭제</button></div>'; }).join(""):'');
     var st=box.querySelector("select"); Array.prototype.forEach.call(box.querySelectorAll("select,input[type=number]"),function(e){ e.style.background="rgba(0,0,0,.25)"; e.style.border="1px solid rgba(255,255,255,.18)"; e.style.color="inherit"; e.style.borderRadius="8px"; e.style.padding="6px 8px"; e.style.fontFamily="inherit"; });
@@ -12474,17 +12482,25 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
     tp.innerHTML=T.map(function(t){ return '<option value="'+E(t)+'">'+E(t)+'</option>'; }).join("")+'<option value="">강의 전체</option>';
     if(sel!=null&&[].some.call(tp.options,function(o){ return o.value===sel; })) tp.value=sel;
   };
-  window.ccAdmGyUp=function(inp){
-    var f=inp.files&&inp.files[0], ms=document.getElementById("gyaMsg"); inp.value=""; if(!f) return;
+  /* 여러 파일 한꺼번에: 파일 이름이 「단계__분야__강의번호.html」이면 그 자리로 (예: 사례풀이강의__보상법규 · 감정평가법__01.html) */
+  function gyName(n){ var m=String(n||"").replace(/\.html?$/i,"").split("__"); if(m.length<3) return null; var lc=parseInt(m[2],10); if(!lc) return null;
+    var st=m[0].trim(), sj=m[1].trim(); if(gyStages().indexOf(st)<0||gySubs().indexOf(sj)<0) return null; return {st:st,sj:sj,lc:lc,tp:(m[3]||"").trim()}; }
+  window.ccAdmGyUp=async function(inp){
+    var fs=Array.prototype.slice.call(inp.files||[]), ms=document.getElementById("gyaMsg"); inp.value=""; if(!fs.length) return;
     function say(t){ if(ms) ms.textContent=t; }
-    if(!/\.html?$/i.test(f.name)){ say("HTML 파일만 올릴 수 있습니다."); return; }
-    if(f.size>1500000){ say("파일이 너무 큽니다 (1.5MB까지)."); return; }
-    var st=document.getElementById("gyaSt").value, sj=document.getElementById("gyaSj").value, lc=+document.getElementById("gyaLec").value||1, tp=document.getElementById("gyaTpl").value||"";
-    var rd=new FileReader(); rd.onload=async function(){ say("올리는 중…");
-      try{ var r=await window.ccSb.from("cc_gyoan").upsert([{subject:sj,stage:st,lec:lc,tpl:tp,title:f.name,html:String(rd.result||""),updated_at:new Date().toISOString()}],{onConflict:"subject,stage,lec,tpl"});
-        if(r&&r.error){ say("올리지 못했습니다: "+r.error.message); return; } await ccAdmGy(); var m2=document.getElementById("gyaMsg"); if(m2) m2.textContent="올렸습니다 — "+st+" · "+sj+" "+lc+"강 · "+(tp||"강의 전체"); }
-      catch(e){ say("올리지 못했습니다."); } };
-    rd.readAsText(f,"utf-8");
+    var many=fs.length>1, ok=0, bad=[];
+    for(var i=0;i<fs.length;i++){ var f=fs[i];
+      if(!/\.html?$/i.test(f.name)||f.size>1500000){ bad.push(f.name); continue; }
+      var nm=gyName(f.name);
+      if(many&&!nm){ bad.push(f.name); continue; }
+      var st=nm?nm.st:document.getElementById("gyaSt").value, sj=nm?nm.sj:document.getElementById("gyaSj").value, lc=nm?nm.lc:(+document.getElementById("gyaLec").value||1), tp=nm?nm.tp:(document.getElementById("gyaTpl").value||"");
+      say("올리는 중… "+(i+1)+"/"+fs.length);
+      try{ var txt=await f.text(); var r=await window.ccSb.from("cc_gyoan").upsert([{subject:sj,stage:st,lec:lc,tpl:tp,title:f.name,html:txt,updated_at:new Date().toISOString()}],{onConflict:"subject,stage,lec,tpl"});
+        if(r&&r.error) bad.push(f.name); else ok++; }catch(e){ bad.push(f.name); }
+    }
+    await ccAdmGy(); var m2=document.getElementById("gyaMsg");
+    if(m2) m2.textContent="올렸습니다 "+ok+"개"+(bad.length?" · 못 올린 파일 "+bad.length+"개 (파일 이름은 「단계__분야__강의번호.html」): "+bad.slice(0,3).join(", "):"");
+    return;
   };
   window.ccAdmGyDel=async function(id){ var x=GY.filter(function(r){ return r.id===id; })[0]; if(!x) return;
     if(!confirm("「"+x.stage+" · "+x.subject+" "+x.lec+"강 · "+(x.tpl||"강의 전체")+"」 교안을 삭제할까요? 삭제하면 되돌릴 수 없습니다.")) return;
