@@ -12556,5 +12556,186 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
       return _ps.apply(this,arguments); }; window.ccPlanSync.__dfr=1; }
 })();
 </script>
+<style>
+/* ── 수험정보 카드 (STEP ① 나의 수강신청) — 펼침 목록 단추 · 2026-11-20 ── */
+.pfx{margin-top:4px;color:#2b2b2b}
+.pfx .pr{display:flex;align-items:center;gap:10px;margin:9px 0;min-height:34px;flex-wrap:wrap}
+.pfx .pl{flex:0 0 110px;color:#8a8a8a;font-size:13.5px}
+.pfx .pn{color:#8a7a50;font-size:12px;line-height:1.5}
+.pfx hr{border:0;border-top:1.5px dashed #d8cfb8;margin:12px 0}
+.pfx .pv{font-weight:800;font-size:14px}
+.pfx .pv small{font-weight:600;color:#8a8a8a;font-size:13px}
+.pfx .gold{color:#9c7a1c;font-weight:800}
+.pfx .tg{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:800;margin-right:5px}
+.pfx .tg.y{background:#E3F0E6;color:#2f7d4f}.pfx .tg.n{background:#EEE;color:#8a8a8a}
+.pfx .dd{position:relative;display:inline-block}
+.pfx .db{display:inline-flex;align-items:center;gap:10px;padding:6px 14px;border-radius:999px;border:1.5px solid #C9A64A;background:#E9D9A6;color:#6b4f00;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.pfx .db:after{content:"▾";font-size:12px}
+.pfx .db.lock{cursor:default}
+.pfx .dl{display:none;position:absolute;top:38px;left:0;z-index:50;background:#fff;border:1.5px solid #C9A64A;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.14);padding:6px;min-width:100%;max-height:300px;overflow:auto}
+.pfx .dd.open .dl{display:block}
+.pfx .dl div{padding:7px 12px;border-radius:8px;font-size:13.5px;font-weight:700;color:#555;cursor:pointer;white-space:nowrap}
+.pfx .dl div:hover{background:#F6F1E4}
+.pfx .dl div.on{background:#E9D9A6;color:#6b4f00}
+.pfx .dl div.on:before{content:"✓ "}
+.pfx .dl div.off{color:#b5b5b5;cursor:default}
+.pfx .dl div.off:hover{background:none}
+.pfx .ps{margin-top:12px;border:1.5px solid #E5C96A;border-radius:12px;padding:12px 16px;background:#FBF7EC;font-size:14px;line-height:1.8}
+.pfx .ps b.big{font-size:20px;color:#0D1F3C}
+</style>
+<script>
+/* ── 수험정보 카드: 수험 종류 · 수험 형태 · 응시 경험(차수 + 회차) · 수강신청 현황 · 학습스타일 · 1주 공부시간
+      값은 계획(CC_PLAN.prof)에 저장 · 수험 종류는 회원 정보라 여기서는 보기만 (변경은 관리자) · 2026-11-20 ── */
+(function(){
+  var EXN={"변시":"변호사자격시험","5급공채":"5급공채시험","노무사":"노무사자격시험","감정평가사":"감정평가사자격시험"};
+  var STY=[{k:"rv",n:"복습중심형 1 : 2",lec:1/3},{k:"bal",n:"강의수강:복습균형형 1 : 1",lec:1/2},{k:"lec",n:"강의수강중심형 2 : 1",lec:2/3}];
+  function E(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function tr(){ try{ return (user&&user.track)||TRACK||"변시"; }catch(e){ return "변시"; } }
+  function P(){ var pl=ccPlanOf(TRACK)||{}; var p=pl.prof||{};
+    var ty=String((user&&user.type)||""); var ex=String((user&&user.exp2)||"");
+    return { form:p.form||(/직장/.test(ty)?"직장 병행":"전업"),
+             cha:p.cha||"2차",
+             round:p.round||(/응시|재/.test(ex)?"재시":"초시"),
+             style:p.style||"bal", wd:p.wd!=null?p.wd:6, we:p.we!=null?p.we:8 }; }
+  function save(k,v){ var pl=ccPlanOf(TRACK); pl.prof=Object.assign({},pl.prof||{}); pl.prof[k]=v;
+    if(k==="style"||k==="wd"||k==="we"){ var n=perOf(Object.assign(P(),pl.prof)); if(n>0){ if(!pl.per){ ccPlanWrite(TRACK,pl); try{ ccPlanSetPer(TRACK,n); }catch(e){} draw(); return; }
+        pl.perNext={v:n,from:ccISO(ccAddDays(ccToday(),1))}; } }
+    ccPlanWrite(TRACK,pl); draw(); }
+  function dayH(p){ return (p.wd*5+p.we*2)/7; }
+  function styOf(k){ return STY.filter(function(s){ return s.k===k; })[0]||STY[1]; }
+  function perOf(p){ return Math.max(1,Math.min(window.CC_PER_MAX||20,Math.round(dayH(p)*styOf(p.style).lec))); }   /* 1강 ≈ 1시간 */
+  function hm(h){ var m=Math.round(h*60/10)*10; return Math.floor(m/60)+"시간"+(m%60?" "+(m%60)+"분":""); }
+  function dd(id,val,opts,lock,w){ return '<span class="dd" id="pfd_'+id+'"><button class="db'+(lock?' lock':'')+'" type="button" onclick="ccPfOpen(\''+id+'\')"'+(w?' style="min-width:'+w+'px;justify-content:space-between"':'')+'>'+E(val)+'</button><div class="dl">'+
+      opts.map(function(o){ var on=(o.v===val||o.n===val), off=!!o.off; return '<div class="'+(on?'on':'')+(off?' off':'')+'"'+(off?' title="'+E(o.t||"")+'"':' onclick="ccPfSet(\''+id+'\',\''+String(o.v).replace(/'/g,"\\'")+'\')"')+'>'+E(o.n)+'</div>'; }).join("")+'</div></span>'; }
+  window.ccPfOpen=function(id){ var el=document.getElementById("pfd_"+id); if(!el) return; var o=el.classList.contains("open");
+    Array.prototype.forEach.call(document.querySelectorAll(".pfx .dd.open"),function(x){ x.classList.remove("open"); }); if(!o) el.classList.add("open"); };
+  document.addEventListener("click",function(e){ if(!e.target.closest||!e.target.closest(".pfx .dd")) Array.prototype.forEach.call(document.querySelectorAll(".pfx .dd.open"),function(x){ x.classList.remove("open"); }); });
+  window.ccPfSet=function(id,v){ if(id==="exam") return; if(id==="wd"||id==="we") v=+v; save(id==="sty"?"style":id,v); };
+  function stages(){ var t=TRACK, S=(CC_STAGES[t]||[]), on=[], off=[];
+    S.forEach(function(st,si){ var any=false; try{ (CC_LAWS[t]||[]).forEach(function(l){ if(!any&&(ccCat(t,l)[si]||0)>0&&ccCount(ccSel(t,l,si))>0) any=true; }); }catch(e){}
+      var has=false; try{ (CC_LAWS[t]||[]).forEach(function(l){ if((ccCat(t,l)[si]||0)>0) has=true; }); }catch(e){}
+      if(!has) return; (any?on:off).push(st); }); return {on:on,off:off}; }
+  function draw(){
+    var card=document.querySelector("#s1 .pcard"); if(!card||typeof user==="undefined"||!user) return;
+    var t=tr(), p=P(), bar=(t==="변시"), hrs=[]; for(var i=0;i<=16;i++) hrs.push({v:i,n:String(i)});
+    var nm=document.getElementById("profName"); if(nm) nm.textContent=(EXN[t]||t)+(bar?"":" "+p.cha)+" · "+p.form+" 수험";
+    var pd=document.getElementById("profDesc"), pg=document.getElementById("profDiag"); if(pd) pd.style.display="none"; if(pg) pg.style.display="none";
+    var box=document.getElementById("pfxBox"); if(!box){ box=document.createElement("div"); box.id="pfxBox"; box.className="pfx"; card.appendChild(box); }
+    var sg=stages(), tot=p.wd*5+p.we*2, per=perOf(p), lh=dayH(p)*styOf(p.style).lec, rh=dayH(p)-lh, pl=ccPlanOf(TRACK)||{};
+    var nx=pl.perNext&&pl.perNext.from>ccISO(ccToday())?' <span class="pn">(내일부터 하루 '+pl.perNext.v+'강으로 배정)</span>':'';
+    box.innerHTML=
+      '<div class="pr"><span class="pl">수험 종류</span>'+dd("exam",EXN[t]||t,Object.keys(EXN).map(function(k){ return {v:k,n:EXN[k],off:k!==t,t:"수험 종류 변경은 관리자에게 요청해 주세요"}; }),false,170)+'</div>'+
+      '<div class="pr"><span class="pl">수험 형태</span>'+dd("form",p.form,[{v:"전업",n:"전업"},{v:"직장 병행",n:"직장 병행"}])+'</div>'+
+      '<div class="pr"><span class="pl">응시 경험</span>'+(bar?'':dd("cha",p.cha,[{v:"1차",n:"1차"},{v:"2차",n:"2차"},{v:"동차(1+2차)",n:"동차(1+2차)"}]))+
+        dd("round",p.round,[{v:"초시",n:"초시"},{v:"재시",n:"재시"},{v:"삼시이상",n:"삼시이상"}])+(bar?'':'<span class="pn">※ 동차의 경우 2차 응시경험을 선택하면 됩니다.</span>')+'</div>'+
+      '<hr>'+
+      '<div class="pr"><span class="pl">수강신청 현황</span><span class="pv">'+(sg.on.length?'<span class="tg y">선택</span>'+E(sg.on.join(" · ")):'<span class="tg y">선택</span><small>아직 없음</small>')+
+        (sg.off.length?' &nbsp;&nbsp;<span class="tg n">미선택</span><small>'+E(sg.off.join(" · "))+'</small>':'')+'</span></div>'+
+      '<div class="pr"><span class="pl">학습스타일</span>'+dd("sty",styOf(p.style).n,STY.map(function(s){ return {v:s.k,n:s.n}; }))+'<span class="pn">※ 하루 3시간 기준으로 복습중심형은 수강1 : 복습2 / 강의수강복습균형형은 1.5 : 1.5 / 강의수강중심형은 2 : 1입니다.</span></div>'+
+      '<div class="pr"><span class="pl">1주 공부시간</span><span class="pv">주중(월~금) 하루</span>'+dd("wd",String(p.wd),hrs)+'<span class="pv">시간 · 주말(토~일) 하루</span>'+dd("we",String(p.we),hrs)+'<span class="pv">시간 · <span class="gold">한 주 총 '+tot+'시간</span></span><span class="pn">※ 수정시 익일부터 적용됩니다.</span></div>'+
+      '<div class="ps">📅 학습스타일에 따른 나의 수강일정 : <b>하루 평균 수강강의수</b> <b class="big">약 '+per+'강</b> &nbsp;·&nbsp; <b>하루 평균 복습시간</b> <b class="big">약 '+hm(rh)+'</b>'+nx+(pl.per?'':' <button style="margin-left:10px;padding:6px 14px;border-radius:999px;border:1.5px solid #0D1F3C;background:#0D1F3C;color:#fff;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit" onclick="ccPfStart()">▶ 이 일정으로 시작</button>')+'</div>';
+  }
+  window.ccPfDraw=draw;
+  window.ccPfInfo=function(){ try{ var p=P(), lh=dayH(p)*styOf(p.style).lec; return {per:perOf(p),rv:hm(dayH(p)-lh)}; }catch(e){ return null; } };
+  window.ccPfStart=function(){ try{ ccPlanSetPer(TRACK,perOf(P())); }catch(e){} draw(); };
+  /* 「수정시 익일부터」: 내일 첫 동기화 때 하루 수강량을 바꿈 */
+  var _ps=window.ccPlanSync;
+  if(_ps&&!_ps.__pn){ window.ccPlanSync=function(t){ try{ var pl=ccPlanOf(t); if(pl.perNext&&pl.perNext.from<=ccISO(ccToday())){ pl.per=pl.perNext.v; delete pl.perNext; ccPlanWrite(t,pl); } }catch(e){} return _ps.apply(this,arguments); }; window.ccPlanSync.__pn=1; window.ccPlanSync.__dfr=_ps.__dfr; }
+  var _cs=window.ccPathSummary;
+  if(_cs&&!_cs.__pf){ window.ccPathSummary=function(){ var r=_cs.apply(this,arguments); try{ draw(); }catch(e){} return r; }; window.ccPathSummary.__pf=1; }
+})();
+</script>
+<style>
+/* ── 첫 화면 정리: STEP ② 오늘 해야 할 공부(위) · STEP ③ 현재 나의 학습성과(아래) · 2026-11-20 ── */
+#ccGoQB{display:none!important}
+#s3lede,#s3 .today .panel>.sub{display:none!important}
+.ccpct{display:inline-block;margin-left:8px;padding:2px 14px;border:2px solid #E3B8B0;border-radius:999px;color:#C0392B;font-size:22px;font-weight:900;vertical-align:middle;background:#fff}
+#ccAccT{font-size:15.5px}
+.ccaccf{display:inline-flex;gap:6px;margin-left:10px;vertical-align:middle;font-family:"Noto Sans KR",sans-serif}
+.ccaccf .db{padding:4px 12px;font-size:12.5px}
+#s3 .today .panel:nth-child(2)>h3{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.ccone{margin-top:14px;padding:16px;border:1.5px solid #E5C96A;border-radius:14px;text-align:center;background:#FBF7EC}
+.ccone .t{font-weight:800;font-size:14.5px;color:#0D1F3C}.ccone .pc{font-size:44px;font-weight:900;color:#C0392B;margin:6px 0}
+.ccone .tr{height:14px;border-radius:999px;background:rgba(127,127,127,.18);overflow:hidden}.ccone .fl{height:100%;background:var(--gold,#E8B93C);border-radius:999px}
+.ccone .s{margin-top:8px;font-size:13px;color:#777}
+.ccst{cursor:pointer;border-radius:10px;padding:2px 6px;margin:6px -6px 0}.ccst:hover{background:rgba(201,166,74,.10)}
+.ccacc.stg .h{font-size:14.5px}.ccacc.stg .tr{height:11px}
+.ccsub{margin:2px 0 8px 14px;padding-left:10px;border-left:2px solid #E5C96A}
+.ccacc.sm{margin-top:6px}.ccacc.sm .h{font-size:13px;font-weight:600}.ccacc.sm .tr{height:7px}.ccacc.sm .fl{background:#C9A64A}
+.ccnote2{margin:10px 0 18px;padding:12px 16px;border:1.5px solid #E5C96A;border-radius:12px;font-size:14px;color:#555;background:transparent}
+#ccPlanBar.ccpb2{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px}
+#ccPlanBar.ccpb2 .pbv b{font-size:16px}
+#ccPlanBar.ccpb2 .pbr{margin-left:auto}
+</style>
+<script>
+(function(){
+  function E(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function lay(){ try{
+    var s2=document.getElementById("s2"), s3=document.getElementById("s3");
+    if(s2&&s3&&s3.nextElementSibling!==s2&&s2.parentNode===s3.parentNode) s2.parentNode.insertBefore(s3,s2);
+    var t3=s3&&s3.querySelector(".step-tag"); if(t3) t3.textContent="STEP ② 오늘 해야 할 공부";
+    var t2=s2&&s2.querySelector(".step-tag"); if(t2) t2.textContent="STEP ③ 현재 나의 학습성과";
+    var hs=s3?s3.querySelectorAll(".today .panel>h3"):[]; if(hs[0]) hs[0].textContent="현재 진행 중인 강의"; if(hs[1]&&!hs[1].querySelector("#ccAccF")) hs[1].textContent="누적수강현황";
+    var ld=document.getElementById("rmLede"); if(ld) ld.style.display="none";
+  }catch(e){} }
+  window.ccLayFix=lay;
+  /* 누적수강현황: 제목 옆 [단계 ▾] [분야 ▾] — 고른 범위만 보여 줌
+     단계 전부+분야 전부 = 분야별 막대(기존) · 단계 하나 = 그 단계의 분야별 · 분야 하나 = 그 분야의 단계별 · 둘 다 = 큰 막대 하나 */
+  var AF={si:-1,l:""};
+  window.ccAccSet=function(k,v){ if(k==="si") AF.si=+v; else AF.l=v; accStage(); };
+  function bar(name,h,n,cls){ var pc=n?Math.round(h/n*100):0; return '<div class="ccacc'+(cls?' '+cls:'')+'"><div class="h">'+name+'<span>'+h+' / '+n+'강 · '+pc+'%</span></div><div class="tr"><div class="fl" style="width:'+pc+'%"></div></div></div>'; }
+  function ddm(id,val,opts){ return '<span class="dd" id="pfd_'+id+'"><button class="db" type="button" onclick="ccPfOpen(\''+id+'\')">'+E(val)+'</button><div class="dl">'+
+      opts.map(function(o){ return '<div class="'+(o.on?'on':'')+'" onclick="ccPfOpen(\''+id+'\');ccAccSet(\''+(id==="accS"?"si":"l")+'\',\''+String(o.v).replace(/'/g,"\\'")+'\')">'+E(o.n)+'</div>'; }).join("")+'</div></span>'; }
+  function accStage(){ try{
+    var A=document.getElementById("ccAccL"); if(!A||typeof user==="undefined"||!user) return;
+    var t=TRACK, pl=ccPlanOf(t), f=ccFlat(t,pl), Tm=ccISO(ccToday()), as=pl.asg||{}, S=CC_STAGES[t]||[], lo=(CC_LAWS[t]||[]);
+    var hasS={}, hasL={}; f.forEach(function(o){ hasS[o.si]=1; hasL[o.l]=1; });
+    var sis=Object.keys(hasS).map(Number).sort(function(a,b){ return a-b; }), Ls=lo.filter(function(l){ return hasL[l]; });
+    if(AF.si>=0&&!hasS[AF.si]) AF.si=-1; if(AF.l&&!hasL[AF.l]) AF.l="";
+    var head=document.querySelector("#s3 .today .panel:nth-child(2)>h3");
+    if(head){ var fb=document.getElementById("ccAccF"); if(!fb){ fb=document.createElement("span"); fb.id="ccAccF"; fb.className="pfx ccaccf"; head.appendChild(fb); }
+      fb.innerHTML=ddm("accS",AF.si<0?"단계 전부":S[AF.si],[{v:-1,n:"단계 전부",on:AF.si<0}].concat(sis.map(function(si){ return {v:si,n:S[si],on:AF.si===si}; })))+
+                   ddm("accL",AF.l||"분야 전부",[{v:"",n:"분야 전부",on:!AF.l}].concat(Ls.map(function(l){ return {v:l,n:l,on:AF.l===l}; }))); }
+    var F=f.filter(function(o){ return (AF.si<0||o.si===AF.si)&&(!AF.l||o.l===AF.l); });
+    var heard=function(o){ var a=as[o.key]; return !!(a&&a<Tm); };
+    var grp=function(key,ord,name){ var G={}; F.forEach(function(o){ var k=o[key], g=G[k]=G[k]||{n:0,h:0}; g.n++; if(heard(o)) g.h++; });
+      return ord.filter(function(k){ return G[k]; }).map(function(k){ return bar(E(name(k)),G[k].h,G[k].n); }).join(""); };
+    var html;
+    if(!F.length) html='<div class="sub" style="margin-top:10px">'+(f.length?'고른 단계 · 분야에 담은 강의가 없습니다.':'강의선택에서 강의를 담으면 수강율이 여기에 나옵니다.')+'</div>';
+    else if(AF.si>=0&&AF.l){ var h=F.filter(heard).length, n=F.length, pc=Math.round(h/n*100);
+      html='<div class="ccone"><div class="t">'+E(S[AF.si])+' · '+E(AF.l)+'</div><div class="pc">'+pc+'%</div><div class="tr"><div class="fl" style="width:'+pc+'%"></div></div><div class="s">'+h+' / '+n+'강 수강</div></div>'; }
+    else if(AF.l) html=grp("si",sis,function(si){ return S[si]; });
+    else html=grp("l",Ls,function(l){ return l; });
+    A.innerHTML=html;
+    var AT=document.getElementById("ccAccT"); if(AT){ var hh=F.filter(heard).length, nn=F.length, p2=nn?Math.round(hh/nn*100):0;
+      AT.innerHTML=(AF.si<0&&!AF.l?'담은 강의 전체':'고른 범위')+' 수강율 : <span class="ccpct">'+p2+'%</span>'; AT.dataset.done="1"; }
+  }catch(e){ console.warn(e); } }
+  window.ccAccStage=accStage;
+
+  /* 누적 합계: 「N분야 합계 수강율 : (12%)」 */
+  var _tr=window.ccTodayRender;
+  if(_tr&&!_tr.__lf){ window.ccTodayRender=function(){ var r=_tr.apply(this,arguments); try{ lay();
+      accStage();
+      var AT=document.getElementById("ccAccT"); if(AT&&!AT.dataset.done&&typeof user!=="undefined"&&user){ var m=/<b>(\d+)<\/b>\s*\/\s*(\d+)/.exec(AT.innerHTML), n=(AT.textContent.match(/(\d+)분야/)||[])[1]||"";
+        if(m){ var h=+m[1], t=+m[2], pc=t?Math.round(h/t*100):0; AT.innerHTML='담은 강의 전체 수강율 : <span class="ccpct">'+pc+'%</span>'; } } }catch(e){} return r; }; window.ccTodayRender.__lf=1; }
+  /* 계획 막대: 한 줄로 · 하루 수강강의수는 수험정보(학습스타일 · 1주 공부시간)에서 */
+  var _pb=window.ccPlanBar;
+  if(_pb&&!_pb.__lf){ window.ccPlanBar=function(){ var r=_pb.apply(this,arguments); try{ lay();
+      var bar=document.getElementById("ccPlanBar"); if(!bar||typeof user==="undefined"||!user) return r;
+      var c=ccPlanCalc(TRACK), miss=bar.querySelector(".ccmiss"), mh=miss?miss.outerHTML:"", pf=window.ccPfInfo?ccPfInfo():null;
+      bar.classList.add("ccpb2");
+      bar.innerHTML='<span class="pbt">📅 나의 수강 계획'+(typeof ccIsDual==="function"&&ccIsDual()?' · '+E(TRACK):'')+'</span>'+
+        '<span class="pbv">담은 강의 <b>'+c.total+'강</b></span>'+
+        (c.per?'<span class="pbv">하루 평균 수강강의수 <b>약 '+c.per+'강</b></span>'+(pf?'<span class="pbv">하루 평균 복습시간 <b>약 '+E(pf.rv)+'</b></span>':'')+
+          '<span class="pbv">완료 예정 <b>'+E(c.endTxt||"–")+'</b>'+(c.left!=null?' <small>D-'+c.left+'</small>':'')+'</span>'
+          :'<span class="pbv need">👉 위 수험정보에서 학습스타일 · 1주 공부시간을 정하면 하루 수강강의수와 완료 예정일이 계산됩니다</span>')+
+        '<button class="mini pbr" onclick="openEngine(\'match\')">🎯 강의선택 다시하기</button>'+mh;
+      var nt=document.getElementById("ccNote2"); if(!nt){ nt=document.createElement("div"); nt.id="ccNote2"; nt.className="ccnote2"; nt.textContent="칸을 클릭하면 그 칸의 구체적인 학습상황을 알 수 있습니다."; bar.parentNode.insertBefore(nt,bar.nextSibling); }
+    }catch(e){} return r; }; window.ccPlanBar.__lf=1; }
+  var _sr=window.showRoadmap;
+  if(_sr&&!_sr.__lf){ window.showRoadmap=function(){ var r=_sr.apply(this,arguments); try{ lay(); window.ccPfDraw&&ccPfDraw(); }catch(e){} return r; }; window.showRoadmap.__lf=1; }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",lay); else lay();
+})();
+</script>
 </body>
 </html>
