@@ -12676,12 +12676,35 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
 .nmstg.on{border-color:#C9A64A;background:#FBF4E2;color:#6b4f00}
 .nmstg.on button{border-color:#2f7d4f;background:#2f7d4f;color:#fff}
 .nmstg.na{opacity:.4}.nmstg.na button{cursor:default}
-.nmstgbox{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px;max-width:420px}
+.nmstgbox{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin:10px 0 4px;align-items:start}
+.nmcol{display:flex;flex-direction:column;gap:8px}
+.nmcol+.nmcol{position:sticky;top:0}
+.nmch{display:flex;align-items:center;justify-content:space-between;font-weight:900;font-size:14px;color:#0D1F3C;padding:0 2px}
+.nmab{margin-left:4px;padding:2px 10px;border-radius:999px;border:1.5px solid #d8cfb8!important;background:#fff!important;color:#6b4f00!important;font:inherit;font-size:11.5px;font-weight:800;cursor:pointer}
+@media(max-width:640px){.nmstgbox{grid-template-columns:1fr}}
 .nmsr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1.5px solid #ddd6c4;border-radius:12px;background:#fff;font-weight:800;font-size:14.5px;color:#555}
 .nmsr button{padding:5px 14px;border-radius:999px;border:1.5px solid #c9cfdb;background:#f4f4f4;color:#777;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
-.nmsr.on{border-color:#C9A64A;background:#FBF4E2;color:#6b4f00}.nmsr.on button{border-color:#2f7d4f!important;background:#2f7d4f!important;color:#fff!important}
+.nmsr.on{border-color:#C9A64A;background:#FBF4E2;color:#6b4f00}.nmsr{cursor:pointer}.nmsr span small{display:block;font-size:11.5px;font-weight:600;color:#9c7a1c;margin-top:2px}
+.nmsr.act{box-shadow:0 0 0 2.5px #0D1F3C inset}.nmsr.na{opacity:.45;cursor:default}
+.nmfor{font-weight:800;color:#9c7a1c;font-size:12.5px}
+.nmsr.on button{border-color:#2f7d4f!important;background:#2f7d4f!important;color:#fff!important}
 .nmall{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
 .nmall button{padding:4px 12px;border-radius:999px;border:1.5px solid #C9A64A;background:#fff;color:#6b4f00;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
+.nmstgbox{display:block!important;margin:10px 0 4px}
+.nmrow{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.nmdd{position:relative;min-width:230px}
+.nmlb{font-weight:900;font-size:13.5px;color:#0D1F3C;margin:0 0 6px 4px}.nmlb small{color:#9c7a1c;font-weight:800}
+.nmdb{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:9px 16px;border-radius:999px;border:1.5px solid #C9A64A!important;background:#E9D9A6!important;color:#6b4f00!important;font:inherit;font-weight:800;font-size:14px;cursor:pointer}
+.nmdb:after{content:"▾"}
+.nmdl{display:none;position:static;margin-top:6px;background:#fff;border:1.5px solid #C9A64A;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.14);padding:6px;max-height:340px;overflow:auto}
+.nmdl.open{display:block}
+.nmdl>div{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:8px;font-weight:700;font-size:13.5px;color:#555;cursor:pointer}
+.nmdl>div:hover{background:#F6F1E4}.nmdl>div.on{background:#E9D9A6;color:#6b4f00}.nmdl>div.off{opacity:.4;cursor:default}
+.nmdl small{font-weight:600;color:#9c7a1c;font-size:12px}
+.nmdl .nmtop{justify-content:flex-start;cursor:default}.nmdl .nmtop:hover{background:none}
+.nmdl .nmtop button{padding:3px 10px;border-radius:999px;border:1.5px solid #d8cfb8!important;background:#fff!important;color:#6b4f00!important;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.nmsum{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.nmsum span{padding:3px 10px;border-radius:999px;border:1.5px solid #e3dccb;font-size:12.5px;font-weight:700;color:#555;cursor:pointer}.nmsum span b{color:#2f7d4f}.nmsum span.z{opacity:.55}.nmsum span.act{border-color:#C9A64A;background:#FBF4E2}
 </style>
 <script>
 /* ── 수강신청 = 분야마다 들을 단계를 「선택」 (2026-11-20)
@@ -12699,36 +12722,56 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
       return '<small class="pbadge diag">'+a.map(function(si){ return String(CC_STAGES[t][si]).replace(/강의$/,""); }).join("·")+'</small>'; }catch(e){ return ""; } };
   try{ ccPathBadge=window.ccPathBadge; }catch(e){}
   /* 수강신청 = 들을 「단계」만 고름 → 강의선택에는 고른 단계만 나오고, 그 안에서 분야와 강의를 고름 */
-  var SEL={};
-  function curSel(t){ try{ var pl=ccPlanOf(t); if(pl.stgS) return pl.stgS.slice(); var u={}; (CC_LAWS[t]||[]).forEach(function(l){ stgOf(t,l).forEach(function(si){ u[si]=1; }); }); var a=Object.keys(u).map(Number).sort(); return a.length?a:[0,1,2,3].slice(0,ccNS(t)); }catch(e){ return [0]; } }
-  function row(t,si){ var on=(SEL[t]||[]).indexOf(si)>=0;
-    return '<div class="nmsr'+(on?' on':'')+'"><span>'+CC_STAGES[t][si]+'</span><button type="button" onclick="ccStgTog(\''+t+'\','+si+')">'+(on?'✓ 선택':'선택')+'</button></div>'; }
-  function paint(t){ var el=document.getElementById("nmStgBox_"+t); if(el) el.innerHTML=CC_STAGES[t].map(function(x,si){ return row(t,si); }).join(""); }
-  window.ccStgTog=function(t,si){ var a=SEL[t]||(SEL[t]=[]), i=a.indexOf(si); if(i>=0) a.splice(i,1); else a.push(si); a.sort(); paint(t); };
+  /* 분야마다 들을 단계: 왼쪽에서 분야를 고르면 오른쪽에 그 분야의 단계 → 선택 */
+  var STG={}, ACT={};
+  function initT(t){ STG[t]={}; (CC_LAWS[t]||[]).forEach(function(l){ var pl=ccPlanOf(t); STG[t][l]=(pl.stg&&pl.stg[l])?pl.stg[l].slice():stgOf(t,l); });
+    ACTS[t]=0; }
+  /* 왼쪽 [단계 ▾] → 오른쪽 [분야 ▾]: 단계를 고르고, 그 단계에서 들을 분야를 선택 (펼침 목록 단추) */
+  var ACTS={}, OPEN="";
+  function has(t,l,si){ return (ccCat(t,l)[si]||0)>0; }
+  function lawsOn(t,si){ return (CC_LAWS[t]||[]).filter(function(l){ return has(t,l,si)&&(STG[t][l]||[]).indexOf(si)>=0; }); }
+  function paint(t){ var el=document.getElementById("nmStgBox_"+t); if(!el) return; var si=ACTS[t]||0, L=CC_LAWS[t]||[], on=lawsOn(t,si);
+    var dl=function(id,body){ return '<div class="nmdl'+(OPEN===id?' open':'')+'">'+body+'</div>'; };
+    el.innerHTML='<div class="nmrow">'+
+      '<div class="nmdd"><div class="nmlb">단계</div><button type="button" class="nmdb" onclick="ccNmOpen(\'s\',\''+t+'\')">'+CC_STAGES[t][si]+'</button>'+
+        dl("s",CC_STAGES[t].map(function(x,k){ var n=lawsOn(t,k).length; return '<div class="'+(k===si?'on':'')+'" onclick="ccNmStage(\''+t+'\','+k+')">'+x+'<small>'+(n?n+'분야':'선택 안 함')+'</small></div>'; }).join(""))+'</div>'+
+      '<div class="nmdd"><div class="nmlb">분야 <small>· '+CC_STAGES[t][si]+'</small></div><button type="button" class="nmdb" onclick="ccNmOpen(\'l\',\''+t+'\')">'+(on.length?(on.length===L.filter(function(l){ return has(t,l,si); }).length?'전 분야':on.length+'개 분야 선택'):'선택')+'</button>'+
+        dl("l",'<div class="nmtop"><button type="button" onclick="event.stopPropagation();ccNmAll(\''+t+'\',1)">모두 선택</button><button type="button" onclick="event.stopPropagation();ccNmAll(\''+t+'\',0)">모두 해제</button></div>'+
+          L.map(function(l,i){ var h=has(t,l,si), o=on.indexOf(l)>=0; return '<div class="'+(o?'on':'')+(h?'':' off')+'"'+(h?' onclick="event.stopPropagation();ccNmLaw(\''+t+'\','+i+')"':'')+'>'+(o?'✓ ':'')+l+(h?'':'<small>강의 없음</small>')+'</div>'; }).join(""))+'</div>'+
+      '</div>'+
+      '<div class="nmsum">'+CC_STAGES[t].map(function(x,k){ var n=lawsOn(t,k).length; return '<span class="'+(k===si?'act':'')+(n?'':' z')+'" onclick="ccNmStage(\''+t+'\','+k+')">'+String(x).replace(/강의$/,"")+' <b>'+n+'</b></span>'; }).join("")+'</div>'; }
+  window.ccNmOpen=function(k,t){ OPEN=(OPEN===k)?"":k; paint(t); };
+  window.ccNmStage=function(t,si){ ACTS[t]=si; OPEN=""; paint(t); };
+  window.ccNmLaw=function(t,i){ var l=(CC_LAWS[t]||[])[i], si=ACTS[t]||0, a=STG[t][l]||(STG[t][l]=[]), j=a.indexOf(si); if(j>=0) a.splice(j,1); else a.push(si); a.sort(); paint(t); };
+  window.ccNmAll=function(t,on){ var si=ACTS[t]||0; (CC_LAWS[t]||[]).forEach(function(l){ if(!has(t,l,si)) return; var a=STG[t][l]||(STG[t][l]=[]), j=a.indexOf(si); if(on&&j<0) a.push(si); if(!on&&j>=0) a.splice(j,1); a.sort(); }); paint(t); };
+  document.addEventListener("click",function(e){ if(!OPEN) return; if(e.target.closest&&e.target.closest(".nmdd")) return; OPEN=""; Object.keys(STG).forEach(paint); });
   var pm=window.ccPathModal;
-  if(pm&&!pm.__stg){ window.ccPathModal=function(){ var r=pm.apply(this,arguments);
+  /* 관리자 미리보기에서도 수강신청 창을 열고 시험해 볼 수 있게 (서버에는 저장하지 않음 — 이 브라우저 안에서만) */
+  function noPrev(fn,ctx,args){ var pv=window.ccPreview; if(pv) window.ccPreview=false; try{ return fn.apply(ctx,args); } finally{ if(pv) window.ccPreview=pv; } }
+  if(pm&&!pm.__stg){ window.ccPathModal=function(){ var r=noPrev(pm,this,arguments);
       try{ SEL={};
-        document.querySelectorAll("#pathBody .psec").forEach(function(sec){ var s=sec.querySelector("select.nmstart"); if(!s) return; var t=s.getAttribute("data-t"); SEL[t]=curSel(t);
+        document.querySelectorAll("#pathBody .psec").forEach(function(sec){ var s=sec.querySelector("select.nmstart"); if(!s) return; var t=s.getAttribute("data-t"); initT(t);
           var rows=sec.querySelector(".prows"); if(rows) rows.style.display="none"; var hd=sec.querySelector(".psech small"); if(hd) hd.style.display="none";
           var box=document.createElement("div"); box.className="nmstgbox"; box.id="nmStgBox_"+t; sec.appendChild(box); paint(t); });
         var subs=document.querySelectorAll("#pathBody .upsub");
-        if(subs[0]) subs[0].innerHTML="들을 <b>단계</b>의 <b>선택</b> 단추를 누르세요. 저장하면 <b>강의선택</b>에 고른 단계만 나오고, 그 안에서 <b>분야와 강의</b>를 고르면 됩니다.";
-        if(subs[1]) subs[1].innerHTML="저장한 뒤에도 수강신청은 언제든 다시 할 수 있고, 강의는 「🎯 강의선택 다시하기」에서 빼거나 더 담을 수 있습니다.";
+        if(subs[0]) subs[0].innerHTML="들을 분야와 단계를 선택한다.";
+        if(subs[1]) subs[1].style.display="none";
       }catch(e){ console.warn(e); }
       return r; }; window.ccPathModal.__stg=1; }
   var ps=window.ccPathSave;
   if(ps&&!ps.__stg){ window.ccPathSave=function(silent){
-      var keep={}; try{ Object.keys(SEL).forEach(function(t){ var a=SEL[t]; if(!a.length){ toast("들을 단계를 하나 이상 선택해 주세요"); throw "none"; }
-          document.querySelectorAll('#pathBody select.nmstart[data-t="'+t+'"]').forEach(function(s){ s.value=String(Math.min.apply(null,a)); });
+      var keep={}; try{ Object.keys(STG).forEach(function(t){ var any=Object.keys(STG[t]).some(function(l){ return STG[t][l].length; }); if(!any){ toast("들을 분야와 단계를 하나 이상 선택해 주세요"); throw "none"; }
+          document.querySelectorAll('#pathBody select.nmstart[data-t="'+t+'"]').forEach(function(s){ var a=STG[t][s.getAttribute("data-s")]||[]; s.value=a.length?String(Math.min.apply(null,a)):"-1"; });
           var pl=ccPlanOf(t); keep[t]=JSON.parse(JSON.stringify(pl.pick||{})); }); }catch(e){ if(e==="none") return; }
-      var r=ps.apply(this,arguments);
-      try{ Object.keys(SEL).forEach(function(t){ var a=SEL[t].slice().sort(), pl=ccPlanOf(t);
-          pl.stgS=a; pl.stg={}; (CC_LAWS[t]||[]).forEach(function(l){ pl.stg[l]=a.slice(); });
-          pl.pick=pl.pick||{}; Object.keys(keep[t]||{}).forEach(function(k){ var si=+k.split("|")[1]; if(a.indexOf(si)>=0) pl.pick[k]=keep[t][k]; });   /* 고른 단계에 담아 둔 강의는 그대로 */
-          (CC_LAWS[t]||[]).forEach(function(l){ for(var si=0;si<ccNS(t);si++){ if(a.indexOf(si)<0&&(ccCat(t,l)[si]||0)>0) pl.pick[l+"|"+si]="0".repeat(ccCat(t,l)[si]); } });   /* 고르지 않은 단계는 비움 */
+      var r=noPrev(ps,this,arguments);
+      try{ Object.keys(STG).forEach(function(t){ var pl=ccPlanOf(t), U={};
+          pl.stg={}; (CC_LAWS[t]||[]).forEach(function(l){ var a=(STG[t][l]||[]).filter(function(si){ return (ccCat(t,l)[si]||0)>0; }).sort(); pl.stg[l]=a; a.forEach(function(si){ U[si]=1; }); });
+          pl.stgS=Object.keys(U).map(Number).sort();
+          pl.pick=pl.pick||{}; Object.keys(keep[t]||{}).forEach(function(k){ var pp=k.split("|"); if((pl.stg[pp[0]]||[]).indexOf(+pp[1])>=0) pl.pick[k]=keep[t][k]; });   /* 고른 분야 · 단계에 담아 둔 강의는 그대로 */
+          (CC_LAWS[t]||[]).forEach(function(l){ for(var si=0;si<ccNS(t);si++){ if((pl.stg[l]||[]).indexOf(si)<0&&(ccCat(t,l)[si]||0)>0) pl.pick[l+"|"+si]="0".repeat(ccCat(t,l)[si]); } });   /* 고르지 않은 분야 · 단계는 비움 */
           ccPlanWrite(t,pl);
           if(t===TRACK){ try{ P.A.cells=buildCellsA(); grid(); ccPathSummary(); ccSaveState(); ccPlanSync(t); ccPlanBar(); }catch(e){} } });
-        try{ window.ccPfDraw&&ccPfDraw(); }catch(e){} }catch(e){ console.warn(e); }
+        try{ window.ccPfDraw&&ccPfDraw(); }catch(e){} if(window.ccPreview){ try{ toast("관리자 미리보기 — 이 브라우저에서만 시험으로 반영했습니다 (서버에 저장하지 않음)"); }catch(e){} } }catch(e){ console.warn(e); }
       return r; }; window.ccPathSave.__stg=1; }
 })();
 </script>
