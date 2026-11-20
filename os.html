@@ -13581,7 +13581,7 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
       '<div class="wl">현재까지 들은 강의수: <b>'+heard+'강</b></div><div class="wl">주말에 들어야 할 강의수: <b>'+weNeed+'강</b></div>'+warn+
       '<button class="wbtn" onclick="parent.ccGoPace()">📈 밀린 학습 재조정 →</button></div>';
   };
-  window.ccGoPace=function(){ try{ showRoadmap(); }catch(e){} try{ ccPaceRender(); }catch(e){} setTimeout(function(){ var e=document.getElementById("ccPace"); if(e) e.scrollIntoView({behavior:"smooth",block:"start"}); },300); };
+  window.ccGoPace=function(){ try{ closeEngine(); }catch(e){} try{ showRoadmap(); }catch(e){} try{ ccPaceRender(); }catch(e){} setTimeout(function(){ var e=document.getElementById("ccPace"); if(e){ var y=e.getBoundingClientRect().top+window.scrollY-90; window.scrollTo({top:y,behavior:"smooth"}); } },350); };
 })();
 </script>
 
