@@ -8214,13 +8214,15 @@ window.nmPubClose=function(){ const m=document.getElementById("nmPubPop"); if(m)
         ' <button type="button" class="mini" style="vertical-align:middle" onclick="ccGoalPeek(\''+t+'\')">계산</button></div>'+
         '<div id="ccGoalR" style="display:'+((window.__ccGoalPrev||window.__ccGoalMsg)?'block':'none')+';font-size:14px;margin-top:6px;line-height:1.9">'+ccGoalRes(t)+'</div></div>'; };
     /* ④ 조합을 바꿀 때마다: 시험 전 완료 가능 진단 */
-    const diag4=function(v){ try{ const r=ccEndByCap(v), end=r&&r.end; let ex=null; try{ ex=ccExamDate(t,ccToday()); }catch(e){}
+    const diag4=function(v){ try{ const r=ccEndByCap(v), end=r&&r.end;
+        /* 기준 = 계획된 완료예정일 (행정법만 공부하는 것이 아니므로 시험일이 아니라 내 계획 기준) */
+        const base=(D.pl.chEnd?ccParse(D.pl.chEnd):null)||c.end;
         if(!end) return '<div style="margin-top:8px;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:13px">담은 강의가 없어 진단할 수 없습니다.</div>';
         const k=ccCap(v), wk='한 주 '+k.wk+'강(주중 하루 '+k.wd+'강 · 주말 하루 '+k.we+'강)';
-        if(!ex) return '<div style="margin-top:8px;padding:8px 12px;border:1.5px solid #C9A227;border-radius:8px;font-size:13px;line-height:1.7">📅 '+wk+' → 완료예정 <b>'+ccYMD(end)+'</b></div>';
-        const dd=Math.round((ex-end)/86400000);
-        if(dd>=0) return '<div style="margin-top:8px;padding:8px 12px;border:1.5px solid #2f7d4f;border-radius:8px;color:#2f7d4f;font-size:13px;font-weight:700;line-height:1.7">✅ 시험 전 완료 가능 — '+wk+' → 완료예정 '+ccYMD(end)+' · 시험일('+ccYMD(ex)+')까지 '+dd+'일 여유</div>';
-        return '<div class="cclate" style="margin-top:8px;line-height:1.7">⚠️ 시험 전 완료 불가 — '+wk+' → 완료예정 '+ccYMD(end)+' · 시험일('+ccYMD(ex)+')보다 '+(-dd)+'일 늦음<br>학습시간을 늘리거나 강의수강중심형의 변경을 고려하세요</div>';
+        if(!base) return '<div style="margin-top:8px;padding:8px 12px;border:1.5px solid #C9A227;border-radius:8px;font-size:13px;line-height:1.7">📅 '+wk+' → 완료예정 <b>'+ccYMD(end)+'</b></div>';
+        const dd=Math.round((base-end)/86400000);
+        if(dd>=0) return '<div style="margin-top:8px;padding:8px 12px;border:1.5px solid #2f7d4f;border-radius:8px;color:#2f7d4f;font-size:13px;font-weight:700;line-height:1.7">✅ 계획된 완료예정일 안에 완료 — '+wk+' → 완료예정 '+ccYMD(end)+' · 계획된 완료예정일('+ccYMD(base)+')'+(dd?'보다 '+dd+'일 빠름':'과 같음')+'</div>';
+        return '<div class="cclate" style="margin-top:8px;line-height:1.7">⚠️ 계획된 완료예정일보다 늦어짐 — '+wk+' → 완료예정 '+ccYMD(end)+' · 계획된 완료예정일('+ccYMD(base)+')보다 '+(-dd)+'일 늦음<br>공부시간을 늘리거나 학습스타일 변경을 고려하세요</div>';
       }catch(e){ return ''; } };
     /* ④ 1주 공부가능시간 · 학습스타일 변경 — 여기서 고르면 STEP ① 수험정보 · 위 줄에도 함께 (수정시 익일부터) (2026-11-20 행정법) */
     const row4=function(){ const v=ccProfGet()||{}, F=function(x){ return x%1?x.toFixed(1):String(x); };
