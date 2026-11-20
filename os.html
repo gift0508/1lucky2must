@@ -12667,6 +12667,45 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
       return _ps.apply(this,arguments); }; window.ccPlanSync.__dfr=1; }
 })();
 </script>
+<script>
+/* ── 목차(매칭채점표 grid)를 고치면 같은 문제(문제 · 사례 지문이 같은 문항)에도 반영 (2026-11-20)
+      · 같은 차수: 목차 · 논증키워드 · 배점까지 그대로
+      · 다른 차수(변시 ↔ 5급공채 등): 목차(번호 · 이름 · 순서 · 더하기 · 지우기)만 — 내용(논증키워드 · 구분 · 배점 · 핵심필수현출문구)은 그 차수 것을 그대로
+        (변시: 판례-사안 / 그 밖: 학설-판례-검토-사안으로 전개가 달라서) ── */
+(function(){
+  function parse(t){ var pre=[],rows=[],cur=null; String(t||"").split("\n").forEach(function(line){ var l=line.trim(), p=l.split("|").map(function(x){ return x.trim(); });
+      var isRow=l&&!/^(핵심필수현출문구|금지표현)\s*[:：|]/.test(l)&&!/^※/.test(l)&&p.length>=3&&parseFloat(p[p.length-1])>=0;
+      if(isRow){ var mok="",name="",tag="",kw=""; if(p.length>=5){ mok=p[0]; name=p[1]; tag=p[2]; kw=p.slice(3,p.length-1).join(" | "); } else if(p.length===4){ mok=p[0]; name=p[1]; kw=p[2]; } else { mok=p[0]; name=p[1]; }
+        cur={mok:mok,name:name,tag:tag,kw:kw,pts:p[p.length-1],extra:[]}; rows.push(cur); }
+      else if(l){ if(cur) cur.extra.push(line); else pre.push(line); } });
+    return {pre:pre,rows:rows}; }
+  function ser(g){ return g.pre.concat([].concat.apply([],g.rows.map(function(r){ return [r.mok+" | "+r.name+" | "+(r.tag||"일반")+" | "+(r.kw||"")+" | "+(r.pts||"0")].concat(r.extra||[]); }))).join("\n"); }
+  function key(r){ return String(r.mok||"").replace(/\s+/g,""); }
+  /* 다른 차수: 목차 틀만 새 것으로, 내용은 그 문항 것을 번호(없으면 이름)로 찾아 그대로 */
+  function mergeToc(src,dst){ var S=parse(src), D=parse(dst), byK={}, byN={}; D.rows.forEach(function(r){ if(key(r)) byK[key(r)]=r; byN[String(r.name).trim()]=r; });
+    var used={}; var rows=S.rows.map(function(r){ var o=(key(r)&&byK[key(r)])||byN[String(r.name).trim()]; if(o&&!used[D.rows.indexOf(o)]){ used[D.rows.indexOf(o)]=1; return {mok:r.mok,name:r.name,tag:o.tag,kw:o.kw,pts:o.pts,extra:o.extra}; }
+      return {mok:r.mok,name:r.name,tag:"일반",kw:"",pts:r.pts,extra:[]}; });
+    return ser({pre:D.pre,rows:rows}); }
+  function go(){ var o=window.ccQUpdate; if(typeof o!=="function"||o.__twin) return false;
+    window.ccQUpdate=async function(id,up){
+      var row=await o.apply(this,arguments);
+      try{ if(up&&Object.prototype.hasOwnProperty.call(up,"grid")&&row&&row.question){
+          var q=sb.from("cc_questions").select("id,track,grid").eq("question",row.question).eq("qtype",row.qtype||"주관식").neq("id",row.id);
+          q=row.case_text?q.eq("case_text",row.case_text):q.is("case_text",null);
+          var r=await q; var L=(r&&r.data)||[], same=0, other=0;
+          for(var i=0;i<L.length;i++){ var x=L[i], g=(x.track===row.track)?row.grid:mergeToc(row.grid,x.grid); if(g===x.grid) continue;
+            var u={grid:g,edited_at:new Date().toISOString()}; if(row.edited_by) u.edited_by=row.edited_by;
+            var w=await sb.from("cc_questions").update(u).eq("id",x.id).select("*").maybeSingle();
+            if(w.error&&/edited_(at|by)/.test(w.error.message||"")) w=await sb.from("cc_questions").update({grid:g}).eq("id",x.id).select("*").maybeSingle();
+            if(w.error) throw w.error; if(w.data){ try{ ccQBroadcast(w.data); }catch(e){} } if(x.track===row.track) same++; else other++; }
+          if(same||other){ try{ toast("같은 문제에도 반영했습니다 — "+(same?"같은 차수 "+same+"곳(목차 · 내용)":"")+(same&&other?" · ":"")+(other?"다른 차수 "+other+"곳(목차만, 내용은 그대로)":"")); }catch(e){} } } }
+      catch(e){ try{ toast("이 문제는 저장했지만 같은 문제에는 반영하지 못했습니다 — "+((e&&e.message)||e)); }catch(_){} }
+      return row; };
+    window.ccQUpdate.__twin=1; return true; }
+  window.__ccMergeToc=mergeToc;
+  if(!go()) setTimeout(go,0);
+})();
+</script>
 <style>
 /* ── 수강신청: 분야마다 단계별 「선택」 단추 (2026-11-20) ── */
 #pathBody .prow{flex-wrap:wrap;gap:6px 8px;align-items:center}
