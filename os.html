@@ -13617,7 +13617,7 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
       b=document.createElement("button"); b.className="mini ccb"; b.id="ccHomeMv"; b.textContent="← 홈으로"; b.onclick=function(){ try{ showHome(); }catch(e){} };
       sy.after(sp); sp.after(b); }
     var ds=document.getElementById("dashSections"), on=!!(ds&&ds.style.display!=="none"&&ds.offsetParent!==null), s=document.getElementById("ccHomeSep");
-    b.style.display=on?"":"none"; if(s) s.style.display=on?"":"none"; }
+    b.style.display=""; if(s) s.style.display=""; }
   setInterval(run,400); if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",run); else run();
 })();
 </script>
