@@ -3371,12 +3371,12 @@ function ccPlanCalc(t){
   f.forEach(function(o){ const a=A[o.key]; if(a&&a<T) r.pos++; if(a===T) todayN++; });
   r.today=todayN;
   const onT=ccCalOn(pl,today)&&T>=(pl.start||T);
-  let day=(onT&&todayN<per)?today:ccCalNext(pl,ccAddDays(today,1)), cap=(onT&&todayN<per)?per-todayN:per, firstWait=null;
+  let day=(onT&&todayN<per)?today:ccCalNext(pl,ccAddDays(today,1)), cap=(onT&&todayN<per)?per-todayN:(window.ccPerOn?ccPerOn(pl,day,per):per), firstWait=null; const RM=(window.__ccReMiss?__ccReMiss(t,pl):{});
   const when={};
   f.forEach(function(o){
-    if(A[o.key]){ when[o.key]=ccParse(A[o.key]); return; }
+    if(A[o.key]&&!RM[o.key]){ when[o.key]=ccParse(A[o.key]); return; }
     if(!ccAvail(t,o)){ r.pending++; if(!firstWait) firstWait=o; }
-    if(cap<=0){ day=ccCalNext(pl,ccAddDays(day,1)); cap=per; }
+    if(cap<=0){ day=ccCalNext(pl,ccAddDays(day,1)); cap=(window.ccPerOn?ccPerOn(pl,day,per):per); }
     when[o.key]=day; cap--;
   });
   f.forEach(function(o){ const w=when[o.key]; if(!lo[o.si]||w<lo[o.si]) lo[o.si]=w; if(!hi[o.si]||w>hi[o.si]) hi[o.si]=w; if(!r.end||w>r.end) r.end=w; });
@@ -13506,6 +13506,26 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
   var _g=window.grid;
   if(typeof _g==="function"&&!_g.__p2){ window.grid=function(){ var r=_g.apply(this,arguments); fix(); return r; }; window.grid.__p2=1; }
   window.ccGridFix=fix;
+})();
+</script>
+
+<script>
+/* ── 나의 수정을 적용하면(익일부터) 전체학습계획의 완료예정일 · 칸 기간은 바로 새 계산으로 (오늘 배정은 그대로) (2026-11-20) ── */
+(function(){
+  window.ccPerOn=function(pl,d,per){ try{ var T=ccISO(ccToday()), iso=ccISO(d); if(iso<=T) return per; var b=per;
+      if(pl.pend&&pl.pend.from&&iso>=pl.pend.from&&pl.pend.per!=null) b=pl.pend.per; else if(pl.perNext!=null&&pl.perFrom&&iso>=pl.perFrom) b=pl.perNext;
+      return b+((pl.xtra||{})[iso]||0); }catch(e){ return per; } };
+  var busy=false;
+  window.__ccReMiss=function(t,pl){ if(busy||!(pl&&pl.pend&&pl.pend.re)) return {}; busy=true; var M={}; try{ var D=ccPaceData(t); if(D&&D.miss) Object.keys(D.miss).forEach(function(d){ D.miss[d].forEach(function(k){ M[k]=1; }); }); }catch(e){} busy=false; return M; };
+  /* 계획 막대: 내일부터 바뀌는 내용 표시 */
+  var o=window.ccPlanBar;
+  if(o&&!o.__nx2){ window.ccPlanBar=function(){ var r=o.apply(this,arguments); try{ var bar=document.getElementById("ccPlanBar"); if(!bar) return r; var pl=ccPlanOf(TRACK), x=bar.querySelector(".ccnx"); if(x) x.remove();
+        var n=(pl.pend&&pl.pend.per!=null)?pl.pend.per:(pl.perNext!=null?pl.perNext:null), msg=[];
+        if(n!=null&&n!==pl.per) msg.push("하루 "+pl.per+"강 → "+n+"강");
+        if(pl.xtra&&Object.keys(pl.xtra).length) msg.push("밀린 강의를 완료예정일까지 나눠 추가");
+        if(pl.pend&&pl.pend.re) msg.push("밀린 강의 다시 배정");
+        if(msg.length){ var sp=document.createElement("div"); sp.className="pbn ccnx"; sp.style.cssText="width:100%;font-weight:700;color:#2f7d4f"; sp.textContent="🔜 내일부터 적용: "+msg.join(" · ")+" — 완료 예정일과 칸 기간은 이미 새 계획으로 계산했습니다 (오늘 배정은 그대로)"; bar.appendChild(sp); }
+      }catch(e){} return r; }; window.ccPlanBar.__nx2=1; }
 })();
 </script>
 </body>
