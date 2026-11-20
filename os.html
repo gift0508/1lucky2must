@@ -12648,6 +12648,7 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
 <style>
 /* ── 첫 화면 정리: STEP ② 오늘 해야 할 공부(위) · STEP ③ 현재 나의 학습성과(아래) · 2026-11-20 ── */
 #ccGoQB{display:none!important}
+#s1 .ccbtns{display:none!important}
 #s3lede,#s3 .today .panel>.sub{display:none!important}
 .ccpct{display:inline-block;margin-left:8px;padding:2px 14px;border:2px solid #E3B8B0;border-radius:999px;color:#C0392B;font-size:22px;font-weight:900;vertical-align:middle;background:#fff}
 #ccAccT{font-size:15.5px}
@@ -12735,6 +12736,47 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
   var _sr=window.showRoadmap;
   if(_sr&&!_sr.__lf){ window.showRoadmap=function(){ var r=_sr.apply(this,arguments); try{ lay(); window.ccPfDraw&&ccPfDraw(); }catch(e){} return r; }; window.showRoadmap.__lf=1; }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",lay); else lay();
+})();
+</script>
+<style>
+/* ── STEP ③ 칸 모양: 날짜(굵게) · 강의 수 · 오른쪽 위 상태 알약 · 분야 이름 아래 「처음부터 · 완료 M/D」 (2026-11-20) ── */
+#s2 .legend{display:none!important}
+#grid .cell .dots{display:none!important}
+#grid .cell{position:relative}
+#grid .cell .period.p2{font-size:14.5px;font-weight:800;color:#0D1F3C;letter-spacing:0;padding-right:58px;line-height:1.35}
+#grid .cell .cnt{font-size:13px;color:#8a8a8a;margin-top:2px}
+#grid .cell .st.p2{position:absolute;top:9px;right:9px;margin:0;padding:2px 9px;border-radius:999px;border:1.5px solid #c9cfdb;background:#fff;color:#2d3e5c;font-size:11.5px;font-weight:800}
+#grid .cell.now .st.p2{border-color:#C9A64A;background:#F6ECCB;color:#6b4f00}
+#grid .cell.done .st.p2{border-color:#2f7d4f;background:#E3F0E6;color:#2f7d4f}
+#grid .gl{text-align:center;word-break:keep-all;padding:6px 8px;font-family:"Noto Serif KR",serif;font-weight:900;font-size:15.5px;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#fff;border-radius:12px}
+#grid .gl .glsub{display:block;font-family:"Noto Serif KR",serif;margin-top:4px;font-size:12px;font-weight:700;color:#9c7a1c}
+#grid .gl .glsub .pbadge{all:unset}
+</style>
+<script>
+(function(){
+  var ST={done:"수강완료",now:"수강중",todo:"예정",skip:"담지 않음",credit:"선행",none:"미진입"};
+  function fix(){ try{
+    var g=document.getElementById("grid"); if(!g) return;
+    try{ var ns=g.querySelectorAll(".gh").length-1; if(ns>0) g.style.gridTemplateColumns="150px repeat("+ns+",1fr)"; }catch(e){}
+    var cells=g.querySelectorAll(".cell"), rowEnd={};
+    Array.prototype.forEach.call(cells,function(c){
+      var m=/^c-(\d+)-(\d+)$/.exec(c.id||""); if(!m) return; var li=+m[1];
+      var pe=c.querySelector(".period"), st=c.querySelector(".st"); if(!pe||!st||pe.classList.contains("p2")) return;
+      var tx=pe.textContent.trim(), k=/^(.+?)\s*·\s*(\d+강)$/.exec(tx), cnt="";
+      if(k){ tx=k[1]; cnt=k[2]; } else if(/^\d+강$/.test(tx)){ cnt=tx; tx="일정 미정"; }
+      var e=/[–~-]\s*(\d{1,2})\/(\d{1,2})\s*$/.exec(tx)||/^(\d{1,2})\/(\d{1,2})$/.exec(tx);
+      if(e){ var mm=+e[1], dd=+e[2], v=(mm<new Date().getMonth()+1-2?mm+12:mm)*100+dd; if(!rowEnd[li]||v>rowEnd[li].v) rowEnd[li]={v:v,t:mm+"/"+dd}; }
+      pe.textContent=tx; pe.classList.add("p2");
+      if(cnt){ var cn=document.createElement("div"); cn.className="cnt"; cn.textContent=cnt; pe.parentNode.insertBefore(cn,pe.nextSibling); }
+      var s=(c.className.match(/\b(done|now|todo|skip|credit|none)\b/)||[])[1]; st.textContent=ST[s]||st.textContent; st.classList.add("p2");
+    });
+    Array.prototype.forEach.call(g.querySelectorAll(".gl"),function(gl,li){
+      if(gl.querySelector(".glsub")) return; var b=gl.querySelector(".pbadge"), bt=b?b.textContent:"";
+      if(b) b.remove(); var sp=document.createElement("small"); sp.className="glsub"; sp.textContent=(bt||"")+(rowEnd[li]?(bt?" · ":"")+"완료 "+rowEnd[li].t:""); if(sp.textContent) gl.appendChild(sp); });
+  }catch(e){ console.warn(e); } }
+  var _g=window.grid;
+  if(typeof _g==="function"&&!_g.__p2){ window.grid=function(){ var r=_g.apply(this,arguments); fix(); return r; }; window.grid.__p2=1; }
+  window.ccGridFix=fix;
 })();
 </script>
 </body>
