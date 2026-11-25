@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="cc-build" content="2026-11-23 14:27 지난주비교_표기">
+<meta name="cc-build" content="2026-11-25b 복습칸_배치수정">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -3064,7 +3064,10 @@ window.ccQBOpen=function(track){
   let upto=null;
   if(pl.per){
     const p2=ccPlanSync(track,true), A=p2.asg||{}, T=ccISO(ccToday()); let last=null;
-    ccFlat(track,p2).forEach(function(o){ const a=A[o.key]; if(a&&a<=T){
+    /* (2026-11-24) 이번 주(월~일) 수강강의목록에 올라온 강의는 모두 열림 — 미리 들어도 문항이 바로 열리게 */
+    const td=ccToday(), SN=ccISO(ccAddDays(td,6-((td.getDay()+6)%7)));
+    let PA2=null; try{ PA2=window.nxProjectA?nxProjectA(track):null; }catch(e){}
+    ccFlat(track,p2).forEach(function(o){ const a=A[o.key]||(PA2&&PA2[o.key]); if(a&&a<=SN){
       const sh=window.ccSharedName&&ccSharedName(track,o.l,o.si,o.src,o.i);
       (sh?sh.list:[o.l]).forEach(function(l){ open[l+"|"+stg[o.si]+"|"+(o.i+1)]=1; }); last=o; } });
     if(last) upto=last.l+" "+stg[last.si]+" "+ccJindo(last.i+1);
@@ -4697,8 +4700,7 @@ function nmRvNoteDraw(){
       '<details class="nmrvdet"><summary>문제 · 정답 · 해설 보기</summary>'+(q.case_text?'<div class="nmrvcase">'+nmRvEsc(q.case_text)+'</div>':'')+
         ch.map(function(x,ci){ return '<div class="nmrvopt'+(ci===a?' right':'')+'">'+"①②③④⑤⑥⑦⑧"[ci]+' '+nmRvEsc(x)+'</div>'; }).join("")+(q.explanation?'<div class="nmrvexp">💡 '+nmRvEsc(q.explanation)+'</div>':'')+'</details>'+
       nmRvNoteForm(r,"rvn"+i)+'</div>'; });
-  h+='<div class="nmrvnav"><button onclick="nmRvClose();try{ccOpenQB(\''+nmRvEsc(subj)+'\',null,null,null,\'1차\')}catch(e){}">📕 오답집으로 받기 — '+nmRvEsc(subj)+' 실전문제풀이 →</button></div>'+
-    '<div class="tksub">실전문제풀이의 「🎯 오답집 받기」에서 <b>📒 오답노트 문항</b>을 고르면 정답·해설과 함께 인쇄·저장할 수 있습니다 (오답집 받기와 같은 응시권).</div>';
+  /* (2026-11-24) 오답노트는 이 화면에서만 — 「📕 오답집으로 받기」 버튼 · 안내 삭제 */
   body.innerHTML=h;
   window.__nmRvRpt=subj;
 }
@@ -7615,7 +7617,7 @@ body.qd-on #qaDock{display:flex}
 /* 📂 내 공부기록 탭 순서·이름 (2026-11-12): 받은 조언 → 강의노트 → 오답노트 → 판례특강강의 암기노트 → 변시 제출답안 → 첨삭답안 */
 (function(){
   const dr=window.ccRecDraw; if(!dr) return;
-  const ORD=["advice","note","wrong","theme","case","fb"], NM={advice:"💬 받은 조언",note:"📝 강의노트",wrong:"📒 오답노트",theme:"🔁 판례특강강의 암기노트",case:"✍️ 변시 제출답안",fb:"📄 첨삭답안"};
+  const ORD=["advice","fb","case","note","wrong","theme"]   /* (2026-11-25) 받은 조언 → 첨삭답안 → 변시 제출답안 → 강의노트 → 오답노트 → 판례특강강의 암기노트 */, NM={advice:"💬 받은 조언",note:"📝 강의노트",wrong:"📒 오답노트",theme:"🔁 판례특강강의 암기노트",case:"✍️ 변시 제출답안",fb:"📄 첨삭답안"};
   window.ccRecDraw=function(){ const none=!CC_REC.tab; if(none) CC_REC.tab="note";
     const r=dr.apply(this,arguments); if(none) CC_REC.tab="";
     try{ const tabs=document.querySelector("#nmRvBody .nmrvtabs"); if(!tabs) return r;
@@ -8468,15 +8470,17 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
     const P=RD("cc_nxstep"), done=!!RD("cc_nxdone")[k], s=done?S.length:Math.min(P[k]||0,S.length);
     if(idx>=s){ STARTED[k]=idx; window.__nxLast={k:k,idx:idx}; window.__nxPending=true; } else { window.__nxPending=false; }
     try{ window.__nxLecLabel=r.o.name||((r.o.subj||"")+" "+(r.o.stage||"")+" "+(r.o.lecNo||"")+"강"); }catch(e){}
-    OPEN[k]=true;
+    (Object.keys(OPEN).forEach(function(x){ if(x!==k) OPEN[x]=false; }),OPEN[k]=true);
     try{ run(r.o,r.day,x[2]); }catch(e){ console.warn(e); }
     nxRender();
   };
   window.nxStepDone=function(k,idx,quiet){
     const r=REG[k]; if(!r||prev()) return ""; const S=steps(r.o,r.day), P=RD("cc_nxstep"); let msg;
     if((P[k]||0)<=idx){ P[k]=idx+1; WR("cc_nxstep",P); }
-    delete STARTED[k]; OPEN[k]=true;
-    if(idx+1>=S.length){ const D=RD("cc_nxdone"); D[k]=ccISO(ccToday()); WR("cc_nxdone",D); msg="✅ 이 강의 학습 완료 — 체크되었습니다"; }
+    delete STARTED[k]; (Object.keys(OPEN).forEach(function(x){ if(x!==k) OPEN[x]=false; }),OPEN[k]=true);
+    if(idx+1>=S.length&&r.day>0&&r.day<8&&!RD("cc_nxdone")[k]) msg="✅ 복습 완료 — 복습필요 · 복습불필요 중 하나를 반드시 선택하세요";   /* (2026-11-24) 복습은 선택해야 끝남 */
+    else if(idx+1>=S.length&&r.day===0&&!RD("cc_nxdone")[k]&&(function(){ try{ return ccRvNFor(r.o.t,r.o.si)>0; }catch(e){ return false; } })()) msg="✅ 이 강의 학습 완료 — 복습필요 · 복습불필요 중 하나를 선택하세요";   /* (2026-11-24) 고르면 체크 */
+    else if(idx+1>=S.length){ const D=RD("cc_nxdone"); D[k]=ccISO(ccToday()); WR("cc_nxdone",D); msg="✅ 이 강의 학습 완료 — 체크되었습니다"; }
     else msg="✅ 수업완료 — 다음 단계 「"+S[idx+1][1]+"」가 열렸습니다";
     if(!quiet){ try{ toast(msg); }catch(e){} nxRender(); }
     return msg;
@@ -8495,29 +8499,48 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
       const b=d.createElement("button"); b.id="nxDoneFab"; b.type="button"; b.textContent="✅ 수업완료 — 나의 학습으로";
       b.setAttribute("style","position:fixed;right:18px;bottom:18px;z-index:99999;font:inherit;font-size:14px;font-weight:800;padding:12px 18px;border-radius:12px;border:none;background:#C9A227;color:#0D1F3C;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer");
       b.onclick=function(){ try{ parent.nxEngDone(); }catch(e){} };
-      d.body.appendChild(b); }catch(e){} }); })();
+      d.body.appendChild(b);
+      /* (2026-11-24) 끝 화면에는 「○○풀이완료」 버튼이 있으므로 오른쪽 아래 「✅ 수업완료」는 숨김 (같은 버튼 하나만) */
+      try{ const tg=function(){ const dn=d.querySelector("#play .done"); b.style.display=dn?"none":""; }; new MutationObserver(tg).observe(d.body,{childList:true,subtree:true}); tg(); }catch(e){}
+      /* (2026-11-24) 머리쏙쏙 화면의 [✓ 머리쏙쏙 완료] = 나의 학습 ① 머리쏙쏙 완료 · [🔘 OX풀이로 →] = 나의 학습 ② OX풀이 시작 */
+      try{ const w=f.contentWindow, L=window.__nxLast, r=L&&REG[L.k];
+        if(r&&w&&typeof w.markRead==="function"){ const S=steps(r.o,r.day), cur=S[L.idx];
+          if(cur&&cur[2]==="sum"){
+            const mr=w.markRead; w.markRead=function(){ const out=mr.apply(this,arguments); try{ if(window.__nxLast&&window.__nxLast.k===L.k&&window.__nxLast.idx===L.idx){ nxStepDone(L.k,L.idx,true); window.__nxPending=false; nxRender(); } }catch(e){} return out; };
+            const oi=S.findIndex(function(x,i){ return i>L.idx&&(x[2]==="ox"||x[2]==="oxw"); });
+            if(oi>=0&&typeof w.goOX==="function"){ const go=w.goOX; w.goOX=function(){ try{ const P=RD("cc_nxstep"); if((P[L.k]||0)<oi){ nxStepDone(L.k,L.idx,true); } nxGo(L.k,oi); return; }catch(e){} return go.apply(this,arguments); }; }
+          } }
+        /* (2026-11-24) OX풀이 끝 화면의 [📚 5지택일 · 선다형 풀이로 →] = 나의 학습 ② OX풀이 완료 + ③ 5지택일 시작 */
+        if(r&&w&&typeof w.goNext==="function"){ const S=steps(r.o,r.day), cur=S[L.idx];
+          if(cur&&(cur[2]==="ox"||cur[2]==="oxw")){ const mi=S.findIndex(function(x,i){ return i>L.idx&&(x[2]==="lec"||x[2]==="mcw"); });
+            if(mi>=0){ const gn=w.goNext; w.goNext=function(){ try{ const P=RD("cc_nxstep"); if((P[L.k]||0)<mi) nxStepDone(L.k,L.idx,true); nxGo(L.k,mi); return; }catch(e){} return gn.apply(this,arguments); }; } } }
+        /* 끝 화면의 [✅ 오늘할당된학습하기로 →] = 「✅ 수업완료」와 같게 (이 단계 완료 후 나의 학습으로) */
+        if(w&&typeof w.goMission==="function"){ const gm=w.goMission; w.goMission=function(){ try{ if(window.__nxPending&&window.__nxLast&&window.__nxLast.k===L.k){ nxEngDone(); return; } }catch(e){} return gm.apply(this,arguments); }; }
+      }catch(e){ console.warn("[머리쏙쏙 연결]",e); }
+      }catch(e){} }); })();
   window.nxWrong=function(k){ const r=REG[k]; if(r) try{ run(r.o,r.day,"wrong"); }catch(e){ console.warn(e); } };
-  window.nxTog=function(k){ OPEN[k]=!OPEN[k]; nxRender(); };
+  window.nxTog=function(k){ const on=!OPEN[k]; if(on) Object.keys(OPEN).forEach(function(x){ OPEN[x]=false; }); OPEN[k]=on; nxRender(); };   /* (2026-11-24) 한 강의를 열면 다른 강의 칸은 닫힘 */
   window.nxChk=function(k,on){ if(prev()){ nxRender(); return; } const D=RD("cc_nxdone"); if(on) D[k]=ccISO(ccToday()); else delete D[k]; WR("cc_nxdone",D);
     if(on){ const r=REG[k]; if(r){ const P=RD("cc_nxstep"); P[k]=Math.max(P[k]||0,steps(r.o,r.day).length); WR("cc_nxstep",P); } } nxRender(); };
   const itemHTML=function(o,day,num,cls){
     const k=dk(day,o.key); REG[k]={o:o,day:day};
     const D=RD("cc_nxdone"), P=RD("cc_nxstep"), done=!!D[k], S=steps(o,day), s=done?S.length:Math.min(P[k]||0,S.length), op=!!OPEN[k];
-    let h='<div class="it'+(done?' done':'')+((day>0&&RD("cc_nxrvskip")[k])?' skip':'')+(cls?' '+cls:'')+(op?' open':'')+'" onclick="'+(op?'':'nxAdpTap('+day+');')+'nxTog(\''+J(k)+'\')"><input type="checkbox"'+(done?' checked':'')+' onclick="event.stopPropagation()" onchange="nxChk(\''+J(k)+'\',this.checked)">'+
-      '<span><b>'+(num?num+'. ':'')+E(o.name)+'</b>'+(o.ttl?'<small>'+E(o.ttl)+'</small>':'')+'</span><span class="chev">'+(op?'▲':'▼')+'</span></div>';
+    let h='<div class="it'+(done?' done':'')+((day>0&&RD("cc_nxrvskip")[k])?' skip':'')+(cls?' '+cls:'')+(op?' open':'')+'" onclick="'+(op?'':'nxAdpTap('+day+');')+'nxTog(\''+J(k)+'\')"><input type="checkbox"'+(done?' checked':'')+' onclick="event.stopPropagation()" onchange="'+((day>0&&day<8)?'nxRvChk':'nxChk')+'(\''+J(k)+'\',this.checked)">'+
+      '<span'+((day>0&&!window.ccViewUid)?' class="rvh"':'')+'><b>'+(num?num+'. ':'')+E(o.name)+'</b>'+((day>0&&!window.ccViewUid)?'<button type="button" class="rvsk'+(RD("cc_nxrvskip")[k]?' on':'')+'" onclick="event.stopPropagation();nxRvSkip(\''+J(o.key)+'\','+day+')">복습생략</button>'+''/* (2026-11-25) 「※ 반드시 선택」은 복습불필요 옆으로 */:'')+(o.ttl?'<small>'+E(o.ttl)+'</small>':'')+'</span>'+'<span class="chev">'+(op?'▲':'▼')+'</span></div>';
     /* 다 들은 강의: [복습필요 | 수강완료] (2026-11-23) — 기본 복습필요 · 수강완료를 누르면 이 강의는 복습에 올라오지 않음 */
-    if(day===0&&done&&!window.ccViewUid){ let rvn=0; try{ rvn=ccRvNFor(o.t,o.si); }catch(e){}
-      if(rvn>0){ const nr=!!RD("cc_nxnorv")[o.key];
-        h+='<div class="rvsel"><button type="button" class="'+(nr?'':'on')+'" onclick="nxNoRv(\''+J(o.key)+'\',false)">복습필요</button><button type="button" class="'+(nr?'on':'')+'" onclick="nxNoRv(\''+J(o.key)+'\',true)">수강완료</button></div>'; } }
+    let wkRv='', rvRow='', rvLtn='';   /* (2026-11-24) 복습 강의도 [복습필요 | 복습불필요]를 펼친 칸의 마지막 줄로 */   /* (2026-11-24) 이번 주 강의: [복습필요 | 복습불필요]는 펼친 학습 단계의 「완료」 아래로 */
+    if(day===0&&(done||s>=S.length)&&!window.ccViewUid){ let rvn=0; try{ rvn=ccRvNFor(o.t,o.si); }catch(e){}
+      if(rvn>0){ const nr=!!RD("cc_nxnorv")[o.key];   /* (2026-11-24) 둘 중 하나를 누르면 체크 */
+        wkRv='<div class="rvsel wkin"><button type="button" class="'+(done&&!nr?'on':'')+'" onclick="nxNoRv(\''+J(o.key)+'\',false)">복습필요</button><button type="button" class="'+(done&&nr?'on':'')+'" onclick="nxNoRv(\''+J(o.key)+'\',true)">복습불필요</button></div>'+(done?'':'<span class="rvmust">※ 둘 중 반드시 선택</span>'); } }
     /* 복습 강의: [복습생략 | 다음복습필요 | 다음복습불필요] (2026-11-23) — 복습생략: 오늘 이 복습은 건너뜀(시간이 없어 이번 주 강의가 더 급할 때) · 그다음 다음복습필요/불필요 중 하나 · 14일째(마지막)는 [복습생략]만 */
     if(day>0&&!window.ccViewUid){ const E2=RD("cc_nxrvend"), en=E2[o.key]!=null&&+E2[o.key]===day, last=day>=8, sk=!!RD("cc_nxrvskip")[k];
-      h+='<div class="rvsel r3">'+'<button type="button" class="sk'+(sk?' on':'')+'" onclick="nxRvSkip(\''+J(o.key)+'\','+day+')">복습생략</button>'+
-        (last?'':'<button type="button" class="nx'+(done&&!en?' on':'')+'" onclick="nxRvEnd(\''+J(o.key)+'\','+day+',false)">다음복습필요</button><button type="button" class="'+(done&&en?'on':'')+'" onclick="nxRvEnd(\''+J(o.key)+'\','+day+',true)">다음복습불필요</button>')+'</div>'; }
+      /* (2026-11-24) 복습생략은 강의명 옆으로 · 아래 줄은 [복습필요 | 복습불필요] 두 개 */
+      if(!last) rvRow='<div class="rvsel rv2 wkin"><button type="button" class="nx'+(done&&!en?' on':'')+'" onclick="nxRvEnd(\''+J(o.key)+'\','+day+',false)">복습필요</button><button type="button" class="'+(done&&en?'on':'')+'" onclick="nxRvEnd(\''+J(o.key)+'\','+day+',true)">복습불필요</button>'+'</div>'+(done?'':'<span class="rvmust">※ 둘 중 반드시 선택</span>'); }
     if(day===0&&!done&&!window.ccViewUid){ try{ const pl=ccPlanOf(o.t), T=ccISO(ccToday()); if((pl.xadd||{})[o.key]===T) h+='<div class="rvsel xs"><button type="button" onclick="nxAddLec(-1,\''+J(o.key)+'\')">− 이 강의 빼기 (추가한 강의)</button></div>'; }catch(e){} }
     if(op){
       h+='<div class="flow">'+(window.ccMyNoteRow?ccMyNoteRow(o):'')+S.map(function(x,i){ if(i>s) return ''; const ok=i<s;
-        return '<div class="st'+(ok?' ok':'')+'"><span class="nn">'+(ok?'✓':(i+1))+'</span><b>'+x[0]+' '+E(x[1])+'</b>'+(ok?'<button onclick="event.stopPropagation();nxGo(\''+J(k)+'\','+i+')">다시</button><span class="dn">완료</span>':(STARTED[k]===i?'<button onclick="event.stopPropagation();nxGo(\''+J(k)+'\','+i+')">다시 열기</button><button class="okb" onclick="event.stopPropagation();nxStepDone(\''+J(k)+'\','+i+')">✅ 완료</button>':'<button onclick="event.stopPropagation();nxGo(\''+J(k)+'\','+i+')">시작 →</button>'))+'</div>'; }).join("")+
-        (s<S.length?(s<S.length-1?'':'<div class="st lock">마지막 단계입니다 — 마치고 「✅ 완료」를 누르면 이 강의가 체크됩니다</div>'):'<div class="st fin">✅ 이 강의 학습 완료 — 체크되었습니다</div>')+
+        return '<div class="st'+(ok?' ok':'')+'"><span class="nn">'+(ok?'✓':(i+1))+'</span><b>'+x[0]+' '+E(x[1])+'</b>'+((!ok&&x[2]==="sum")?'<span class="sumtip">※ 머리쏙쏙 시작으로 들어가서 하단의 머리쏙쏙 완료버튼을 누르면 학습을 생략할 수 있습니다.단, ox풀이와 5지택일풀이는 필수입니다.</span>':'')+(ok?'<span class="dn">완료</span><button onclick="event.stopPropagation();nxGo(\''+J(k)+'\','+i+')">재학습</button>':(STARTED[k]===i?'<button onclick="event.stopPropagation();nxGo(\''+J(k)+'\','+i+')">다시 열기</button><button class="okb" onclick="event.stopPropagation();nxStepDone(\''+J(k)+'\','+i+')">✅ 완료</button>':'<button onclick="event.stopPropagation();nxGo(\''+J(k)+'\','+i+')">시작 →</button>'))+'</div>'; }).join("")+
+        (rvRow?('<div class="st fin fwk">'+rvRow+'</div>'+rvLtn):(s<S.length?(s<S.length-1?'':'<div class="st lock">마지막 단계입니다 — 마치고 「✅ 완료」를 누르면 이 강의가 체크됩니다</div>'):(wkRv?'<div class="st fin fwk">'+wkRv+'</div>':'<div class="st fin">✅ 이 강의 학습 완료 — 체크되었습니다</div>')))+
         ((!ccCase(o.t)&&o.stage==="사례풀이강의"&&day===0)?'<div class="st ex"><button onclick="event.stopPropagation();nxWrong(\''+J(k)+'\')">📒 오답노트 '+(noteHas("오답|"+o.key)?'보기 ✓':'올리기')+'</button></div>':'')+
         '</div>';
     }
@@ -8529,6 +8552,7 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
     el=document.createElement("div"); el.id="nxMine"; el.style.display="none";
     const tb=document.querySelector(".wrap .topbar"); if(tb&&tb.parentNode) tb.parentNode.insertBefore(el,tb.nextSibling); else document.body.appendChild(el); return el; };
   const RVC=[[2,"k2","+2","2일 전 수강강의","첫 복습",40],[4,"k4","+6","6일 전 수강강의","두 번째 복습",20],[8,"k8","+14","14일 전 수강강의","세 번째 복습",10]];   /* 띠 이름 = 실제 복습 날짜 · 복습시간 강의당 40 · 20 · 10분 (2026-11-22) */
+  window.nxProjectA=function(t){ try{ const p=project(t); return p?p.A:null; }catch(e){ return null; } };   /* (2026-11-24) 이번 주 수강강의목록과 같은 배정 — 문항 화면 열림에 씀 */
   window.nxRender=function(){
     const el=document.getElementById("nxMine"); if(!el||el.style.display==="none"||typeof user==="undefined"||!user) return;
     if(el.contains(document.activeElement)&&document.activeElement.tagName==="SELECT") return;
@@ -8957,6 +8981,22 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
     return h+'</div>'; };
   window.nxWizToHrs=function(){ const S=stepsOf(), i=S.findIndex(function(x){ return x.k==="hrs"; }); if(i>=0) nxWizGo(i+1); };
   window.nxWizAltRS=function(){ const rs=window.__nxAltRS; if(!rs) return; A.rm="own"; A.rs=Object.assign({},A.rs||{}); Object.keys(rs).forEach(function(t){ A.rs[t]=Object.assign({},A.rs[t]||{},rs[t]); }); A.rsOpen=false; draw(); };
+  /* ── 유튜브 → 학습OS 강의 바로가기 (2026-11-23): #lec=트랙-분야-단계-강 ── */
+  window.nxDeepLec=function(t,l,si,i){
+    try{ nxShowMine(); }catch(e){}
+    setTimeout(function(){ try{
+      const ks=Object.keys(REG).filter(function(k){ const o=REG[k].o; return o&&o.t===t&&o.l===l&&+o.si===si&&+o.i===i; });
+      const k=ks.find(function(x){ return x.indexOf("0|")===0; })||ks[0];
+      if(k){ OPEN[k]=true; nxRender();
+        setTimeout(function(){ const kk=k.replace(/\\/g,"\\\\").replace(/'/g,"\\'"); const el=[].slice.call(document.querySelectorAll("#nxMine .it")).find(function(e){ return e.outerHTML.indexOf(kk)>=0; }); if(el) el.scrollIntoView({behavior:"smooth",block:"center"}); },120);
+        try{ toast("📘 "+REG[k].o.name+" — 학습 단계를 열었습니다"); }catch(e){} return; }
+      const pl=ccPlanOf(t), f=(ccFlat(t,pl)||[]).find(function(x){ return x.l===l&&+x.si===si&&+x.i===i; });
+      if(!f){ try{ toast("이 강의를 찾지 못했습니다 — 나의 학습에서 골라 주세요"); }catch(e){} return; }
+      const o=itemOf(t,f), S=steps(o,0); if(!S||!S.length) return;
+      try{ window.__nxLecLabel=o.name; }catch(e){}
+      run(o,0,S[0][2]); try{ toast("📘 "+o.name+" — 「"+S[0][1]+"」를 열었습니다 (오늘 학습 목록 밖의 강의)"); }catch(e){}
+    }catch(e){ console.warn("[강의 바로가기]",e); } },400);
+  };
 
   const prog=function(S){ return '<div class="prog">'+S.map(function(s,i){ return '<i class="'+(i<step?'on':'')+'"></i>'; }).join("")+'</div>'; };
   const draw=function(){
@@ -9086,7 +9126,7 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
       /* 관리자 미리보기(특정 수강생이 아님): 예시 공부시간으로 화면을 채워 보여 줌 — 이 브라우저에만, 서버 저장 안 됨 */
       try{ if(!window.ccViewUid&&!ccProfGet()) localStorage.setItem("cc_prof",JSON.stringify({wd:4,we:8,r:"11",rm:"rec",demo:1}));
         const v=ccProfGet(); if(v) ccTracks().forEach(function(t){ if(!ccPlanOf(t).per){ if(t===TRACK) ccCapAuto(v); else ccPlanSetPer(t,ccPerOf(v)); } }); }catch(e){}
-      try{ nxShowMine(); }catch(e){ console.warn(e); }
+      try{ nxHome(); }catch(e){ console.warn(e); }   /* (2026-11-24) 관리자 열람도 수강생과 똑같이 홈부터 */
       return; }
     try{ ccTracks().forEach(function(t){ nxPassApply(t,false); }); }catch(e){ console.warn(e); }
     try{ nxDualSplit(); }catch(e){}
@@ -9861,6 +9901,7 @@ window.nxRedesign=function(){
 (function(){ try{ if(CC.syncExact.indexOf("cc_nxnorv")<0) CC.syncExact.push("cc_nxnorv"); }catch(e){} })();
 window.nxNoRv=function(k,on){ if(window.ccPreview){ try{ toast("관리자 미리보기 — 저장하지 않습니다"); }catch(e){} return; }
   try{ const M=JSON.parse(localStorage.getItem("cc_nxnorv")||"{}")||{}; if(on) M[k]=1; else delete M[k]; localStorage.setItem("cc_nxnorv",JSON.stringify(M)); }catch(e){}
+  try{ const D=JSON.parse(localStorage.getItem("cc_nxdone")||"{}")||{}; if(!D["0|"+k]){ nxChk("0|"+k,true); return; } }catch(e){}   /* (2026-11-24) 고르면 체크 */
   try{ nxRender(); }catch(e){} };
 window.nxAddLec=function(d,key){
   if(window.ccPreview){ try{ toast("관리자 미리보기 — 저장하지 않습니다"); }catch(e){} return; }
@@ -13920,5 +13961,120 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
 })();
 </script>
 <style>#nxMine .mntop .mnyt{display:inline-block;font-size:12.5px;font-weight:800;padding:5px 11px;border-radius:8px;background:#ff3b30;color:#fff!important;text-decoration:none;margin-right:6px}#nxMine .mntop .mnyt.off{background:#eee;color:#888!important}#nxMine .mntop .mnyh{font-size:12.5px;color:#6b5210}</style>
+<script>
+/* ── 유튜브 ↔ 학습OS 강의 연동 (2026-11-23)
+   주소: (CC.site)#lec=트랙-분야번호-단계번호-강번호  (트랙 b=변시 · g=5급공채 · n=노무사 · a=감정평가사)
+   · 로그인 전이면 기억해 두었다가 로그인 뒤 그 강의로 · 노무사 · 감평사 수강생이 5급공채 주소로 오면 자기 차수의 같은 강의로 ── */
+(function(){
+  var TC={b:"변시",g:"5급공채",n:"노무사",a:"감정평가사"}, CT={"변시":"b","5급공채":"g","노무사":"n","감정평가사":"a"};
+  var SITE=String((window.CC&&CC.site)||"https://1lucky2must.com/os.html").split("#")[0];
+  window.ccLecLink=function(t,l,si,i){ try{ var L=(CC_LAWS&&CC_LAWS[t])||[], li=L.indexOf(l); if(li<0||!CT[t]) return ""; return SITE+"#lec="+CT[t]+"-"+(li+1)+"-"+(si+1)+"-"+(i+1); }catch(e){ return ""; } };
+  function grab(){ var m=/[#&]lec=([bgna])-(\d+)-(\d+)-(\d+)/.exec(location.hash||""); if(!m) return;
+    try{ localStorage.setItem("cc_deep",JSON.stringify({c:m[1],li:+m[2]-1,si:+m[3]-1,i:+m[4]-1,at:Date.now()})); }catch(e){}
+    try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} }
+  grab(); window.addEventListener("hashchange",function(){ grab(); go(); });
+  var told=false;
+  function go(){ var d=null; try{ d=JSON.parse(localStorage.getItem("cc_deep")||"null"); }catch(e){}
+    if(!d) return; if(Date.now()-d.at>6*3600*1000){ localStorage.removeItem("cc_deep"); return; }
+    if(typeof user==="undefined"||!user){ if(!told){ told=true; setTimeout(function(){ try{ toast("로그인하면 유튜브에서 보던 강의의 학습으로 바로 이어집니다"); }catch(e){} },1500); } return; }
+    var w=document.getElementById("nxWiz"); if(w&&w.style.display!=="none"&&w.offsetParent) return;   /* 첫 화면(합격 설계) 마친 뒤 */
+    if(typeof window.nxDeepLec!=="function") return;
+    var t0=TC[d.c], L0=(CC_LAWS&&CC_LAWS[t0])||[], l=L0[d.li], t=(typeof TRACK!=="undefined"&&TRACK)||t0;
+    if(!l||!((CC_LAWS[t]||[]).indexOf(l)>=0)) t=t0;
+    localStorage.removeItem("cc_deep");
+    if(!l||!(CC_LAWS[t]||[]).length||(CC_LAWS[t]||[]).indexOf(l)<0){ try{ toast("이 강의는 내 수험 종류의 강의 목록에 없습니다"); }catch(e){} return; }
+    nxDeepLec(t,l,d.si,d.i); }
+  setInterval(go,1000);
+  /* 관리자 「🏷️ 강의명 · 유튜브 주소」: 고른 분야·단계의 강의마다 학습주소 복사 */
+  function cp(u,btn){ var ok=function(){ try{ toast("복사했습니다 — 유튜브 설명란에 붙여 넣으세요"); }catch(e){} if(btn){ btn.textContent="✓ 복사됨"; } };
+    try{ navigator.clipboard.writeText(u).then(ok,function(){ prompt("이 주소를 복사하세요",u); }); }catch(e){ prompt("이 주소를 복사하세요",u); } }
+  window.ccLecLinkCp=function(btn){ cp(btn.getAttribute("data-u"),btn); };
+  window.ccLecLinkAll=function(){ var a=[].slice.call(document.querySelectorAll("#ltLinks [data-u]")).map(function(b){ return b.getAttribute("data-n")+"  "+b.getAttribute("data-u"); }); if(a.length) cp(a.join("\n")); };
+  function draw(){ var pn=document.getElementById("ccLtPanel"); if(!pn) return; var box=document.getElementById("ltLinks");
+    if(!box){ box=document.createElement("div"); box.id="ltLinks"; pn.appendChild(box); }
+    try{ var t=document.getElementById("ltTrack").value, l=document.getElementById("ltSubj").value, si=+document.getElementById("ltStage").value;
+      var n=0; try{ n=ccLtCat(t,l,si,ccLtSrcSel(t,l,si)); }catch(e){}
+      var E=function(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
+      var rows=[]; for(var i=0;i<n;i++){ var u=ccLecLink(t,l,si,i); if(!u) continue; var tt=""; try{ tt=ccLecTitle(t,l,si,i)||""; }catch(e){}
+        var nm=(i+1)+"강"+(tt?" "+tt:""); rows.push('<div class="llr"><span>'+E(nm)+'</span><code>'+E(u)+'</code><button class="mini" data-n="'+E(nm)+'" data-u="'+E(u)+'" onclick="ccLecLinkCp(this)">🔗 복사</button></div>'); }
+      box.innerHTML=rows.length?'<div class="llh"><b>🔗 학습주소</b> — 유튜브 영상 설명란에 붙여 넣으면, 누른 수강생이 OS의 그 강의 학습으로 바로 들어옵니다 <button class="mini" onclick="ccLecLinkAll()">전체 복사</button></div>'+rows.join(""):'<div class="llh sub">이 분야·단계는 학습주소를 만들 강의가 없습니다 (수강생 분야 목록에 없는 분야)</div>';
+    }catch(e){ box.innerHTML=""; } }
+  var oF=window.ccLtFill; if(typeof oF==="function"){ window.ccLtFill=ccLtFill=function(){ var r=oF.apply(this,arguments); try{ draw(); }catch(e){} return r; }; }
+  var st=document.createElement("style"); st.textContent="#ltLinks{margin-top:12px;max-height:340px;overflow:auto;border-top:1px dashed #d8d2c2;padding-top:8px}#ltLinks .llh{font-size:13px;margin:4px 0 8px}#ltLinks .llr{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:3px 0;border-bottom:1px solid #f0ece2}#ltLinks .llr span{flex:0 0 260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#ltLinks .llr code{flex:1;color:#5a6070;font-size:12px}"; document.head.appendChild(st);
+})();
+</script>
+<script>
+/* 복습생략 — 강의명 옆 작은 단추 (2026-11-24) */
+(function(){ try{ const c=new CSSStyleSheet();
+  c.replaceSync('html body #nxMine#nxMine .it .rvsk{display:inline-block;margin:0 0 0 10px;padding:3px 9px!important;font-size:11.2px!important;font-weight:700;line-height:1.5;border:1px solid #cfc7ae;border-radius:7px;background:#fff;color:#6b6b6b;cursor:pointer;vertical-align:1px;min-width:0;width:auto}'+
+   'html body #nxMine#nxMine .it span.rvh{display:flex!important;align-items:center;flex-wrap:wrap}html body #nxMine#nxMine .it span.rvh>b{display:inline!important}'+
+   'html body #nxMine#nxMine .it .rvsk:hover{border-color:#b8921d;color:#8a6d1a}'+
+   'html body #nxMine#nxMine .it .rvsk.on{background:#6b7280;border-color:#6b7280;color:#fff}');
+  document.adoptedStyleSheets=document.adoptedStyleSheets.concat([c]); }catch(e){} })();
+</script>
+<script>
+/* 복습: 복습필요 · 복습불필요 중 반드시 선택 (2026-11-24) — 체크칸을 직접 눌러 끝낼 수 없음 */
+window.nxRvChk=function(k,on){
+  if(on){ try{ toast("복습필요 · 복습불필요 중 하나를 선택하세요"); }catch(e){} try{ nxRender(); }catch(e){} return; }
+  try{ const day=parseInt(k,10), key=k.slice(String(day).length+1), M=JSON.parse(localStorage.getItem("cc_nxrvend")||"{}")||{}; if(+M[key]===day){ delete M[key]; localStorage.setItem("cc_nxrvend",JSON.stringify(M)); } }catch(e){}
+  nxChk(k,false); };
+(function(){ try{ const c=new CSSStyleSheet(); c.replaceSync('html body #nxMine#nxMine .rvrw{display:flex;align-items:center}html body #nxMine#nxMine .flow .st.fwk{display:flex;align-items:center;flex-wrap:nowrap;gap:6px 12px;padding-left:46px}html body #nxMine#nxMine .flow .rvsel.wkin{margin:0;width:220px;flex:0 0 220px}html body #nxMine#nxMine .rvrw>.rvsel{flex:0 0 240px;width:240px}html body #nxMine#nxMine .flow .st .sumtip{margin-left:10px;font-size:11px;color:#6b7280;font-weight:700;flex:1 1 auto;text-align:left}html body #nxMine#nxMine .flow .st:has(.sumtip)>b{flex:0 0 auto!important}html body #nxMine#nxMine .it .rvmust.t{margin-left:10px;font-size:11px;font-weight:700;color:#c62828;white-space:nowrap}html body #nxMine#nxMine .rvltn{margin:0 0 6px 34px!important}html body #nxMine#nxMine .st.fwk .rvmust,html body #nxMine#nxMine .rvrw .rvmust{flex:0 0 auto;margin-left:10px;font-size:11px;font-weight:700;color:#c62828;white-space:nowrap;background:none;border:0}');
+  document.adoptedStyleSheets=document.adoptedStyleSheets.concat([c]); }catch(e){} })();
+</script>
+<script>
+/* 📂 내 공부기록 빨간 점 (2026-11-24): 새 선생님조언(안 읽음) · 새 첨삭답안(첨삭 완료 · 안 열어 봄)이 있으면 점 — 읽으면 사라짐 */
+(function(){
+  try{ const c=new CSSStyleSheet(); c.replaceSync('html body button.ccdot{position:relative!important;overflow:visible!important}html body button.ccdot::after{content:"";position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#e53935;box-shadow:0 0 0 2px #fff;pointer-events:none}');
+    document.adoptedStyleSheets=document.adoptedStyleSheets.concat([c]); }catch(e){}
+  let LA="", LF="";
+  const tick=function(){ try{
+    const off=!!(typeof user==="undefined"||!user||(window.ccPreview&&!window.ccViewUid));   /* 관리자 「이 수강생 화면으로 보기」에서도 그 학생 기준으로 보임 */
+    /* 기록을 아직 안 불러왔으면 한 번 불러옴 (로그인 · 열람 학생이 바뀔 때마다) */
+    if(!off){ const uid=window.ccViewUid||(typeof ccUid!=="undefined"?ccUid:"");
+      if(uid&&LA!==uid&&typeof nmAdvMine==="function"&&!(window.NM_ADV&&NM_ADV.mine&&NM_ADV.mineUid===uid)){ LA=uid; try{ nmAdvMine(); }catch(e){} }
+      if(uid&&!window.ccViewUid&&LF!==uid&&typeof nmFbLoad==="function"&&!(window.NM_FB&&NM_FB.mine)){ LF=uid; try{ nmFbLoad(); }catch(e){} } }
+    const na=off?0:((window.NM_ADV&&NM_ADV.mine)||[]).filter(function(a){ return !a.read_at; }).length;
+    const nf=off?0:((window.NM_FB&&NM_FB.mine)||[]).filter(function(x){ return x.status==="첨삭 완료"&&!x.read_at; }).length;
+    document.querySelectorAll("[data-rec]").forEach(function(b){ b.classList.toggle("ccdot",b.getAttribute("data-rec")==="1"&&!!(na+nf)); });
+    document.querySelectorAll("#nmRvBody .nmrvtabs button").forEach(function(b){ const m=/CC_REC\.tab='(\w+)'/.exec(b.getAttribute("onclick")||""), k=m?m[1]:"";
+      b.classList.toggle("ccdot",(k==="advice"&&!!na)||(k==="fb"&&!!nf)); });
+  }catch(e){} };
+  setInterval(tick,1500); setTimeout(tick,500);
+})();
+</script>
+<script>
+/* [합격을 향해 가는 나] — 홈 「합격 진단」 바로 위 실선 박스 (2026-11-24 노무사판에서 가져옴 · 행정법 OS용) */
+(function(){
+  const st=document.createElement("style");
+  st.textContent='#hmMe{border:1px solid #cbd5e1;border-radius:14px;padding:12px 16px;margin:0 0 12px;background:#fff;text-align:left;line-height:1.75;font-size:13px;color:#334155}#hmMe .mt{font-weight:800;color:#0D1F3C;font-size:13.5px;margin-bottom:2px}#hmMe b{color:#0D1F3C;font-weight:700}';
+  document.head.appendChild(st);
+  const E=function(x){ return String(x==null?"":x).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+  const RD=function(k){ try{ return JSON.parse(localStorage.getItem(k)||"{}")||{}; }catch(e){ return {}; } };
+  let last="", lastAt=0;
+  const lec=function(t){ try{ const pl=ccPlanOf(t), f=ccFlat(t,pl), D=RD("cc_nxdone"); let o=null;
+      f.forEach(function(x){ if(D["0|"+t+"|"+x.key]) o=x; });
+      if(!o) return "아직 완료한 강의 없음";
+      return CC_STAGES[t][o.si]+" "+o.l+" "+ccJindo(o.i+1)+"까지 완료"; }catch(e){ return "—"; } };
+  const dd=function(t){ try{ const td=ccToday(); return Math.max(0,Math.round((ccExamDate(t,td)-td)/864e5)); }catch(e){ return null; } };
+  const go=function(){ try{
+    const top=document.getElementById("hmTop"); if(!top||typeof user==="undefined"||!user) return;
+    let b=document.getElementById("hmMe");
+    if(!b){ b=document.createElement("div"); b.id="hmMe"; }
+    if(b.parentNode!==top.parentNode||b.nextSibling!==top) top.parentNode.insertBefore(b,top);
+    const now=Date.now(); const key=(user.id||"")+"|"+(user.track||"")+"|"+(typeof TRACK!=="undefined"?TRACK:"")+"|"+(localStorage.getItem("cc_nxdone")||"")+"|"+ccISO(ccToday());
+    if(key===last&&now-lastAt<60000) return; last=key; lastAt=now;
+    const t=(typeof TRACK!=="undefined"&&TRACK)||user.track||"변시";
+    const lab=(window.CC_EXAM_LABEL&&CC_EXAM_LABEL[t])||t;
+    const xp=String(user.exp2||"");
+    const ex=xp==="응시해 봄"?"재시":(xp==="합격·면제"?"면제":(xp?"초시":""));
+    b.innerHTML='<div class="mt">[합격을 향해 가는 나]</div>'+
+      '<div>- 이름: <b>'+E(user.name||user.login_id||"")+'</b></div>'+
+      '<div>- 유형: '+E(lab+(ex?" "+ex:""))+'</div>'+
+      '<div>- 수강: '+E(lec(t))+'</div>'+
+      '<div>- 시험일: D-'+E(dd(t))+'</div>';
+  }catch(e){ console.warn("[합격을 향해 가는 나]",e); } };
+  setInterval(go,800); setTimeout(go,300);
+})();
+</script>
 </body>
 </html>
