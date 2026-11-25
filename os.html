@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="cc-build" content="2026-11-25c 복습_강의생략">
+<meta name="cc-build" content="2026-11-25f 홈_깜빡임수정">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -9716,10 +9716,10 @@ html #nxHofAdm .hr{display:grid;grid-template-columns:40px 1fr 110px 130px;gap:1
   window.ccMyNoteRow=function(o,day){ if(!o||!o.key) return '';
     if(N.uid!==uidNow()) load();
     const f=N.map[hx(o.key)], kk=E(String(o.key).replace(/\\/g,"\\\\").replace(/'/g,"\\'")), nn=E(nm(o).replace(/\\/g,"\\\\").replace(/'/g,"\\'"));
-    return '<div class="st mynote" onclick="event.stopPropagation()">'+(window.ccViewUid?'':'<div class="mntop">'+(function(){ let u=''; try{ u=window.ccLecUrl?ccLecUrl(o.t,o.l,o.si,o.i):''; }catch(e){} return u?'<a class="mnyt" href="'+E(u)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ YouTube강의</a>':'<span class="mnyt off">▶ YouTube강의 준비중</span>'; })()+((day>0)?(function(){ const sk=!!(RDJ('cc_nxlecskip')[day+'|'+o.key]); return ' <button type="button" class="mnlsk'+(sk?' on':'')+'" onclick="event.stopPropagation();ccLecSkip('+day+',\''+kk+'\')">'+(sk?'강의생략 ✓':'강의생략')+'</button>'; })():' <span class="mnyh">강의 수강 후 시작하세요</span>')+'</div>')+
-      (f?'<button class="mnv" onclick="ccMyNoteView(\''+E(f.path)+'\',\''+nn+'\')">📷 나의노트 보기 ✓</button>'+(window.ccViewUid?'':'<button class="mnu" onclick="ccMyNotePick(\''+kk+'\',\''+nn+'\')">다시 올리기</button>')
+    return '<div class="st mynote" onclick="event.stopPropagation()">'+(window.ccViewUid?'':'<div class="mntop">'+(function(){ let u=''; try{ u=window.ccLecUrl?ccLecUrl(o.t,o.l,o.si,o.i):''; }catch(e){} return u?'<a class="mnyt" href="'+E(u)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ YouTube강의</a>':'<span class="mnyt off">▶ YouTube강의 준비중</span>'; })()+((day>0)?(function(){ const sk=!!(RDJ('cc_nxlecskip')[day+'|'+o.key]); return ' <button type="button" class="mnlsk'+(sk?' on':'')+'" onclick="event.stopPropagation();ccLecSkip('+day+',\''+kk+'\')">'+(sk?'강의수강생략 ✓':'강의수강생략')+'</button>'; })():' <span class="mnyh">강의 수강 후 시작하세요</span>')+'</div>')+
+      ((day>0&&!window.ccViewUid)?(f?'<button class="mnv" onclick="ccMyNoteView(\''+E(f.path)+'\',\''+nn+'\')">📷 노트보기</button><button class="mnu" onclick="ccMyNotePick(\''+kk+'\',\''+nn+'\')">수정노트올리기</button>':'<span class="mnh">올린 노트가 없습니다</span><button class="mnu" onclick="ccMyNotePick(\''+kk+'\',\''+nn+'\')">노트올리기</button>'):(f?'<button class="mnv" onclick="ccMyNoteView(\''+E(f.path)+'\',\''+nn+'\')">📷 나의노트 보기 ✓</button>'+(window.ccViewUid?'':'<button class="mnu" onclick="ccMyNotePick(\''+kk+'\',\''+nn+'\')">다시 올리기</button>')
         :(window.ccViewUid?'<span class="mnh">올린 나의노트가 없습니다</span>':'<button class="mnu on" onclick="ccMyNotePick(\''+kk+'\',\''+nn+'\')">📷 나의노트 올리기 (사진)</button>'))+
-      (window.ccViewUid?'':'<button class="mnhow" onclick="var h=this.parentNode.querySelector(\'.mnh.how\');if(h)h.style.display=h.style.display===\'block\'?\'none\':\'block\'">이용방법</button><div class="mnh how" style="display:none">선택사항입니다<br>올리지 않아도 학습은 그대로 진행됩니다<br>강의당 용지 1장으로 압축정리하여 사진으로 올리세요</div>')+'</div>';
+      (window.ccViewUid?'':'<button class="mnhow" onclick="var h=this.parentNode.querySelector(\'.mnh.how\');if(h)h.style.display=h.style.display===\'block\'?\'none\':\'block\'">이용방법</button><div class="mnh how" style="display:none">선택사항입니다<br>올리지 않아도 학습은 그대로 진행됩니다<br>강의당 용지 1장으로 압축정리하여 사진으로 올리세요</div>'))+'</div>';
   };
   const shrink=function(f){ return new Promise(function(ok){ const u=URL.createObjectURL(f), im=new Image();
     im.onload=function(){ const k=Math.min(1,2000/Math.max(im.width,im.height)), c=document.createElement("canvas"); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k);
@@ -13920,7 +13920,7 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
   }
   setInterval(function(){ try{ var top=document.getElementById("hmTop"); if(!top) return; var b=document.getElementById("ccIdBox");
       if(!b){ b=document.createElement("div"); b.id="ccIdBox"; b.style.cssText="width:100%!important;box-sizing:border-box!important;border-radius:12px!important;background:#fff!important;padding:12px 14px!important;text-align:left!important"; }
-      if(b.parentNode!==top.parentNode||b.nextSibling!==top){ top.parentNode.insertBefore(b,top); } b.style.setProperty("margin","0 0 12px 0","important");
+      var me=document.getElementById("hmMe"), an=(me&&me.parentNode===top.parentNode)?me:top; /* (2026-11-25) [합격을 향해 가는 나]와 자리다툼 방지: 신상칸 → 합격을 향해 가는 나 → 합격 진단 */ if(b.parentNode!==top.parentNode||b.nextSibling!==an){ top.parentNode.insertBefore(b,an); } b.style.setProperty("margin","0 0 12px 0","important");
       var h=html(); if(b.__h!==h){ b.innerHTML=h; b.__h=h; } }catch(e){} },700);
 })();
 </script>
