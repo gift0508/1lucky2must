@@ -8452,7 +8452,7 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
        · 강의요약은 있고 필수암기문장이 없는 강의 = 🧠 머리쏙쏙(강의요약) 한 칸만 */
     if(two&&st==="기본이론강의"&&window.nmSumOnly&&nmSumOnly(o)) return [["🧠","머리쏙쏙 (강의요약)","sum"]];
     /* (2026-11-26) ① 기본이론강의 복습 날 = 🧠 복습요약 → 📝 필수문장 덮고 떠올리기 → 🔘 틀린 OX만 */
-    if(two&&st==="기본이론강의") return day>0?[["🧠","복습요약","sum"],["📝","필수문장 덮고 떠올리기","memor"],["🔘","틀린 OX만","oxw"]]:[["🧠","머리쏙쏙","sum"],["🔘","OX풀이","ox"],["🧩","필수암기문장암기","memo"],["📖","사례형 답안 미리보기","casev"]];
+    if(two&&st==="기본이론강의") return day>0?[["🧠","복습요약","sum"],["📝","필수문장 덮고 떠올리기","memor"],["🔘","틀린 OX만","oxw"]]:(window.nmGyoHas&&nmGyoHas(o)?[["🎞️","강의 교안","gyo"]]:[]).concat([["🧠","머리쏙쏙","sum"],["🔘","OX풀이","ox"],["🧩","필수암기문장암기","memo"],["📖","사례형 답안 미리보기","casev"]]);
     /* (2026-11-26) ② 답안작성원리강의 = 문장이 쓰인 목차를 빠르게 익힘 — 강의 날: 📝 노트기록 → 📝 200문 목차 도전 / 복습 날: 📝 200문 목차 도전만 */
     if(two&&st==="답안작성원리강의") return day>0?[["📝","200문 목차 도전","toc200"]]:[["📝","노트기록","notew"],["📝","200문 목차 도전","toc200"]];
     /* (2026-11-26) ③ 답안작성강의 = 문장과 목차를 섞어 답안을 씀 — 강의 날: 📖 강의 → ✍️ 답안작성(목차 제시 → 간단채점 → [클리어 | 재작성]) / 복습 날: ✍️ ○일 전 작성답안(재작성 문제만 · 목차 비제시) · 강의는 복습하지 않음
@@ -8472,6 +8472,7 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
     if(act==="ox"||act==="oxw"||act==="lec"||act==="mcw") return ccOpenQB(q,s,n,act,o.t);
     if(act==="case") return ccOpenQB(q,s,n,null,o.t);
     if(act==="ans") return nmAnsView(q,s,n);
+    if(act==="gyo") return nmGyoOpen(o);   /* (2026-11-26) 🎞️ 기본이론강의 촬영교안 */
     if(act==="memo") return nmMemoOpen(o);   /* (2026-11-26) 🧩 필수암기문장암기 */
     if(act==="casev") return nmCaseView(o);  /* (2026-11-26) 📖 사례형 답안 미리보기 */
     if(act==="due") return nmRvStart("due");
@@ -14623,6 +14624,27 @@ html body #nmCyc .empty{padding:24px 10px;text-align:center;color:#6b7280;line-h
         .sort(function(a,b){ const x=A[RK(t,a.id)], y=A[RK(t,b.id)]; return ((y.st==="must")-(x.st==="must"))||((y.n||0)-(x.n||0)); }); }
     }); };
   window.nmCycAutoCount=function(t){ const A=J("cc_cyc_v1"); let rw=0, mu=0; Object.keys(A).forEach(function(k){ if(k.indexOf(t+"|")!==0) return; if(A[k].st==="rw") rw++; else if(A[k].st==="must") mu++; }); return {rw:rw,must:mu}; };
+})();
+</script>
+
+<script>
+/* (2026-11-26) 기본이론강의 촬영교안 — cc_gyoan(tpl='촬영교안')이 있는 강의에만 「🎞️ 강의 교안」 칸 */
+(function(){
+  var K=null;
+  function load(){ try{ if(typeof sb==="undefined"||!sb) return;
+    sb.from("cc_gyoan").select("subject,lec").eq("stage","기본이론강의").eq("tpl","촬영교안").then(function(r){
+      if(r&&r.data){ K={}; r.data.forEach(function(x){ K[x.subject+"|"+x.lec]=1; }); try{ if(window.nxRender) nxRender(); }catch(e){} } }); }catch(e){} }
+  window.nmGyoHas=function(o){ return !!(K&&o&&K[(o.qsubj||o.l)+"|"+o.lecNo]); };
+  window.nmGyoOpen=async function(o){
+    var w=window.open("","_blank"); if(!w){ try{ toast("새 창을 열 수 없습니다 — 팝업 차단을 풀어 주세요"); }catch(e){} return; }
+    w.document.write('<p style="font:16px sans-serif;padding:24px">교안을 불러오는 중…</p>');
+    try{ var r=await sb.from("cc_gyoan").select("html").eq("subject",o.qsubj||o.l).eq("stage","기본이론강의").eq("lec",o.lecNo).eq("tpl","촬영교안").maybeSingle();
+      if(!r||!r.data){ w.document.body.innerHTML='<p style="font:16px sans-serif;padding:24px">이 강의의 교안이 아직 없습니다.</p>'; return; }
+      w.document.open(); w.document.write(r.data.html); w.document.close();
+      try{ var L=window.__nxLast; if(window.__nxPending&&L){ nxStepDone(L.k,L.idx); window.__nxPending=false; } }catch(e){}
+    }catch(e){ w.document.body.innerHTML='<p style="font:16px sans-serif;padding:24px">교안을 불러오지 못했습니다.</p>'; }
+  };
+  if(document.readyState==="complete") setTimeout(load,800); else addEventListener("load",function(){ setTimeout(load,800); });
 })();
 </script>
 </body>
