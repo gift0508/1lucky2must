@@ -6139,7 +6139,7 @@ function closeEngine(){
     return h;
   }
   function sec(title,n,body){ return '<details open style="margin:10px 0;border:1px solid var(--line);border-radius:10px;padding:8px 12px"><summary style="cursor:pointer;font-weight:800">'+title+' <small style="color:var(--mute);font-weight:400">'+n+'개</small></summary><div style="margin-top:8px">'+body+'</div></details>'; }
-  window.qxGyOpen=function(i){ const x=(window.__qxGY||[])[i]; if(!x) return; const w=window.open("","_blank"); if(!w){ try{ toast("새 창을 열 수 없습니다 — 팝업 차단을 풀어 주세요"); }catch(e){} return; } w.document.open(); w.document.write(x.html); w.document.close(); };
+  window.qxGyOpen=function(i){ const x=(window.__qxGY||[])[i]; if(!x) return; window.__GYCTX={id:x.id,sb:sb,admin:true}; const w=window.open("","_blank"); try{ w.__GY=window.__GYCTX; }catch(e){} if(!w){ try{ toast("새 창을 열 수 없습니다 — 팝업 차단을 풀어 주세요"); }catch(e){} return; } w.document.open(); w.document.write(x.html); w.document.close(); };
   window.qxView=async function(lec){
     const s=QX.sel; if(!s.t) return;
     let ov=document.getElementById("qxModal");
@@ -9747,7 +9747,7 @@ html #nxHofAdm .hr{display:grid;grid-template-columns:40px 1fr 110px 130px;gap:1
   window.ccMyNoteRow=function(o,day){ if(!o||!o.key) return '';
     if(N.uid!==uidNow()) load();
     const f=N.map[hx(o.key)], kk=E(String(o.key).replace(/\\/g,"\\\\").replace(/'/g,"\\'")), nn=E(nm(o).replace(/\\/g,"\\\\").replace(/'/g,"\\'"));
-    return '<div class="st mynote" onclick="event.stopPropagation()">'+(window.ccViewUid?'':'<div class="mntop">'+(function(){ let u=''; try{ u=window.ccLecUrl?ccLecUrl(o.t,o.l,o.si,o.i):''; }catch(e){} return u?'<a class="mnyt" href="'+E(u)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ YouTube강의</a>':'<span class="mnyt off">▶ YouTube강의 준비중</span>'; })()+((day>0)?(function(){ const sk=!!(RDJ('cc_nxlecskip')[day+'|'+o.key]); return ' <button type="button" class="mnlsk'+(sk?' on':'')+'" onclick="event.stopPropagation();ccLecSkip('+day+',\''+kk+'\')">'+(sk?'강의수강생략 ✓':'강의수강생략')+'</button>'; })():' <span class="mnyh">강의 수강 후 시작하세요</span>')+'</div>')+
+    return '<div class="st mynote" onclick="event.stopPropagation()">'+(window.ccViewUid?'':'<div class="mntop">'+''+((day>0)?(function(){ const sk=!!(RDJ('cc_nxlecskip')[day+'|'+o.key]); return ' <button type="button" class="mnlsk'+(sk?' on':'')+'" onclick="event.stopPropagation();ccLecSkip('+day+',\''+kk+'\')">'+(sk?'강의수강생략 ✓':'강의수강생략')+'</button>'; })():' <span class="mnyh">강의 수강 후 시작하세요</span>')+'</div>')+
       ((day>0&&!window.ccViewUid)?(f?'<button class="mnv" onclick="ccMyNoteView(\''+E(f.path)+'\',\''+nn+'\')">📷 노트읽기</button>':'<button class="mnv" onclick="toast(\'아직 올린 노트가 없습니다 — 수정노트올리기(사진)로 올려 두면 다음 복습 때 여기서 읽을 수 있습니다\')">📷 노트읽기</button>')+'<button class="mnu" onclick="ccMyNotePick(\''+kk+'\',\''+nn+'\',1)">수정노트올리기(사진)</button>':(f?'<button class="mnv" onclick="ccMyNoteView(\''+E(f.path)+'\',\''+nn+'\')">📷 나의노트 보기 ✓</button>'+(window.ccViewUid?'':'<button class="mnu" onclick="ccMyNotePick(\''+kk+'\',\''+nn+'\')">다시 올리기</button>')
         :(window.ccViewUid?'<span class="mnh">올린 나의노트가 없습니다</span>':'<button class="mnu on" onclick="ccMyNotePick(\''+kk+'\',\''+nn+'\')">📷 나의노트 올리기 (사진)</button>'))+
       (window.ccViewUid?'':'<button class="mnhow" onclick="var h=this.parentNode.querySelector(\'.mnh.how\');if(h)h.style.display=h.style.display===\'block\'?\'none\':\'block\'">이용방법</button><div class="mnh how" style="display:none">선택사항입니다<br>올리지 않아도 학습은 그대로 진행됩니다<br>강의당 용지 1장으로 압축정리하여 사진으로 올리세요</div>'))+'</div>';
@@ -14638,8 +14638,9 @@ html body #nmCyc .empty{padding:24px 10px;text-align:center;color:#6b7280;line-h
   window.nmGyoOpen=async function(o){
     var w=window.open("","_blank"); if(!w){ try{ toast("새 창을 열 수 없습니다 — 팝업 차단을 풀어 주세요"); }catch(e){} return; }
     w.document.write('<p style="font:16px sans-serif;padding:24px">교안을 불러오는 중…</p>');
-    try{ var r=await sb.from("cc_gyoan").select("html").eq("subject",o.qsubj||o.l).eq("stage","기본이론강의").eq("lec",o.lecNo).eq("tpl","촬영교안").maybeSingle();
+    try{ var r=await sb.from("cc_gyoan").select("id,html").eq("subject",o.qsubj||o.l).eq("stage","기본이론강의").eq("lec",o.lecNo).eq("tpl","촬영교안").maybeSingle();
       if(!r||!r.data){ w.document.body.innerHTML='<p style="font:16px sans-serif;padding:24px">이 강의의 교안이 아직 없습니다.</p>'; return; }
+      window.__GYCTX={id:r.data.id,sb:sb,admin:false}; try{ w.__GY=window.__GYCTX; }catch(e){}
       w.document.open(); w.document.write(r.data.html); w.document.close();
       try{ var L=window.__nxLast; if(window.__nxPending&&L){ nxStepDone(L.k,L.idx); window.__nxPending=false; } }catch(e){}
     }catch(e){ w.document.body.innerHTML='<p style="font:16px sans-serif;padding:24px">교안을 불러오지 못했습니다.</p>'; }
