@@ -3117,13 +3117,18 @@ function ccQBPanel(){
   let pn=document.getElementById("ccQBPanel"); if(pn) return pn;
   const anchor=document.getElementById("ccPwReqPanel")||document.getElementById("ccAppPanel"); if(!anchor) return null;
   pn=document.createElement("div"); pn.className="panel"; pn.style.marginTop="22px"; pn.id="ccQBPanel";
-  pn.innerHTML='<h3>📚 문제 은행 현황 <span id="ccQBTotal" style="color:var(--gold);font-size:.9rem"></span></h3>'+
+  pn.innerHTML='<h3 id="ccQBH3" style="cursor:pointer" onclick="if(event.target.closest(\'button:not(#ccQBFold)\'))return;ccQBFoldT()" title="눌러서 펼치기 / 접기"><span id="ccQBArw" style="display:inline-block;width:18px">▸</span>📚 문제 은행 현황 <span id="ccQBTotal" style="color:var(--gold);font-size:.9rem"></span> <button id="ccQBFold" class="mini" type="button" style="margin-left:8px">펼치기</button></h3>'+
     '<div class="sub">서버 문제 은행에 들어 있는 문항 수입니다 · 문항은 SQL 파일을 Supabase SQL Editor에서 실행해 올립니다 · 수강생은 <b>자기가 수강한 진도까지만</b> 풀 수 있습니다<br>'+
     '모든 강의: <b>강의요약</b>(머리쏙쏙) · <b>OX</b> / 1차: <b>'+(window.CC_MCL5||'5지택일 · 선다형')+'</b>(진도별) / 변시: <b>주관식 사례형</b>(진도별)'+
     ' <button class="mini" style="margin-left:8px" onclick="ccQBRefresh()">⟳ 새로고침</button></div>'+
     '<div class="atable" id="ccQBCounts"></div>';
-  anchor.after(pn); return pn;
+  anchor.after(pn); ccQBFoldApply(); return pn;
 }
+/* (2026-11-27) 문제 은행 현황 펼치기 / 접기 — 처음에는 접힌 채(제목만) · 상태는 이 브라우저에 기억 */
+function ccQBFoldApply(){ const pn=document.getElementById("ccQBPanel"); if(!pn) return; let open=false; try{ open=localStorage.getItem("cc_qb_open")==="1"; }catch(e){}
+  pn.classList.toggle("qbfold",!open); const a=document.getElementById("ccQBArw"), b=document.getElementById("ccQBFold"); if(a) a.textContent=open?"▾":"▸"; if(b) b.textContent=open?"접기":"펼치기"; }
+function ccQBFoldT(){ let open=false; try{ open=localStorage.getItem("cc_qb_open")==="1"; localStorage.setItem("cc_qb_open",open?"0":"1"); }catch(e){} ccQBFoldApply(); }
+(function(){ const st=document.createElement("style"); st.textContent="#ccQBPanel.qbfold>*:not(h3){display:none!important}"; document.head.appendChild(st); })();
 async function ccQBRefresh(){
   if(!ccQBPanel()) return;
   const el=document.getElementById("ccQBCounts"); el.innerHTML='<div class="sub">불러오는 중…</div>';
