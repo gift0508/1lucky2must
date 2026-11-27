@@ -15,7 +15,7 @@ window.CC={
   site:"https://1lucky2must.com/os.html",   /* 수강생에게 안내하는 접속 주소 — index.html로 교체하면 https://1lucky2must.com 으로 고칩니다 */
   ns:"adm__",                          /* 이 기기 저장 공간 구분 (같은 github.io 주소의 다른 사이트와 섞이지 않게) */
   /* 수강생별로 서버에 저장하는 학습 진도 */
-  syncExact:["cc_cyc_v1","cc_cyc_skip","cc_cyc_asg","cc_toc200_v1","cc_state","cc_learnlog","cc_sum_v1","cc_note_v1","cc_memo_prog","cc_qb_res","cc_qb_hist","cc_case_stage","cc_combo_v1","cc_case3_v1","cc_dap_prac_v1","cc_flow_v1","1h2p_gp_learner_progress","1h2p_gp_history","iq_db_v1","iq_meta_v1","ilhaeng2pil_track_bexam_v1","1h2p_learner_progress"],
+  syncExact:["cc_catch_v1","cc_cyc_v1","cc_cyc_skip","cc_cyc_asg","cc_toc200_v1","cc_state","cc_learnlog","cc_sum_v1","cc_note_v1","cc_memo_prog","cc_qb_res","cc_qb_hist","cc_case_stage","cc_combo_v1","cc_case3_v1","cc_dap_prac_v1","cc_flow_v1","1h2p_gp_learner_progress","1h2p_gp_history","iq_db_v1","iq_meta_v1","ilhaeng2pil_track_bexam_v1","1h2p_learner_progress"],
   syncPrefix:["1h2p_attempts_","1h2p_gp_ans_","1h2p_gp_graded_","1h2p_gp_attempts_","1h2p_ultra_answer_"]
 };
 window.CC_TRACKS=["변시","5급공채"];window.ccCase=function(t){return t==="변시"||t==="5급공채"||t==="노무사"||t==="감정평가사";};window.ccTrk=function(t){return (t==="5급공채"||t==="노무사"||t==="감정평가사")?"5급공채":"변시";};
@@ -8454,7 +8454,8 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
     /* (2026-11-26) ① 기본이론강의 복습 날 = 🧠 복습요약 → 📝 필수문장 덮고 떠올리기 → 🔘 틀린 OX만 */
     if(two&&st==="기본이론강의") return day>0?[["🧠","복습요약","sum"],["📝","필수문장 덮고 떠올리기","memor"],["🔘","틀린 OX만","oxw"]]:(window.nmGyoHas&&nmGyoHas(o)?[["🎞️","강의 교안","gyo"]]:[]).concat([["🧠","머리쏙쏙","sum"],["🔘","OX풀이","ox"],["🧩","필수암기문장암기","memo"],["📖","사례형 답안 미리보기","casev"]]);
     /* (2026-11-26) ② 답안작성원리강의 = 문장이 쓰인 목차를 빠르게 익힘 — 강의 날: 📝 노트기록 → 📝 200문 목차 도전 / 복습 날: 📝 200문 목차 도전만 */
-    if(two&&st==="답안작성원리강의") return day>0?[["📝","200문 목차 도전","toc200"]]:[["📝","노트기록","notew"],["📝","200문 목차 도전","toc200"]];
+    /* (2026-11-27) ② 답안작성원리강의 = 노트기록 → 강의요약 → 필수암기문장(대전제·판례) → 필수암기단어 캐치 / 복습: 200문 목차 도전 → 틀린 단어만 다시 캐치 */
+    if(two&&st==="답안작성원리강의") return day>0?[["📝","200문 목차 도전","toc200"],["🧺","틀린 단어만 다시 캐치","catchw"]]:[["📝","노트기록","notew"],["🧠","강의요약","sum"],["🧩","필수암기문장 — 대전제 · 판례","memor"],["🧺","필수암기단어 캐치","memo"]];
     /* (2026-11-26) ③ 답안작성강의 = 문장과 목차를 섞어 답안을 씀 — 강의 날: 📖 강의 → ✍️ 답안작성(목차 제시 → 간단채점 → [클리어 | 재작성]) / 복습 날: ✍️ ○일 전 작성답안(재작성 문제만 · 목차 비제시) · 강의는 복습하지 않음
        ④ 최신판례특강 = 판례 문장을 더하고 답안을 반복 — 강의 날: 🧠 판례강의 머리쏙쏙 → ✍️ 200문 답안작성 / 복습 날: 🧠 머리쏙쏙 다시 → 📝 판례 필수문장 떠올리기 → ✍️ ○일 전 작성답안 */
     if(two&&(window.NM_CYC_STAGES||[]).indexOf(st)>=0){ const lag=(window.CC_RV_LAG||{})[day]!=null?CC_RV_LAG[day]:day, lb=(window.nmCycLabel?nmCycLabel(o,day):"");
@@ -8473,7 +8474,8 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
     if(act==="case") return ccOpenQB(q,s,n,null,o.t);
     if(act==="ans") return nmAnsView(q,s,n);
     if(act==="gyo") return nmGyoOpen(o);   /* (2026-11-26) 🎞️ 기본이론강의 촬영교안 */
-    if(act==="memo") return nmMemoOpen(o);   /* (2026-11-26) 🧩 필수암기문장암기 */
+    if(act==="memo") return nmMemoOpen(o);
+    if(act==="catchw") return nmMemoOpen(o,{wrong:true});   /* (2026-11-27) 틀린 단어만 다시 캐치 */   /* (2026-11-26) 🧩 필수암기문장암기 */
     if(act==="casev") return nmCaseView(o);  /* (2026-11-26) 📖 사례형 답안 미리보기 */
     if(act==="due") return nmRvStart("due");
     if(act==="notew"||act==="noter") return ccOpenNote({key:o.key,lec:o.name,ttl:o.ttl||"",mode:act==="notew"?"w":"r",stage:s,day:day});
@@ -14161,20 +14163,28 @@ window.ccLecSkip=function(day,k){ try{ const M=RDJ("cc_nxlecskip"), K=day+"|"+k;
   const finishAll=function(){ const L=window.__nxLast;
     try{ if(window.__nxPending&&L){ nxStepDone(L.k,L.idx,true); try{ nxStepDone(L.k,L.idx+1,true); }catch(e){} window.__nxPending=false; } }catch(e){}
     close(); try{ nxRender(); }catch(e){} };
-  window.nmMemoOpen=function(o){
+  window.nmMemoOpen=function(o,opt){
     close();
     const t=o.t||(typeof TRACK!=="undefined"?TRACK:"1차"), subs=[o.qsubj,o.subj].filter(Boolean), st=o.stage, n=+o.lecNo, more=(t==="1차");
+    /* (2026-11-27) 답안작성원리강의 = 🧺 필수암기단어 캐치 · 틀린 단어를 강별로 기록 → 복습 「틀린 단어만 다시 캐치」 */
+    const ANS=(st==="답안작성원리강의"), WRM=!!(opt&&opt.wrong), TT=ANS?"🧺 필수암기단어 캐치"+(WRM?" — 틀린 단어만":""):"🧩 필수암기문장암기", CK=st+"|"+(subs[0]||"")+"|"+n;
+    const ckGet=function(){ try{ return (JSON.parse(localStorage.getItem("cc_catch_v1")||"{}")[CK])||[]; }catch(e){ return []; } };
+    const ckSet=function(a){ try{ const D=JSON.parse(localStorage.getItem("cc_catch_v1")||"{}"); if(a.length) D[CK]=a; else delete D[CK]; localStorage.setItem("cc_catch_v1",JSON.stringify(D)); }catch(e){} };
+    const WR=[];
     const box=document.createElement("div"); box.id="nmMemo";
-    box.innerHTML='<div class="mmw"><div class="mmh"><b>🧩 필수암기문장암기</b><button class="mmx" aria-label="닫기">✕</button></div><div class="empty">불러오는 중…</div></div>';
+    box.innerHTML='<div class="mmw"><div class="mmh"><b>'+TT+'</b><button class="mmx" aria-label="닫기">✕</button></div><div class="empty">불러오는 중…</div></div>';
     document.body.appendChild(box); document.addEventListener("keydown",onKey);
     box.querySelector(".mmx").onclick=close;
     const W=box.querySelector(".mmw");
     Promise.resolve(window.ccQBLoad?ccQBLoad(t):[]).then(function(rows){
       const R=(rows||[]).filter(function(q){ return q.qtype==="필수암기"&&(!q.track||q.track===t)&&subs.indexOf(q.subject)>=0&&q.stage===st&&(+q.lec)===n&&/\[\[.+?\]\]/.test(q.model_answer||""); })
         .sort(function(a,b){ return (a.sort||0)-(b.sort||0)||(a.id-b.id); });
-      if(!R.length){ W.innerHTML='<div class="mmh"><b>🧩 필수암기문장암기</b><button class="mmx" aria-label="닫기">✕</button></div><div class="empty">'+(more?'이 강의에는 아직 필수암기문장이 없습니다.':'이 강의는 답안작성에 필요한 필수암기문장이 없습니다.')+'<br>'+(more?'[완료]를 누르고 다음 칸으로 넘어가세요.':'사례형 답안 미리보기도 함께 마치고 이 강의를 끝냅니다.')+'</div><div class="row" style="justify-content:flex-end"><button class="go ok" id="mmFin">✅ 완료'+(more?' → '+(window.MCL?MCL():'5지택일'):'')+'</button></div>';
-        W.querySelector(".mmx").onclick=close; document.getElementById("mmFin").onclick=more?finish:finishAll; return; }
-      const SS=R.map(function(q){ return {ttl:q.question||"",p:parse(q.model_answer)}; });
+      if(!R.length){ W.innerHTML='<div class="mmh"><b>'+TT+'</b><button class="mmx" aria-label="닫기">✕</button></div><div class="empty">'+(more?'이 강의에는 아직 필수암기문장이 없습니다.':'이 강의는 답안작성에 필요한 필수암기문장이 없습니다.')+'<br>'+(more?'[완료]를 누르고 다음 칸으로 넘어가세요.':'사례형 답안 미리보기도 함께 마치고 이 강의를 끝냅니다.')+'</div><div class="row" style="justify-content:flex-end"><button class="go ok" id="mmFin">✅ 완료'+(more?' → '+(window.MCL?MCL():'5지택일'):'')+'</button></div>';
+        W.querySelector(".mmx").onclick=close; document.getElementById("mmFin").onclick=(more||ANS)?finish:finishAll; return; }
+      let SS=R.map(function(q){ return {ttl:q.question||"",p:parse(q.model_answer)}; });
+      if(WRM){ const ow=ckGet(); SS=SS.filter(function(x){ return x.p.some(function(w,i){ return i%2&&ow.indexOf(w)>=0; }); });
+        if(!SS.length){ W.innerHTML='<div class="mmh"><b>'+TT+'</b><button class="mmx" aria-label="닫기">✕</button></div><div class="empty">✅ 이 강의에서 틀린 단어가 없습니다.</div><div class="row" style="justify-content:flex-end"><button class="go ok" id="mmFin">✅ 완료</button></div>';
+          W.querySelector(".mmx").onclick=close; document.getElementById("mmFin").onclick=finish; return; } }
       /* 필수암기문장이 1~2개인 강의: 앞 강의(없으면 그 앞, 3강 전까지)의 필수단어를 몇 개(최대 4개) 섞어 떨어뜨림 — 정답이 아닌 단어 */
       let PREV=[];
       if(SS.length<=2){ const own=[]; SS.forEach(function(x){ x.p.forEach(function(w,i){ if(i%2) own.push(w); }); });
@@ -14185,7 +14195,7 @@ window.ccLecSkip=function(day,k){ try{ const M=RDJ("cc_nxlecskip"), K=day+"|"+k;
       const load=function(){ stop();
         const P=SS[si].p, ans=P.filter(function(_,i){ return i%2; }), full=P.join("");
         let k=0, words=[], tick=0, sec=8;
-        W.innerHTML='<div class="mmh"><b>🧩 필수암기문장암기 <span class="cn">('+(si+1)+'/'+SS.length+')</span></b><span style="display:flex;align-items:center;gap:8px"><span class="mt">'+E(SS[si].ttl)+'</span><button class="mmx" aria-label="닫기">✕</button></span></div>'+
+        W.innerHTML='<div class="mmh"><b>'+TT+' <span class="cn">('+(si+1)+'/'+SS.length+')</span></b><span style="display:flex;align-items:center;gap:8px"><span class="mt">'+E(SS[si].ttl)+'</span><button class="mmx" aria-label="닫기">✕</button></span></div>'+
           '<div class="bar"><i style="width:'+Math.round(si/SS.length*100)+'%"></i></div>'+
           '<p class="lab" id="mmLb">필수암기문장 <b style="color:#2f5fb3">(1/8)</b></p><div class="top" id="mmTop"></div>'+
           '<div class="row"><span class="mt" id="mmMsg"></span><span style="flex:1"></span><button class="go" id="mmNx" style="display:none"></button></div>'+
@@ -14197,7 +14207,7 @@ window.ccLecSkip=function(day,k){ try{ const M=RDJ("cc_nxlecskip"), K=day+"|"+k;
           right.innerHTML=P.map(function(x,i){ return i%2?'<span class="bk'+((i-1)/2===k?' cur':'')+'">'+((i-1)/2<k?E(x):'')+'</span>':E(x); }).join(""); };
         const done1=function(){ stop(); words.forEach(function(w){ w.el.remove(); }); words=[]; top.textContent=full; msg.textContent="✅ 문장 완성"; nxb.style.display="";
           if(si<SS.length-1){ nxb.textContent="다음 필수암기문장 →"; nxb.onclick=function(){ si++; load(); }; }
-          else{ nxb.className="go ok"; nxb.textContent="✅ 필수암기문장암기 완료 → "+(more?(window.MCL?MCL():"5지택일"):"사례형 답안 미리보기"); nxb.onclick=finish; } };
+          else{ nxb.className="go ok"; nxb.textContent=ANS?("✅ 완료"+(WR.length?" · 틀린 단어 "+WR.length+"개는 복습에서 다시":" · 틀린 단어 없음")):("✅ 필수암기문장암기 완료 → "+(more?(window.MCL?MCL():"5지택일"):"사례형 답안 미리보기")); nxb.onclick=function(){ if(ANS){ if(WRM){ const keep=ckGet().filter(function(w){ return WR.indexOf(w)>=0; }); ckSet(keep); } else ckSet(WR.slice()); } finish(); }; } };
         const spawn=function(){ const pool=[]; for(let j=k;j<ans.length;j++) pool.push({id:"c"+j,t:ans[j]});
           for(let x=si+1;x<SS.length;x++) SS[x].p.forEach(function(w,i){ if(i%2) pool.push({id:x+"_"+i,t:w}); });
           PREV.forEach(function(w,i){ pool.push({id:"p"+i,t:w}); });
@@ -14209,7 +14219,7 @@ window.ccLecSkip=function(day,k){ try{ const M=RDJ("cc_nxlecskip"), K=day+"|"+k;
           const o={el:el,id:q.id,t:q.t,x:x,w:Wd,y:-32};
           el.onclick=function(){ if(o.t===ans[k]){ if(o.id!=="c"+k){ const tw=words.find(function(w){ return w.id==="c"+k; }); if(tw) tw.id=o.id; }
               k++; el.remove(); words=words.filter(function(w){ return w!==o; }); dr(); if(k>=ans.length) done1(); }
-            else{ el.classList.add("no"); setTimeout(function(){ el.classList.remove("no"); },300); } };
+            else{ el.classList.add("no"); setTimeout(function(){ el.classList.remove("no"); },300); if(ANS&&WR.indexOf(ans[k])<0) WR.push(ans[k]); } };
           words.push(o); };
         dr(); right.style.visibility="hidden"; top.textContent=full;
         TM=setInterval(function(){
@@ -14223,7 +14233,7 @@ window.ccLecSkip=function(day,k){ try{ const M=RDJ("cc_nxlecskip"), K=day+"|"+k;
         },20);
       };
       load();
-    },function(){ W.innerHTML='<div class="mmh"><b>🧩 필수암기문장암기</b><button class="mmx" aria-label="닫기">✕</button></div><div class="empty">자료를 불러오지 못했습니다 — 잠시 후 다시 열어 주세요.</div>'; W.querySelector(".mmx").onclick=close; });
+    },function(){ W.innerHTML='<div class="mmh"><b>'+TT+'</b><button class="mmx" aria-label="닫기">✕</button></div><div class="empty">자료를 불러오지 못했습니다 — 잠시 후 다시 열어 주세요.</div>'; W.querySelector(".mmx").onclick=close; });
   };
 })();
 </script>
