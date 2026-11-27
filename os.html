@@ -3143,13 +3143,19 @@ async function ccQBRefresh(){
   const keys=Object.keys(g).sort(function(a,b){ const A=g[a], B=g[b]; return (TO2.indexOf(A.track)-TO2.indexOf(B.track))||(((LO.indexOf(A.subject)+1)||99)-((LO.indexOf(B.subject)+1)||99)); });
   const GRP=[{id:"b",name:"변호사시험",tr:["변시"]},{id:"g",name:"5급공채 · 노무사",tr:["5급공채","노무사"]},{id:"a",name:"감정평가사",tr:["감정평가사"]}];
   const ROW=function(k){ const x=g[k], t=x.t;
-      return '<div class="arow2"><span>'+ccEsc(x.track)+'</span><span class="nm2">'+ccEsc(x.subject)+'</span>'+
+      return '<div class="arow2"><span>'+ccEsc(x._lbl||x.track)+'</span><span class="nm2">'+ccEsc(x.subject)+'</span>'+
         '<span>'+(t["요약"]||0)+" · "+(t["카드"]||0)+" · "+(!ccCase(x.track)?(t["필수암기"]||0):"—")+" · "+(t["OX"]||0)+" · "+(!ccCase(x.track)?((t["5지택일"]||0)+" · "+(t["콤보형"]||0)):"—")+'</span><span>'+(ccCase(x.track)?((t["주관식"]||0)+" · "+(t["필수암기"]||0)):"—")+'</span>'+
         '<span>'+Object.keys(x.lecs).length+'개</span><span><b>'+x.n+'</b></span></div>'; };
   const gOpen=function(id){ try{ return localStorage.getItem("cc_qb_g_"+id)==="1"; }catch(e){ return false; } };
   window.ccQBGrpT=function(id){ try{ localStorage.setItem("cc_qb_g_"+id,gOpen(id)?"0":"1"); }catch(e){} ccQBRefresh(); };
   el.innerHTML=keys.length?GRP.map(function(G){ const ks=keys.filter(function(k){ return G.tr.indexOf(g[k].track)>=0; }); if(!ks.length) return "";
-      const tot=ks.reduce(function(a,k){ return a+g[k].n; },0), op=gOpen(G.id);
+      let tot=ks.reduce(function(a,k){ return a+g[k].n; },0), op=gOpen(G.id);
+      /* 5급공채 · 노무사: 행정쟁송법 자료가 같으므로 같은 분야는 한 줄로 (노무사 범위 밖이면 「5급공채만」 · 수가 다르면 두 줄) */
+      if(G.id==="g"){ const same=function(x,y){ if(!x||!y||x.n!==y.n) return false; const K=Object.keys(x.t).concat(Object.keys(y.t)); return K.every(function(q){ return (x.t[q]||0)===(y.t[q]||0); })&&Object.keys(x.lecs).length===Object.keys(y.lecs).length; };
+        const out=[]; ks.forEach(function(k){ const x=g[k]; if(x.track==="노무사"){ const f=g["5급공채|"+x.subject]; if(same(f,x)) return; out.push(k); return; }
+          const y=g["노무사|"+x.subject]; x._lbl=same(x,y)?"5급공채 · 노무사":(y?"5급공채":"5급공채만"); out.push(k); });
+        ks.forEach(function(k){ if(g[k].track==="노무사") g[k]._lbl="노무사"; });
+        tot=out.reduce(function(a,k){ return a+g[k].n; },0); ks.length=0; out.forEach(function(k){ ks.push(k); }); }
       return '<div onclick="ccQBGrpT(\''+G.id+'\')" style="cursor:pointer;margin:12px 0 4px;padding:8px 12px;border-radius:8px;background:rgba(201,162,39,.16);font-weight:800;display:flex;gap:8px;align-items:center"><span style="width:14px">'+(op?'▾':'▸')+'</span>📘 '+G.name+'<small style="font-weight:600;color:var(--mute);margin-left:auto">분야 '+ks.length+' · '+tot.toLocaleString()+'문항</small> <button type="button" class="mini" style="margin-left:8px">'+(op?'접기':'펼치기')+'</button></div>'+
         (op?'<div class="arow2 head"><span>차수</span><span>분야</span><span>머리쏙쏙(요약 · 카드 · 암기) · OX · '+(window.CC_MCL5||'5지택일 · 선다형')+'</span><span>주관식 · 필수암기</span><span>진도(강의) 수</span><span>합계</span></div>'+ks.map(ROW).join(""):""); }).join(""):
     '<div class="empty-log">아직 올린 문항이 없습니다 — 문항을 보내 주시면 SQL 파일로 만들어 드립니다.</div>';
