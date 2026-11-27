@@ -1293,8 +1293,31 @@ async function ccQAnsMerge(data,wMA,wG){
     if(r.error) throw r.error; (r.data||[]).forEach(function(z){ M[z.id]=z; }); }
   A.forEach(function(x){ if(!x) return; const z=M[x.id]; if(wMA) x.model_answer=z?z.model_answer:null; if(wG) x.grid=z?z.grid:null; });
 }
+/* (2026-11-27) 동적교안 빠르게 열기 — 교안 html 을 이 브라우저(IndexedDB)에 저장해 두고, 서버의 수정 시각(updated_at)이 같으면 다시 받지 않음
+   · 교안을 고치면 수정 시각이 바뀌어 자동으로 새로 받음 · 저장이 안 되는 브라우저는 예전처럼 매번 받음 */
+var CC_GYDB=null;
+function ccGyDB(){ if(CC_GYDB) return CC_GYDB; CC_GYDB=new Promise(function(res){ try{ const r=indexedDB.open("cc_gy_cache",1); r.onupgradeneeded=function(){ r.result.createObjectStore("h"); }; r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ res(null); }; }catch(e){ res(null); } }); return CC_GYDB; }
+async function ccGyGet(ids){ const db=await ccGyDB(), out={}; if(!db) return out;
+  await new Promise(function(res){ try{ const tx=db.transaction("h","readonly"), st=tx.objectStore("h"); ids.forEach(function(id){ const q=st.get(String(id)); q.onsuccess=function(){ if(q.result) out[id]=q.result; }; }); tx.oncomplete=res; tx.onerror=res; tx.onabort=res; }catch(e){ res(); } }); return out; }
+async function ccGyPut(list){ const db=await ccGyDB(); if(!db||!list.length) return;
+  await new Promise(function(res){ try{ const tx=db.transaction("h","readwrite"), st=tx.objectStore("h"); list.forEach(function(x){ st.put({u:x.updated_at||"",html:x.html},String(x.id)); }); tx.oncomplete=res; tx.onerror=res; tx.onabort=res; }catch(e){ res(); } }); }
+function ccGyWrap(qb){ const _sel=qb.select.bind(qb);
+  qb.select=function(cols,opt){ cols=(cols==null)?"*":String(cols); const L=cols.replace(/\s/g,"").split(",");
+    if(L.indexOf("html")<0||L.indexOf("*")>=0||(opt&&opt.head)) return _sel(cols,opt);
+    const c2=L.filter(function(c){ return c!=="html"; }); ["id","updated_at"].forEach(function(c){ if(c2.indexOf(c)<0) c2.push(c); });
+    const fb=_sel(c2.join(","),opt), _then=fb.then.bind(fb);
+    fb.then=function(ok,ng){ return _then(async function(r){ if(!r||r.error||!r.data) return r;
+      const A=Array.isArray(r.data)?r.data:[r.data]; try{
+        const C=await ccGyGet(A.map(function(x){ return x.id; })), need=[];
+        A.forEach(function(x){ const c=C[x.id]; if(c&&c.u===(x.updated_at||"")) x.html=c.html; else need.push(x.id); });
+        if(need.length){ const g=await window.__ccFromRaw("cc_gyoan").select("id,html,updated_at").in("id",need); if(g.error) throw g.error;
+          const M={}; (g.data||[]).forEach(function(z){ M[z.id]=z; }); A.forEach(function(x){ const z=M[x.id]; if(z) x.html=z.html; }); ccGyPut(g.data||[]); }
+      }catch(e){ return Object.assign({},r,{data:null,error:e}); }
+      return r; }).then(ok,ng); };
+    return fb; };
+  return qb; }
 if(sb){ const _from=sb.from.bind(sb); window.__ccFromRaw=_from;
-  sb.from=function(t){ const qb=_from(t); if(t!=="cc_questions") return qb;
+  sb.from=function(t){ const qb=_from(t); if(t==="cc_gyoan") return ccGyWrap(qb); if(t!=="cc_questions") return qb;
     const _sel=qb.select.bind(qb);
     qb.select=function(cols,opt){ cols=(cols==null)?"*":String(cols); const L=cols.replace(/\s/g,"").split(",");
       const all=L.indexOf("*")>=0, wMA=all||L.indexOf("model_answer")>=0, wG=all||L.indexOf("grid")>=0;
@@ -1430,6 +1453,7 @@ async function ccAfterAuth(au){
   if(r.error) throw r.error;
   const pf=r.data;
   if(!pf){
+    try{ await ccMfaStep(); }catch(e2){ try{ await sb.auth.signOut(); }catch(e){} throw e2; }
     let adm=false; try{ const a=await sb.rpc("cc_is_admin"); adm=!a.error&&a.data===true; }catch(e){}
     if(adm){ await ccOpenAdmin(); return; }
     try{ await sb.auth.signOut(); }catch(e){}
@@ -1674,6 +1698,61 @@ function toggleAdminForm(){
   f.style.display=open?"block":"none";
   if(open){var i=document.getElementById("fAdmin");if(i)i.focus();}
 }
+/* (2026-11-27) 관리자 2단계 인증 (휴대폰 인증앱 6자리 코드)
+   · 등록 전: 지금처럼 이메일 · 비밀번호로 들어감 / 등록 후: 비밀번호 다음에 6자리 코드를 한 번 더
+   · 서버(cc_is_admin)도 등록한 관리자는 코드를 통과한 접속만 관리자로 인정 → 비밀번호가 새도 관리자 기능은 못 씀 */
+function ccMfaAsk(msg){ return new Promise(function(res){
+  const w=document.createElement("div"); w.id="ccMfaAsk"; w.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(10,18,35,.72);display:flex;align-items:center;justify-content:center";
+  w.innerHTML='<div style="background:#fff;color:#1d2433;border-radius:14px;padding:22px 24px;width:min(340px,92vw);box-shadow:0 10px 40px rgba(0,0,0,.35);text-align:center">'+
+    '<div style="font-weight:800;font-size:16px;margin-bottom:6px">🔐 2단계 인증</div><div style="font-size:13px;color:#5b6475;margin-bottom:12px">휴대폰 인증앱에 보이는 <b>6자리 코드</b>를 넣어 주세요</div>'+
+    '<input id="ccMfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="font-size:24px;letter-spacing:8px;text-align:center;width:170px;padding:8px;border:1px solid #c9ced8;border-radius:9px">'+
+    '<div id="ccMfaMsg" style="min-height:18px;font-size:12.5px;color:#c0392b;margin:8px 0">'+(msg||"")+'</div>'+
+    '<div style="display:flex;gap:8px;justify-content:center"><button id="ccMfaNo" type="button" style="padding:7px 16px;border-radius:999px;border:1px solid #c9ced8;background:#fff;cursor:pointer">취소</button><button id="ccMfaOk" type="button" style="padding:7px 18px;border-radius:999px;border:0;background:#0D1F3C;color:#fff;font-weight:700;cursor:pointer">확인</button></div></div>';
+  document.body.appendChild(w); const i=w.querySelector("#ccMfaCode"); setTimeout(function(){ i.focus(); },30);
+  const done=function(v){ w.remove(); res(v); };
+  w.querySelector("#ccMfaNo").onclick=function(){ done(null); };
+  w.querySelector("#ccMfaOk").onclick=function(){ const v=i.value.replace(/\D/g,""); if(v.length!==6){ w.querySelector("#ccMfaMsg").textContent="6자리 숫자를 넣어 주세요"; return; } done(v); };
+  i.onkeydown=function(e){ if(e.key==="Enter") w.querySelector("#ccMfaOk").click(); };
+}); }
+async function ccMfaStep(){
+  if(!sb||!sb.auth||!sb.auth.mfa) return;
+  const a=await sb.auth.mfa.getAuthenticatorAssuranceLevel(); if(a.error||!a.data) return;
+  if(!(a.data.currentLevel==="aal1"&&a.data.nextLevel==="aal2")) return;
+  const f=await sb.auth.mfa.listFactors(); const t=((f.data&&f.data.totp)||[]).filter(function(x){ return x.status==="verified"; })[0]; if(!t) return;
+  let msg="";
+  for(let k=0;k<6;k++){ const code=await ccMfaAsk(msg); if(code==null) throw new Error("2단계 인증을 취소했습니다");
+    const v=await sb.auth.mfa.challengeAndVerify({factorId:t.id,code:code}); if(!v.error) return; msg="코드가 맞지 않습니다 — 다시 넣어 주세요"; }
+  throw new Error("코드를 여러 번 틀렸습니다 — 잠시 뒤 다시 로그인해 주세요");
+}
+function ccMfaPanel(){
+  let pn=document.getElementById("ccMfaPanel");
+  if(!pn){ const anchor=document.getElementById("ccAppPanel"); if(!anchor) return;
+    pn=document.createElement("div"); pn.className="panel"; pn.id="ccMfaPanel"; pn.style.marginTop="22px";
+    pn.innerHTML='<h3>🔐 관리자 2단계 인증</h3><div id="mfaBody" class="sub">확인하는 중…</div>'; anchor.after(pn); }
+  ccMfaDraw();
+}
+async function ccMfaDraw(){ const b=document.getElementById("mfaBody"); if(!b) return;
+  let t=null; try{ const f=await sb.auth.mfa.listFactors(); t=((f.data&&f.data.totp)||[]).filter(function(x){ return x.status==="verified"; })[0]||null; }catch(e){ b.textContent="확인하지 못했습니다 — "+ccErr(e); return; }
+  const lost='<br><small style="opacity:.75">휴대폰을 잃어버리면: Supabase 대시보드 → Authentication → Users → 관리자 계정 → MFA 인증 삭제 후 다시 등록</small>';
+  b.innerHTML=t?'<b style="color:#7ee2a8">✓ 등록됨</b> — 로그인할 때 휴대폰 인증앱의 6자리 코드를 한 번 더 넣습니다 <button class="mini" type="button" onclick="ccMfaOff()">해제</button>'+lost
+    :'아직 등록하지 않았습니다 — 등록하면 비밀번호가 새어도 관리자 화면에 들어올 수 없습니다 <button class="mini" type="button" onclick="ccMfaOn()">등록하기</button>';
+}
+async function ccMfaOn(){ const b=document.getElementById("mfaBody"); if(!b) return;
+  try{ const f=await sb.auth.mfa.listFactors(); for(const x of ((f.data&&f.data.all)||[])){ if(x.status!=="verified") await sb.auth.mfa.unenroll({factorId:x.id}); } }catch(e){}
+  const r=await sb.auth.mfa.enroll({factorType:"totp",friendlyName:"1행2필 관리자"}); if(r.error){ b.textContent="등록을 시작하지 못했습니다 — "+ccErr(r.error); return; }
+  const d=r.data, qr=d.totp&&d.totp.qr_code||"";
+  b.innerHTML='<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:6px"><img alt="QR" src="'+qr+'" style="width:170px;height:170px;background:#fff;border-radius:10px;padding:6px">'+
+    '<div style="flex:1;min-width:220px;line-height:1.7">① 휴대폰 인증앱(Google Authenticator 등)에서 <b>QR 코드 스캔</b><br>② 앱에 나온 <b>6자리 코드</b> 입력<br>'+
+    '<input id="mfaNew" inputmode="numeric" maxlength="6" style="font-size:18px;letter-spacing:5px;width:130px;text-align:center;margin:6px 0"> <button class="mini" type="button" id="mfaGo">등록 완료</button> <button class="mini" type="button" onclick="ccMfaDraw()">취소</button>'+
+    '<div id="mfaErr" style="color:#e88;font-size:.85rem"></div><small style="opacity:.7">QR이 안 되면 앱에 직접 입력: '+qeE(d.totp&&d.totp.secret||"")+'</small></div></div>';
+  document.getElementById("mfaGo").onclick=async function(){ const c=(document.getElementById("mfaNew").value||"").replace(/\D/g,""); const e=document.getElementById("mfaErr");
+    if(c.length!==6){ e.textContent="6자리 숫자를 넣어 주세요"; return; }
+    const v=await sb.auth.mfa.challengeAndVerify({factorId:d.id,code:c}); if(v.error){ e.textContent="코드가 맞지 않습니다 — 앱의 새 코드로 다시"; return; }
+    toast("🔐 2단계 인증을 등록했습니다"); ccMfaDraw(); };
+}
+async function ccMfaOff(){ if(!confirm("2단계 인증을 해제할까요?\n\n해제하면 이메일 · 비밀번호만으로 관리자 화면에 들어올 수 있게 됩니다.")) return;
+  try{ const f=await sb.auth.mfa.listFactors(); for(const x of ((f.data&&f.data.all)||[])){ const u=await sb.auth.mfa.unenroll({factorId:x.id}); if(u.error) throw u.error; } toast("2단계 인증을 해제했습니다"); }catch(e){ alert("해제하지 못했습니다 — "+ccErr(e)); }
+  ccMfaDraw(); }
 async function adminLogin(){
   const code=(document.getElementById("fAdmin").value||"").trim();
   const em=(document.getElementById("fAdminEmail").value||"").trim().toLowerCase();
@@ -1689,6 +1768,7 @@ async function adminLogin(){
     try{ await sb.auth.signOut({scope:"local"}); }catch(e){}
     const r=await sb.auth.signInWithPassword({email:em,password:pw});
     if(r.error) throw r.error;
+    err.textContent=""; try{ await ccMfaStep(); }catch(e2){ try{ await sb.auth.signOut(); }catch(e){} throw e2; }
     const a=await sb.rpc("cc_is_admin");
     if(a.error||a.data!==true){ try{ await sb.auth.signOut(); }catch(e){} throw new Error("관리자 명단에 없는 계정입니다"); }
     err.textContent=""; document.getElementById("fAdminPw").value="";
@@ -1700,6 +1780,7 @@ async function ccOpenAdmin(){
   const av=document.getElementById("adminView");
   av.classList.add("open"); av.scrollTop=0;
   await ccLoadAdmin();
+  try{ ccMfaPanel(); }catch(e){}
   try{ ccRoomWatch("admin"); }catch(e){}
 }
 async function adminLogout(){
@@ -3145,8 +3226,8 @@ function ccQBPanel(){
   pn.innerHTML='<h3 id="ccQBH3" style="cursor:pointer" onclick="if(event.target.closest(\'button:not(#ccQBFold)\'))return;ccQBFoldT()" title="눌러서 펼치기 / 접기"><span id="ccQBArw" style="display:inline-block;width:18px">▸</span>📚 문제 은행 현황 <span id="ccQBTotal" style="color:var(--gold);font-size:.9rem"></span> <button id="ccQBFold" class="mini" type="button" style="margin-left:8px">펼치기</button></h3>'+
     '<div class="sub">서버 문제 은행에 들어 있는 문항 수입니다 · 문항은 SQL 파일을 Supabase SQL Editor에서 실행해 올립니다 · 수강생은 <b>자기가 수강한 진도까지만</b> 풀 수 있습니다<br>'+
     '모든 강의: <b>강의요약</b>(머리쏙쏙) · <b>OX</b> / 1차: <b>'+(window.CC_MCL5||'5지택일 · 선다형')+'</b>(진도별) / 변시: <b>주관식 사례형</b>(진도별)'+
-    ' <button class="mini" style="margin-left:8px" onclick="ccQBRefresh()">⟳ 새로고침</button></div>'+
-    '<div class="atable" id="ccQBCounts"></div>';
+    ' <button class="mini" style="margin-left:8px" onclick="ccQBRefresh()">⟳ 새로고침</button> <button class="mini" style="margin-left:4px" onclick="ccQBCheck()" title="같은 문제의 시험별 복사본끼리 내용이 다른 것 찾기">🔎 묶음 점검</button></div>'+
+    '<div id="ccQBChk"></div><div class="atable" id="ccQBCounts"></div>';
   anchor.after(pn); ccQBFoldApply(); return pn;
 }
 /* (2026-11-27) 문제 은행 현황 펼치기 / 접기 — 처음에는 접힌 채(제목만) · 상태는 이 브라우저에 기억 */
@@ -3154,6 +3235,28 @@ function ccQBFoldApply(){ const pn=document.getElementById("ccQBPanel"); if(!pn)
   pn.classList.toggle("qbfold",!open); const a=document.getElementById("ccQBArw"), b=document.getElementById("ccQBFold"); if(a) a.textContent=open?"▾":"▸"; if(b) b.textContent=open?"접기":"펼치기"; }
 function ccQBFoldT(){ let open=false; try{ open=localStorage.getItem("cc_qb_open")==="1"; localStorage.setItem("cc_qb_open",open?"0":"1"); }catch(e){} ccQBFoldApply(); }
 (function(){ const st=document.createElement("style"); st.textContent="#ccQBPanel.qbfold>*:not(h3){display:none!important}"; document.head.appendChild(st); })();
+/* (2026-11-27) 묶음 점검 — 같은 문제(origin_id)의 시험별 복사본 중 내용이 서로 다른 것만 보여 줌
+   · 비교 범위 = 함께 고쳐지는 묶음(ccFam): 기본이론 · 최신판례 = 네 시험 / 답안작성원리 · 답안작성 = 변시 따로, 5급공채 · 노무사 · 감정평가사 끼리
+   · 매칭채점표(grid)는 시험별 목차가 달라도 되므로 비교에서 뺌 · 고치면 묶음 전체가 함께 고쳐짐(✏️ 수정) */
+const CC_CHK_F={question:"문제",case_text:"지문",model_answer:"모범답안",explanation:"해설",choices:"선지",answer:"정답",keywords:"키워드",logic:"핵심논리",chapter:"목차",topic:"주제",advice:"조언",rewrite:"재작성"};
+async function ccQBCheck(){
+  const el=document.getElementById("ccQBChk"); if(!el) return; el.innerHTML='<div class="sub">점검하는 중… (전체 문항을 받아 비교합니다)</div>';
+  let rows; try{ rows=await ccQBFetch("id,track,subject,stage,lec,qtype,origin_id,"+Object.keys(CC_CHK_F).join(",")); }catch(e){ el.innerHTML='<div class="sub" style="color:#e88">점검하지 못했습니다 — '+ccErr(e)+'</div>'; return; }
+  const N=function(v){ if(v==null) return ""; if(typeof v!=="string") v=JSON.stringify(v); return v.replace(/\s+/g," ").trim(); };
+  const G={}; rows.forEach(function(x){ const o=x.origin_id||x.id; const k=o+"|"+(CC_SHARED_STAGES.indexOf(x.stage)>=0?"all":(x.track==="변시"?"b":"g")); (G[k]=G[k]||[]).push(x); });
+  const bad=[]; Object.keys(G).forEach(function(k){ const L=G[k]; if(L.length<2) return; const diff=Object.keys(CC_CHK_F).filter(function(f){ const v=N(L[0][f]); return L.some(function(y){ return N(y[f])!==v; }); }); if(diff.length) bad.push({L:L,diff:diff}); });
+  const groups=Object.keys(G).filter(function(k){ return G[k].length>1; }).length;
+  if(!bad.length){ el.innerHTML='<div class="sub" style="color:#7ee2a8;font-weight:700">✓ 묶음 점검 — 복사본 묶음 '+groups+'개 모두 내용이 같습니다 <button class="mini" onclick="document.getElementById(\'ccQBChk\').innerHTML=\'\'">닫기</button></div>'; return; }
+  const ord=["변시","5급공채","노무사","감정평가사"];
+  let h='<div style="margin:10px 0;padding:10px 12px;border:1px solid rgba(232,136,136,.45);border-radius:10px"><div style="font-weight:800;margin-bottom:6px">⚠️ 묶음 점검 — 내용이 다른 묶음 '+bad.length+'개 / 전체 '+groups+'개 <button class="mini" onclick="document.getElementById(\'ccQBChk\').innerHTML=\'\'">닫기</button></div>'+
+    '<div class="sub" style="margin-bottom:6px">맞는 쪽을 열어 [✏️ 수정] 후 저장하면 같은 묶음이 모두 그 내용으로 맞춰집니다</div>';
+  bad.slice(0,300).forEach(function(b){ const x=b.L[0], f=b.diff[0];
+    b.L.sort(function(p,q){ return ord.indexOf(p.track)-ord.indexOf(q.track); });
+    h+='<div style="padding:7px 0;border-top:1px solid rgba(127,127,127,.2)"><b>'+qeE(x.subject)+'</b> · '+qeE(x.stage)+' '+qeE(x.lec)+'강 · '+qeE(x.qtype)+' — <span style="color:#e8a"><b>다른 칸:</b> '+b.diff.map(function(d){ return CC_CHK_F[d]; }).join(" · ")+'</span>'+
+      b.L.map(function(y){ QE.rows[y.id]=y; return '<div style="display:flex;gap:8px;align-items:baseline;font-size:.82rem;margin-top:3px"><span style="min-width:70px;font-weight:700">'+qeE(y.track)+'</span><span style="flex:1;opacity:.8">'+qeE(N(y[f]).slice(0,90))+'</span><button class="mini" style="padding:2px 9px" onclick="qxEdit('+y.id+')">✏️ 수정</button></div>'; }).join("")+'</div>'; });
+  if(bad.length>300) h+='<div class="sub">… 그 밖에 '+(bad.length-300)+'개</div>';
+  el.innerHTML=h+'</div>';
+}
 async function ccQBRefresh(){
   if(!ccQBPanel()) return;
   const el=document.getElementById("ccQBCounts"); el.innerHTML='<div class="sub">불러오는 중…</div>';
@@ -7791,7 +7894,7 @@ window.ccRecCaseDel=function(id,k){
   const P=S.p||{}, x=P[id]; if(!x||!x.tries) return;
   if(k<0){ if(!confirm("이 문제에 쓴 답안 "+x.tries.length+"회를 모두 지울까요?\n\n지운 답안은 되살릴 수 없고, 「풀이한 문제들」 · 「재작성하기」 목록에서도 빠집니다.")) return; delete P[id]; }
   else { if(!confirm((k+1)+"회차 답안을 지울까요?\n\n지운 답안은 되살릴 수 없습니다.")) return; x.tries.splice(k,1); if(!x.tries.length) delete P[id]; }
-  S.p=P; try{ localStorage.setItem("cc_case3_v1","cc_dap_prac_v1","cc_flow_v1",JSON.stringify(S)); }catch(e){ alert("지우지 못했습니다"); return; }
+  S.p=P; try{ localStorage.setItem("cc_case3_v1",JSON.stringify(S)); }catch(e){ alert("지우지 못했습니다"); return; }
   try{ toast("🗑 지웠습니다"); }catch(e){}
   try{ ccRecDraw(); }catch(e){}
 };
@@ -8440,7 +8543,10 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
   /* 관리자: 📚 분야 순서 — 강의 공개 현황 아래 */
   window.ccOrdPanel=function(){ const pub=document.getElementById("ccPubPanel"); if(!pub) return; let p=document.getElementById("ccOrdPanel");
     if(!p){ p=document.createElement("div"); p.className="panel"; p.id="ccOrdPanel"; p.style.marginTop="22px"; pub.parentNode.insertBefore(p,pub.nextSibling); }
-    const W=window.__ccOrdW=window.__ccOrdW||{"1차":ccOrdOf("1차"),"변시":ccOrdOf("변시"),"5급공채":ccOrdOf("5급공채")}, K=window.__ccCatW=window.__ccCatW||{}, T=window.__ccOrdT||"1차";
+    /* (2026-11-27) 노무사 OS 잔재 정리: 처음 탭이 숨은 「1차」(노무사 1차 과목)로 열리던 것 → 변시부터 · 탭은 이 OS의 시험(CC_TRACKS)만 */
+    if(!window.__ccOrdW){ window.__ccOrdW={}; CC_TRACKS.forEach(function(t){ window.__ccOrdW[t]=ccOrdOf(t); }); }
+    if(CC_TRACKS.indexOf(window.__ccOrdT)<0) window.__ccOrdT=CC_TRACKS[0];
+    const W=window.__ccOrdW, K=window.__ccCatW=window.__ccCatW||{}, T=window.__ccOrdT;
     const R=(typeof nxReq==="function"?nxReq(T):[]), opt=ccCase(T)?(CC_OPT["변시"]||[]):[];
     const cur=function(l,si){ return (ccCatNew(T,l)[si]||0); }, val=function(l,si){ const k=T+"|"+l+"|"+si; return K[k]!=null?K[k]:cur(l,si); };
     const row=function(l,i,fixed){ let sum=0;
@@ -8452,7 +8558,7 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
     const chg=[]; let d=0; Object.keys(K).forEach(function(k){ const q=k.split("|"), c0=(ccCatNew(q[0],q[1])[+q[2]]||0); if(K[k]!==c0){ chg.push(q[0]+' '+q[1]+' '+CC_STAGES[q[0]][+q[2]]+' '+c0+'강 → <b>'+K[k]+'강</b>'); d+=K[k]-c0; } });
     CC_TRACKS.forEach(function(t){ if(W[t].join()!==ccOrdOf(t).join()) chg.push(t+' 분야 순서 → <b>'+W[t].join(' → ')+'</b>'); });
     p.innerHTML='<h3>📚 분야 순서 · 예정 강의 수</h3><div class="sub">촬영일정이 바뀌면 순서를 ▲▼로 · 예정 강의 수가 바뀌면 숫자를 눌러 고치세요 — 수강생 일정은 저장한 다음 날부터 바뀝니다<br>숫자 아래 작은 글씨 = 지금까지 올라온 강의 (강의가 올라올 때마다 위 「강의 공개 현황」에서 [+1강])</div>'+
-      '<div class="ordwrap"><div class="ordtabs">'+CC_TRACKS.map(function(t){ return '<button class="mini'+(t===T?' on':'')+'" onclick="window.__ccOrdT=\''+t+'\';ccOrdPanel()">'+t+'</button>'; }).join("")+'</div>'+
+      '<div class="ordwrap"><div class="ordtabs">'+CC_TRACKS.map(function(t){ return '<button class="mini'+(t===T?' on':'')+'" onclick="window.__ccOrdT=\''+t+'\';ccOrdPanel()">'+(t==="5급공채"?"5급공채 · 노무사":t==="변시"?"변호사시험":t)+'</button>'; }).join("")+'</div>'+
       '<div class="ordtbl"><table><tr><th>순서 · 분야</th>'+R.map(function(si){ return '<th>'+ccEsc(CC_STAGES[T][si])+'</th>'; }).join("")+'<th>합계</th></tr>'+
       W[T].map(function(l,i){ return row(l,i,false); }).join("")+opt.map(function(l){ return row(l,0,true); }).join("")+'</table>'+
       (chg.length?'<div class="ordchg">✏️ 바뀐 것<br>'+chg.join('<br>')+(d?'<br>수강생 영향: 필수강의 '+(d>0?d+'강 늘어남 — 완료 예정이 늦어질 수 있습니다':(-d)+'강 줄어듦 — 줄어든 강의는 수강생 계획에서 빠집니다'):'')+'</div>'+
