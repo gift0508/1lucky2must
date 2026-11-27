@@ -3498,7 +3498,7 @@ function ccPubPanel(){
   const anchor=document.getElementById("ccLtPanel")||document.getElementById("ccWBPanel")||document.getElementById("ccQBPanel"); if(!anchor) return null;
   pn=document.createElement("div"); pn.className="panel"; pn.style.marginTop="22px"; pn.id="ccPubPanel";
   const SL=window.CC_SRC_LABEL||{n:"신규 강의",ny:""};
-  pn.innerHTML='<h3>🆕 '+SL.n+(SL.ny?' ('+SL.ny+')':'')+' 강의 공개 현황</h3>'+
+  pn.innerHTML='<h3 id="pubH3" style="cursor:pointer" onclick="ccPubFoldT()" title="눌러서 펼치기 / 접기"><span id="pubArw" style="display:inline-block;width:18px">▸</span>🆕 '+SL.n+(SL.ny?' ('+SL.ny+')':'')+' 강의 공개 현황 <button id="pubFold" class="mini" type="button" style="margin-left:8px">펼치기</button></h3>'+
     '<div class="sub">27년 강의가 올라오면 <b>[+1강]</b> — 그 강의부터 27년 강의로 바뀝니다 · 아직 올라오지 않은 강의는 <b>26년 강의로 임시 서비스</b>됩니다<br>예정 강의 수는 아래 <b>「📚 분야 순서 · 예정 강의 수」</b>에서 고칩니다</div>'+
     '<div class="pubtabs" id="pubTabs"></div><div id="pubTable"></div><div class="sub" id="pubStat"></div>';
   anchor.after(pn);
@@ -3507,10 +3507,13 @@ function ccPubPanel(){
     "#ccPubPanel table{width:100%;border-collapse:collapse;font-size:.84rem}#ccPubPanel th,#ccPubPanel td{border-bottom:1px solid rgba(255,255,255,.1);padding:7px 6px;text-align:center}#ccPubPanel th:first-child,#ccPubPanel td:first-child{text-align:left;font-weight:800}"+
     "#ccPubPanel .pc{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}#ccPubPanel .pc b{cursor:pointer;min-width:22px;display:inline-block;border-bottom:1px dashed rgba(255,255,255,.4)}#ccPubPanel .pc small{opacity:.6}#ccPubPanel .pc small.tot{opacity:.85;cursor:pointer}#ccOrdPanel .ordwrap{display:flex;gap:16px;margin-top:10px;align-items:flex-start}#ccOrdPanel .ordtabs{display:flex;flex-direction:column;gap:6px;width:90px;flex:none}#ccOrdPanel .ordtabs .mini.on{background:#C9A227;color:#0D1F3C;border-color:#C9A227}#ccOrdPanel .ordtbl{flex:1;overflow-x:auto}#ccOrdPanel table{width:100%;border-collapse:collapse;font-size:13px}#ccOrdPanel th{font-size:11.5px;opacity:.75;padding:6px 4px;text-align:center;border-bottom:1px solid rgba(127,127,127,.25)}#ccOrdPanel th:first-child,#ccOrdPanel td:first-child{text-align:left;white-space:nowrap}#ccOrdPanel td{padding:7px 4px;text-align:center;border-bottom:1px solid rgba(127,127,127,.12)}#ccOrdPanel .ordmv{display:inline-flex;flex-direction:column;gap:2px;vertical-align:middle;margin-right:8px;width:30px}#ccOrdPanel .ordmv .mini{padding:0 6px;font-size:10px;line-height:16px}#ccOrdPanel .ordn{font:inherit;font-weight:800;min-width:52px;padding:3px 8px;border-radius:8px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit;cursor:pointer}#ccOrdPanel .ordn.ch{border-color:#C9A227;background:rgba(201,162,39,.18)}#ccOrdPanel .ordn small{font-weight:600;opacity:.7}#ccOrdPanel .ordp{display:block;font-size:11px;opacity:.7;margin-top:2px}#ccOrdPanel .ordchg{margin-top:12px;border:1px dashed #C9A227;border-radius:10px;padding:9px 12px;font-size:13px;line-height:1.8}#ccOrdPanel .ordbtns{display:flex;flex-direction:column;gap:6px;width:160px;margin-top:10px}#ccPubPanel .pc small.tot u{text-decoration:none;border-bottom:1px dashed currentColor;font-weight:800}"+
     "#ccPubPanel .pc button{font:inherit;font-size:.72rem;font-weight:800;padding:2px 7px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:transparent;color:inherit;cursor:pointer}#ccPubPanel .pc button.p{background:var(--gold,#C9A227);color:#0D1F3C;border-color:transparent}"+
-    "#ccPubPanel .pc.full b{color:#7ee2a8}#ccPubPanel .pc.zero b{opacity:.55}#ccPubPanel .na{opacity:.35}";
-  pn.appendChild(st);
+    "#ccPubPanel .pc.full b{color:#7ee2a8}#ccPubPanel .pc.zero b{opacity:.55}#ccPubPanel .na{opacity:.35}#ccPubPanel.pubfold>*:not(h3):not(style){display:none!important}";
+  pn.appendChild(st); ccPubFoldApply();
   return pn;
 }
+function ccPubFoldApply(){ const pn=document.getElementById("ccPubPanel"); if(!pn) return; let open=false; try{ open=localStorage.getItem("cc_pub_open")==="1"; }catch(e){}
+  pn.classList.toggle("pubfold",!open); const a=document.getElementById("pubArw"), b=document.getElementById("pubFold"); if(a) a.textContent=open?"▾":"▸"; if(b) b.textContent=open?"접기":"펼치기"; }
+function ccPubFoldT(){ try{ localStorage.setItem("cc_pub_open",localStorage.getItem("cc_pub_open")==="1"?"0":"1"); }catch(e){} ccPubFoldApply(); }
 let CC_PUB_T="변시";
 function ccPubLaws(t){ return (ccCase(t)&&window.CC_ADMIN_LAWS2)?CC_ADMIN_LAWS2:((window.CC_LAWS&&CC_LAWS[t])||[]); }
 async function ccPubFetch(){
@@ -3523,15 +3526,28 @@ async function ccPubRender(){
   try{ await ccPubFetch(); }catch(e){ document.getElementById("pubStat").textContent="공개 현황을 불러오지 못했습니다 — "+ccErr(e); }
   ccPubDraw();
 }
+/* (2026-11-27) 탭 = 변호사시험 | 5급공채 · 노무사 | 감정평가사 (문제 은행 현황과 같게)
+   · 5급공채 · 노무사: 같은 강의 — 노무사 범위 밖 분야는 「5급공채만」 표시
+   · 감정평가사: 감정평가사 범위의 분야 + 보상법규(감정평가사 전용) — 답안작성강의는 보상법규 사례로 따로 */
+const CC_PUB_TABS=[["변시","변호사시험"],["5급공채","5급공채 · 노무사"],["감정평가사","감정평가사"]];
+function ccPubScope(ex){ try{ return (window.CC_EXAM_SCOPE||{})[ex]||null; }catch(e){ return null; } }
+function ccPubN(t,l,si){ const n=ccCatNew(t,l)[si]||0; if(n) return n; const x=(ccPubScope("감정평가사")||{}).extra||{}; return (x[l]&&x[l][si])||0; }
 function ccPubDraw(){
-  const T=CC_TRACKS.filter(function(t){ return ccPubLaws(t).length; });
-  document.getElementById("pubTabs").innerHTML=T.map(function(t){ return '<button class="'+(t===CC_PUB_T?"on":"")+'" onclick="CC_PUB_T=\''+t+'\';ccPubDraw()">'+t+'</button>'; }).join("");
-  const t=CC_PUB_T, S=(CC_STAGES[t]||[]), cols=S.map(function(s,si){ return si; }).filter(function(si){ return !ccIsAuto(t,si); });
+  if(CC_PUB_TABS.every(function(x){ return x[0]!==CC_PUB_T; })) CC_PUB_T="변시";
+  document.getElementById("pubTabs").innerHTML=CC_PUB_TABS.map(function(x){ return '<button class="'+(x[0]===CC_PUB_T?"on":"")+'" onclick="CC_PUB_T=\''+x[0]+'\';ccPubDraw()">'+x[1]+'</button>'; }).join("");
+  const TAB=CC_PUB_T, t=(TAB==="변시")?"변시":"5급공채", S=(CC_STAGES[t]||[]), cols=S.map(function(s,si){ return si; }).filter(function(si){ return !ccIsAuto(t,si); });
+  const NM=ccPubScope("노무사")||{}, GA=ccPubScope("감정평가사")||{};
+  let LAWS=ccPubLaws(t).slice();
+  if(TAB==="감정평가사"){ LAWS=LAWS.filter(function(l){ return (GA.drop||[]).indexOf(l)<0||l==="각론"; }); Object.keys(GA.extra||{}).forEach(function(l){ if(LAWS.indexOf(l)<0) LAWS.push(l); }); }
   let h='<table><tr><th>분야</th>'+cols.map(function(si){ return '<th>'+S[si]+'</th>'; }).join("")+'</tr>';
-  ccPubLaws(t).forEach(function(l){
-    const N=ccCatNew(t,l);
-    h+='<tr><td>'+l+'</td>'+cols.map(function(si){
-      const n=N[si]||0, o=(ccCatOld(t,l)[si]||0), a="'"+t+"','"+l+"',"+si;
+  LAWS.forEach(function(l){
+    const N=cols.map(function(si){ return ccPubN(t,l,si); });
+    let tag='';
+    if(TAB==="5급공채"){ if(l==="각론") tag=' <small style="opacity:.7;font-weight:600">노무사: 일부 강의</small>'; else if((NM.drop||[]).indexOf(l)>=0) tag=' <small style="opacity:.7;font-weight:600">5급공채만</small>'; }
+    if(TAB==="감정평가사"){ if(/^보상법규/.test(l)) tag=' <small style="opacity:.7;font-weight:600">감정평가사 전용</small>'; else if(l==="각론") tag=' <small style="opacity:.7;font-weight:600">일부 강의</small>'; }
+    h+='<tr><td>'+l+tag+'</td>'+cols.map(function(si,ci){
+      if(TAB==="감정평가사"&&GA.caseOwn&&S[si]==="답안작성강의"&&!/^보상법규/.test(l)) return '<td><span class="na">— 보상법규 사례로</span></td>';
+      const n=N[ci]||0, o=(ccCatOld(t,l)[si]||0), a="'"+t+"','"+l+"',"+si;
       const tot='<small class="tot">/ '+n+'강</small>';
       if(!n) return '<td><span class="pc zero">'+tot+(o?'<small> · 26년 '+o+'강 임시</small>':'')+'</span></td>';
       const p=Math.min(ccPub(t,l,si),n), cls=p>=n?" full":(p<=0?" zero":"");
@@ -3543,7 +3559,7 @@ function ccPubDraw(){
   document.getElementById("pubTable").innerHTML=h;
 }
 async function ccPubSet(t,l,si,v){
-  const n=ccCatNew(t,l)[si]||0; v=Math.max(0,Math.min(n,parseInt(v,10)||0));
+  const n=ccPubN(t,l,si); v=Math.max(0,Math.min(n,parseInt(v,10)||0));
   try{ await ccPubFetch(); }catch(e){}
   CC_PUB[t+"|"+l+"|"+si]=v;
   const r=await sb.from("cc_settings").upsert([{key:"pub",value:JSON.stringify(CC_PUB),updated_at:new Date().toISOString()}],{onConflict:"key"});
