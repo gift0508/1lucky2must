@@ -6096,17 +6096,36 @@ function closeEngine(){
   }
   function overview(){
     const G=groups(), keys=Object.keys(G);
-    const order=function(k){ const g=G[k]; const ti=!ccCase(g.t)?0:1, li=((CC_LAWS[g.t]||[]).indexOf(g.l)+1)||99, si=(CC_STAGES[g.t]||[]).indexOf(g.s); return ti*1e6+li*1e3+(si<0?99:si)*10+(g.src==="o"?1:0); };
+    /* (2026-11-27) 정렬: 차수 → 단계 → 분야 → 과정 (같은 차수 · 단계끼리 묶어서) */
+    const TO=["1차","변시","5급공채","노무사","감정평가사"], LO=function(t){ const L=(CC_LAWS[t]||window.NM_BASE2||[]).slice(); ["보상법규 · 감정평가법","보상법규 · 토지보상법"].forEach(function(x){ if(L.indexOf(x)<0) L.push(x); }); return L; }, SO=function(t){ return CC_STAGES[t]||CC_STAGES["5급공채"]||[]; };
+    const order=function(k){ const g=G[k]; const ti=TO.indexOf(g.t), li=(LO(g.t).indexOf(g.l)+1)||99, si=SO(g.t).indexOf(g.s); return (ti<0?9:ti)*1e7+(si<0?99:si)*1e5+li*10+(g.src==="o"?1:0); };
     keys.sort(function(a,b){ return order(a)-order(b); });
     if(!keys.length) return '';
-    return '<h4 style="margin:0 0 6px">🗂 분야·단계별 채움 현황 <small style="color:var(--mute);font-weight:400">— 줄을 누르면 강의별로 펼쳐 봅니다</small></h4>'+
-      '<div class="arow2 head" style="grid-template-columns:.6fr 1.3fr 1fr 1.2fr 1.4fr .8fr"><span>차수</span><span>분야</span><span>단계</span><span>과정</span><span>채운 강의 / 편성 강의</span><span>문항</span></div>'+
-      keys.map(function(k){ const g=G[k], filled=Object.keys(g.lec).length, cat=catN(g.t,g.l,g.s,g.src)||filled, on=QX.sel.t===g.t&&QX.sel.l===g.l&&QX.sel.s===g.s&&QX.sel.src===g.src;
-        const pct=cat?Math.round(filled*100/cat):0, col=pct>=100?"var(--gold)":(pct>=50?"#e8a33d":"#e74c3c");
-        return '<div class="arow2" style="grid-template-columns:.6fr 1.3fr 1fr 1.2fr 1.4fr .8fr;cursor:pointer'+(on?';background:rgba(201,162,39,.12)':'')+'" onclick="qxPick(\''+E(g.t)+'\',\''+E(g.l)+'\',\''+E(g.s)+'\',\''+E(g.src)+'\')">'+
-          '<span>'+E(g.t)+'</span><span class="nm2">'+E(g.l)+'</span><span>'+E(g.s)+'</span><span style="font-size:.78rem">'+srcName(g.src)+'</span>'+
-          '<span><b style="color:'+col+'">'+filled+'</b> / '+cat+'강 <small style="color:var(--mute)">('+pct+'%)</small></span><span>'+g.n+'</span></div>'; }).join("");
+    /* (2026-11-27) 펼치기 / 접기 — 차수 머리줄 · 단계 머리줄을 누르면 접고 펼침 · 처음에는 차수가 모두 접힌 채(고른 줄이 있는 차수만 펼침) */
+    const F=QX.fold=QX.fold||{t:{},s:{}};
+    const tOpen=function(t){ return F.t[t]!=null?F.t[t]:(QX.sel.t===t); }, sOpen=function(t,st){ return F.s[t+"|"+st]!==false; };
+    const sumT={}, sumS={}; keys.forEach(function(k){ const g=G[k]; sumT[g.t]=(sumT[g.t]||0)+g.n; const ks=g.t+"|"+g.s; sumS[ks]=sumS[ks]||{n:0,l:0}; sumS[ks].n+=g.n; sumS[ks].l++; });
+    const J=function(x){ return E(x).replace(/'/g,"\\'"); };
+    let out='', curT=null, curS=null;
+    keys.forEach(function(k,ki){ const g=G[k];
+      if(g.t!==curT){ curT=g.t; curS=null; const o=tOpen(g.t), ns=Object.keys(sumS).filter(function(x){ return x.indexOf(g.t+"|")===0; }).length;
+        out+='<div onclick="qxFoldT(\''+J(g.t)+'\')" style="cursor:pointer;margin:'+(ki?'14px':'4px')+' 0 2px;padding:7px 10px;border-radius:8px;background:rgba(201,162,39,.16);font-weight:800;font-size:.95rem;display:flex;gap:8px;align-items:center"><span style="width:14px">'+(o?'▾':'▸')+'</span>📘 '+E(g.t)+'<small style="font-weight:600;color:var(--mute);margin-left:auto">단계 '+ns+' · 문항 '+sumT[g.t].toLocaleString()+'</small></div>'; }
+      if(!tOpen(g.t)) return;
+      if(g.s!==curS){ curS=g.s; const o=sOpen(g.t,g.s), z=sumS[g.t+"|"+g.s];
+        out+='<div onclick="qxFoldS(\''+J(g.t)+'\',\''+J(g.s)+'\')" style="cursor:pointer;margin:6px 0 2px 14px;padding:5px 10px;border-radius:8px;background:rgba(127,127,127,.08);font-weight:800;font-size:.86rem;display:flex;gap:8px;align-items:center"><span style="width:14px">'+(o?'▾':'▸')+'</span>'+E(g.s)+'<small style="font-weight:600;color:var(--mute);margin-left:auto">분야 '+z.l+' · 문항 '+z.n.toLocaleString()+'</small></div>'; }
+      if(!sOpen(g.t,g.s)) return;
+      const filled=Object.keys(g.lec).length, cat=catN(g.t,g.l,g.s,g.src)||filled, on=QX.sel.t===g.t&&QX.sel.l===g.l&&QX.sel.s===g.s&&QX.sel.src===g.src;
+      const pct=cat?Math.round(filled*100/cat):0, col=pct>=100?"var(--gold)":(pct>=50?"#e8a33d":"#e74c3c");
+      out+='<div class="arow2" style="grid-template-columns:1.8fr 1.1fr 1.4fr .7fr;cursor:pointer;padding-left:36px'+(on?';background:rgba(201,162,39,.12)':'')+'" onclick="qxPick(\''+E(g.t)+'\',\''+E(g.l)+'\',\''+E(g.s)+'\',\''+E(g.src)+'\')">'+
+        '<span class="nm2">'+E(g.l)+'</span><span style="font-size:.78rem">'+srcName(g.src)+'</span>'+
+        '<span><b style="color:'+col+'">'+filled+'</b> / '+cat+'강 <small style="color:var(--mute)">('+pct+'%)</small></span><span>'+g.n+'</span></div>'; });
+    const bt='font:inherit;font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:inherit;cursor:pointer';
+    return '<h4 style="margin:0 0 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">🗂 분야·단계별 채움 현황 <small style="color:var(--mute);font-weight:400">— 머리줄을 누르면 접고 펼치며, 분야 줄을 누르면 강의별로 펼쳐 봅니다</small><span style="margin-left:auto;display:flex;gap:6px"><button type="button" style="'+bt+'" onclick="qxFoldAll(1)">모두 펼치기</button><button type="button" style="'+bt+'" onclick="qxFoldAll(0)">모두 접기</button></span></h4>'+
+      '<div class="arow2 head" style="grid-template-columns:1.8fr 1.1fr 1.4fr .7fr"><span>차수 · 단계 / 분야</span><span>과정</span><span>채운 강의 / 편성 강의</span><span>문항</span></div>'+out;
   }
+  window.qxFoldT=function(t){ const F=QX.fold=QX.fold||{t:{},s:{}}; const cur=F.t[t]!=null?F.t[t]:(QX.sel.t===t); F.t[t]=!cur; paint(); };
+  window.qxFoldS=function(t,st){ const F=QX.fold=QX.fold||{t:{},s:{}}; const k=t+"|"+st; F.s[k]=(F.s[k]===false); paint(); };
+  window.qxFoldAll=function(open){ const F=QX.fold={t:{},s:{}}; Object.keys(groups()).forEach(function(k){ const p=k.split("|"); F.t[p[0]]=!!open; }); paint(); };
   function detail(){
     const s=QX.sel; if(!s.t) return '';
     const G=groups(), g=G[[s.t,s.l,s.s,s.src].join("|")]; if(!g) return '';
