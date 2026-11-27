@@ -13851,6 +13851,10 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
   window.ccAdmGy=async function(){
     var pn=apanel("ccGYPanel","🎞️ 동적교안 올리기","강의(답안 틀)마다 동적교안 HTML 파일을 올립니다. 단계 · 분야 · 강의 번호를 고르면 그 강의의 답안 틀이 나옵니다 — 답안 틀 하나에 교안 하나입니다. 답안 틀이 없는 강의(기본이론강의 등)는 「강의 전체」로 올립니다. 같은 자리에 다시 올리면 새 파일로 바뀝니다."); if(!pn||!window.ccSb) return;
     var box=pn.querySelector(".ccadmb");
+    /* 패널 전체 펼치기 / 접기 (처음에는 접힘 · 브라우저에 기억) */
+    if(!pn.querySelector("#gyFoldB")){ var h3=pn.querySelector("h3"); if(h3){ h3.style.cursor="pointer"; h3.insertAdjacentHTML("afterbegin",'<span id="gyArw" style="display:inline-block;width:18px">▸</span>'); h3.insertAdjacentHTML("beforeend",' <button id="gyFoldB" class="mini" type="button" style="margin-left:8px">펼치기</button>'); h3.onclick=function(){ try{ localStorage.setItem("cc_gy_open",localStorage.getItem("cc_gy_open")==="1"?"0":"1"); }catch(e){} gyFoldApply(); }; }
+      var st2=document.createElement("style"); st2.textContent="#ccGYPanel.gyfold>*:not(h3){display:none!important}"; document.head.appendChild(st2); }
+    gyFoldApply();
     try{ var r=await window.ccSb.from("cc_gyoan").select("id,track,origin_id,subject,stage,lec,tpl,title,updated_at").order("track").order("stage").order("subject").order("lec").order("tpl").limit(1000); GY=(r&&r.data)||[]; }catch(e){ GY=[]; }
     var keep={}; ["gyaTr","gyaSt","gyaSj","gyaLec","gyaTpl"].forEach(function(i){ var e=document.getElementById(i); if(e) keep[i]=e.value; });
     box.innerHTML='<div class="ccadmr" style="border-top:0"><select id="gyaTr" title="시험 — 같은 자료를 쓰는 시험에도 각각 올라감">'+["5급공채","변시","노무사","감정평가사"].map(function(x){ return '<option>'+E(x)+'</option>'; }).join("")+'</select><select id="gyaSt" onchange="ccAdmGyTpl()">'+gyStages().map(function(x){ return '<option>'+E(x)+'</option>'; }).join("")+'</select>'+
@@ -13858,12 +13862,28 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
       '<input id="gyaLec" type="number" min="1" value="1" style="flex:0 0 80px" onchange="ccAdmGyTpl()" title="강의 번호"> 강'+
       '<select id="gyaTpl" style="flex:2 1 260px;min-width:0"><option value="">강의 전체</option></select>'+
       '<label class="mini" style="cursor:pointer">📤 HTML 파일 올리기<input type="file" multiple accept=".html,.htm,text/html" style="display:none" onchange="ccAdmGyUp(this)"></label><span id="gyaMsg" style="opacity:.85"></span></div>'+
-      '<div style="opacity:.7;margin-top:6px">올라온 교안 '+GY.length+'개</div>'+
-      (GY.length?GY.map(function(x){ return '<div class="ccadmr"><b>'+E(x.track||"")+' · '+E(x.stage)+' · '+E(x.subject)+' '+(+x.lec)+'강<small>'+E(x.tpl||"강의 전체")+' · '+E(x.title||"")+' · '+when(x.updated_at)+'</small></b><button class="mini" onclick="ccAdmGyDel('+x.id+')">삭제</button></div>'; }).join(""):'');
+      '<div style="opacity:.7;margin-top:6px">올라온 교안 '+GY.length+'개</div><div id="gyList">'+gyList()+'</div>';
     var st=box.querySelector("select"); Array.prototype.forEach.call(box.querySelectorAll("select,input[type=number]"),function(e){ e.style.background="rgba(0,0,0,.25)"; e.style.border="1px solid rgba(255,255,255,.18)"; e.style.color="inherit"; e.style.borderRadius="8px"; e.style.padding="6px 8px"; e.style.fontFamily="inherit"; });
     ["gyaTr","gyaSt","gyaSj","gyaLec"].forEach(function(i){ var e=document.getElementById(i); if(e&&keep[i]!=null&&keep[i]!=="") e.value=keep[i]; });
     await ccAdmGyTpl(keep.gyaTpl);
   };
+  /* (2026-11-27) 올라온 교안 목록 — 변호사시험 | 5급공채 · 노무사 | 감정평가사 → 단계로 묶어 펼치기 / 접기 (처음에는 접힘) */
+  var GYO={};
+  function gyList(){ if(!GY.length) return '';
+    var GR=[["b","변호사시험",["변시"]],["g","5급공채 · 노무사",["5급공채","노무사"]],["a","감정평가사",["감정평가사"]]], SO=(window.CC_STAGES&&CC_STAGES["5급공채"])||[], LO=(window.NM_BASE2||[]).concat(["보상법규 · 감정평가법","보상법규 · 토지보상법"]);
+    var hd=function(k,txt,n,lv){ var o=!!GYO[k]; return '<div onclick="ccAdmGyFold(\''+k+'\')" style="cursor:pointer;margin:'+(lv?'4px 0 2px 14px':'10px 0 2px')+';padding:'+(lv?'5px 10px':'7px 10px')+';border-radius:8px;background:'+(lv?'rgba(127,127,127,.08)':'rgba(201,162,39,.16)')+';font-weight:800;font-size:'+(lv?'.84rem':'.92rem')+';display:flex;gap:8px;align-items:center"><span style="width:14px">'+(o?'▾':'▸')+'</span>'+(lv?'':'🎞️ ')+txt+'<small style="margin-left:auto;font-weight:600;opacity:.7">'+n+'개</small></div>'; };
+    return GR.map(function(G){ var L=GY.filter(function(x){ return G[2].indexOf(x.track||"5급공채")>=0; }); if(!L.length) return '';
+      /* 5급공채 · 노무사: 같은 교안(분야 · 단계 · 강 · 양식이 같은 것)은 한 줄로 */
+      if(G[0]==="g"){ var K=function(x){ return [x.subject,x.stage,x.lec,x.tpl].join("|"); }, F={}; L.forEach(function(x){ if(x.track==="5급공채"){ F[K(x)]=x; x._pair=0; } });
+        L=L.filter(function(x){ if(x.track!=="노무사") return true; var f=F[K(x)]; if(f){ f._pair=x.id; return false; } return true; }); }
+      var h=hd(G[0],G[1],L.length,0); if(!GYO[G[0]]) return h;
+      var st=[]; L.forEach(function(x){ if(st.indexOf(x.stage)<0) st.push(x.stage); }); st.sort(function(a,b){ return SO.indexOf(a)-SO.indexOf(b); });
+      st.forEach(function(sg){ var M=L.filter(function(x){ return x.stage===sg; }).sort(function(a,b){ return (G[2].indexOf(a.track)-G[2].indexOf(b.track))||(((LO.indexOf(a.subject)+1)||99)-((LO.indexOf(b.subject)+1)||99))||(a.lec-b.lec)||String(a.tpl).localeCompare(String(b.tpl)); }), k=G[0]+"|"+sg;
+        h+=hd(k,E(sg),M.length,1); if(!GYO[k]) return;
+        h+=M.map(function(x){ return '<div class="ccadmr" style="padding-left:28px"><b>'+(G[2].length>1?E(x._pair?"5급공채 · 노무사":(x.track==="5급공채"?"5급공채만":(x.track||"")))+' · ':'')+E(x.subject)+' '+(+x.lec)+'강<small>'+E(x.tpl||"강의 전체")+' · '+E(x.title||"")+' · '+when(x.updated_at)+'</small></b><button class="mini" onclick="ccAdmGyDel('+x.id+(x._pair?','+x._pair:'')+')">삭제</button></div>'; }).join(""); });
+      return h; }).join(""); }
+  function gyFoldApply(){ var pn=document.getElementById("ccGYPanel"); if(!pn) return; var o=false; try{ o=localStorage.getItem("cc_gy_open")==="1"; }catch(e){} pn.classList.toggle("gyfold",!o); var a=document.getElementById("gyArw"), b=document.getElementById("gyFoldB"); if(a) a.textContent=o?"▾":"▸"; if(b) b.textContent=o?"접기":"펼치기"; }
+  window.ccAdmGyFold=function(k){ GYO[k]=!GYO[k]; var pn=document.getElementById("ccGYPanel"), box=pn&&pn.querySelector("#gyList"); if(box) box.innerHTML=gyList(); };
   window.ccAdmGyTpl=async function(sel){
     var st=document.getElementById("gyaSt"), sj=document.getElementById("gyaSj"), lc=document.getElementById("gyaLec"), tp=document.getElementById("gyaTpl"); if(!st||!sj||!lc||!tp) return;
     var T=[]; try{ var r=await window.ccSb.from("cc_questions").select("question,sort,id").eq("stage",st.value).eq("subject",sj.value).eq("lec",+lc.value||1).eq("qtype","요약").like("question","[답안 틀]%").order("sort").order("id").limit(60);
@@ -13898,9 +13918,9 @@ window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=docu
     if(m2) m2.textContent="올렸습니다 "+ok+"개"+(bad.length?" · 못 올린 파일 "+bad.length+"개 (파일 이름은 「단계__분야__강의번호.html」): "+bad.slice(0,3).join(", "):"");
     return;
   };
-  window.ccAdmGyDel=async function(id){ var x=GY.filter(function(r){ return r.id===id; })[0]; if(!x) return;
-    if(!confirm("「"+x.stage+" · "+x.subject+" "+x.lec+"강 · "+(x.tpl||"강의 전체")+"」 교안을 삭제할까요? 삭제하면 되돌릴 수 없습니다.")) return;
-    try{ var r=await window.ccSb.from("cc_gyoan").delete().eq("id",id); if(r&&r.error) throw r.error; ccAdmGy(); }catch(e){ try{ toast("삭제하지 못했습니다"); }catch(_){} } };   /* 삭제는 그 시험의 교안만 (다른 시험은 그대로) */
+  window.ccAdmGyDel=async function(id,id2){ var x=GY.filter(function(r){ return r.id===id; })[0]; if(!x) return;
+    if(!confirm("「"+(id2?"5급공채 · 노무사 · ":(x.track?x.track+" · ":""))+x.stage+" · "+x.subject+" "+x.lec+"강 · "+(x.tpl||"강의 전체")+"」 교안을 삭제할까요? 삭제하면 되돌릴 수 없습니다.")) return;
+    try{ var r=await window.ccSb.from("cc_gyoan").delete().in("id",id2?[id,id2]:[id]); if(r&&r.error) throw r.error; ccAdmGy(); }catch(e){ try{ toast("삭제하지 못했습니다"); }catch(_){} } };   /* 삭제는 그 시험의 교안만 (다른 시험은 그대로) */
   /* ── 🔗 최신판례특강 ↔ 답안작성원리강의(답안 틀) 연결 — cc_settings key "dap_links"
         형식: {"분야|판례특강 강의번호": [{l: 답안작성원리강의 강의번호, p: "판례 메모(선택)"}, …]} ── */
   var DL=null;
