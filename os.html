@@ -1516,7 +1516,7 @@ function openUpgrade(feat){
     <label>성명</label><input id="upName" type="text" maxlength="20">
     <label>1행2필 가입 아이디</label><input id="upSd" type="text" placeholder="1행2필에서 쓰는 아이디" maxlength="40" autocapitalize="off" spellcheck="false">
     <label>연락처</label><input id="upPhone" type="tel" placeholder="010-0000-0000" maxlength="13">
-    <label>사용할 아이디 <small style="font-weight:500;opacity:.75">· 직접 정합니다 (다른 사람이 쓰는 아이디는 쓸 수 없음)</small></label><input id="upId" type="text" placeholder="영문 소문자·숫자 4~12자" maxlength="12" autocapitalize="off" spellcheck="false" onchange="ccIdCheck()">
+    <label>사용할 아이디 <small style="font-weight:500;opacity:.75">· 직접 정합니다 (다른 사람이 쓰는 아이디는 쓸 수 없음)</small></label><div style="display:flex;gap:8px;align-items:stretch"><input id="upId" type="text" placeholder="영문 소문자·숫자 4~12자" maxlength="12" autocapitalize="off" spellcheck="false" style="flex:1;min-width:0" oninput="window.__upIdOk=null;clearTimeout(window.__upIdT);window.__upIdT=setTimeout(ccIdCheck,500)" onchange="ccIdCheck()"><button type="button" id="upIdBtn" onclick="ccIdCheck(true)" style="flex:none;font:inherit;font-size:.85rem;font-weight:700;padding:0 14px;border-radius:10px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;white-space:nowrap">중복 확인</button></div>
     <div id="upIdMsg" style="font-size:.78rem;min-height:1.1em;margin:2px 0 0"></div>
     <div class="uperr" id="uperr"></div>
     <button class="btn gbtn" id="upSend" onclick="submitUpgrade()">행정법 학습OS 신청하기 →</button>`;
@@ -1548,6 +1548,10 @@ async function submitUpgrade(){
   if(!/^01\d{8,9}$/.test(digits)){ err.textContent="휴대전화 번호를 확인해 주세요 (예: 010-1234-5678)"; return; }
   if(!/^[a-z0-9]{4,12}$/.test(id)){ err.textContent="아이디는 영문 소문자·숫자 4~12자로 정해 주세요."; return; }
   if(!sb){ err.textContent="서버 연결 모듈을 불러오지 못했습니다 — 새로고침해 주세요"; return; }
+  /* (2026-11-28) 아이디 중복이면 신청을 막음 — 확인을 안 했으면 여기서 한 번 확인 */
+  { let ok=window.__upIdOk; if(ok!==true) ok=await window.ccIdCheck(true);
+    if(ok===false){ err.textContent="이미 쓰이는 아이디입니다 — 다른 아이디로 정한 뒤 [중복 확인]을 눌러 주세요."; return; }
+    if(ok!==true){ err.textContent="아이디 중복 확인을 하지 못했습니다 — [중복 확인]을 눌러 주세요."; return; } }
   const phone=digits.length===11?digits.replace(/(\d{3})(\d{4})(\d{4})/,"$1-$2-$3"):digits.replace(/(\d{3})(\d{3})(\d{4})/,"$1-$2-$3");
   const btn=document.getElementById("upSend"); if(btn) btn.disabled=true;
   err.textContent="접수 중…";
@@ -13564,11 +13568,15 @@ window.ccUnlockBuy=async function(ids){ var sb=window.ccSb; if(!sb) throw new Er
 
 <script>
 /* 신청서의 아이디 칸: 적고 나면 바로 「쓸 수 있는 아이디 / 이미 쓰이는 아이디」를 알려 줌 (서버 cc_login_free) */
-window.ccIdCheck=async function(){ var i=document.getElementById("upId"), m=document.getElementById("upIdMsg"); if(!i||!m) return; var id=(i.value||"").trim().toLowerCase(); m.textContent=""; m.style.color="";
-  if(!id) return; if(!/^[a-z0-9]{4,12}$/.test(id)){ m.style.color="#d9695c"; m.textContent="아이디는 영문 소문자·숫자 4~12자로 정해 주세요."; return; }
-  try{ var sbx=window.ccSb||(typeof sb!=="undefined"?sb:null); if(!sbx) return; var r=await sbx.rpc("cc_login_free",{p_login:id}); if(r.error) return;
-    if(((document.getElementById("upId")||{}).value||"").trim().toLowerCase()!==id) return;
-    m.style.color=r.data?"#1b8558":"#d9695c"; m.textContent=r.data?"✓ 쓸 수 있는 아이디입니다":"✕ 이미 쓰이는 아이디입니다 — 다른 아이디로 정해 주세요"; }catch(e){} };
+/* (2026-11-28) [중복 확인] 버튼 · 입력을 멈추면 자동 확인 · 결과는 window.__upIdOk 에 남겨 신청 버튼이 확인함 */
+window.ccIdCheck=async function(btn){ var i=document.getElementById("upId"), m=document.getElementById("upIdMsg"); if(!i||!m) return null; var id=(i.value||"").trim().toLowerCase(); m.textContent=""; m.style.color=""; window.__upIdOk=null;
+  if(!id){ if(btn){ m.style.color="#d9695c"; m.textContent="사용할 아이디를 먼저 적어 주세요."; } return null; }
+  if(!/^[a-z0-9]{4,12}$/.test(id)){ m.style.color="#d9695c"; m.textContent="아이디는 영문 소문자·숫자 4~12자로 정해 주세요."; window.__upIdOk=false; return false; }
+  m.style.color="#8a93a6"; m.textContent="확인하는 중…";
+  try{ var sbx=window.ccSb||(typeof sb!=="undefined"?sb:null); if(!sbx){ m.textContent=""; return null; } var r=await sbx.rpc("cc_login_free",{p_login:id}); if(r.error){ m.style.color="#d9695c"; m.textContent="확인하지 못했습니다 — 잠시 뒤 다시 눌러 주세요"; return null; }
+    if(((document.getElementById("upId")||{}).value||"").trim().toLowerCase()!==id) return null;
+    window.__upIdOk=!!r.data; if(r.data){ var ue=document.getElementById("uperr"); if(ue&&/아이디/.test(ue.textContent)) ue.textContent=""; }
+    m.style.color=r.data?"#1b8558":"#d9695c"; m.textContent=r.data?"✓ 쓸 수 있는 아이디입니다":"✕ 이미 쓰이는 아이디입니다 — 다른 아이디로 정해 주세요"; return !!r.data; }catch(e){ m.textContent=""; return null; } };
 </script>
 <script>
 /* 메뉴 이름: 📝 실전문제풀이(간단채점) · 📊 실전답안첨삭(축문채점) — 메뉴가 다시 그려져도 따라 붙음 */
