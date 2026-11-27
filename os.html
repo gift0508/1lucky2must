@@ -1281,6 +1281,31 @@ function rebalance(){
 let user=null;
 const sb=(CC.url&&CC.key&&window.supabase&&window.supabase.createClient)?window.supabase.createClient(CC.url,CC.key):null;
 window.ccSb=sb;  /* 학습엔진(iframe)에서 쓰는 Supabase 연결 — 강의노트 파일 올리기 등 */
+/* (2026-11-27) 모범답안 보호 — cc_questions 의 모범답안(model_answer)·매칭채점표(grid)는 표에서 바로 읽지 못하게 막고(서버 권한),
+   서버 함수 cc_q_answers 가 「볼 수 있는 문제」의 것만 내려준다 (관리자 = 전부 · 수강생 = 본인 시험 사례 + 응시권으로 연 전범위기출 + 요약·카드·OX·필수암기).
+   여기서 cc_questions 조회를 감싸 자동으로 붙이므로 화면·학습도구 코드는 그대로 */
+var CC_QCOLS="id,created_at,track,subject,stage,lec,qtype,case_text,question,choices,answer,explanation,keywords,sort,chapter,topic,logic,advice,rewrite,src,edited_at,edited_by,origin_id,no200";
+async function ccQAnsMerge(data,wMA,wG){
+  const A=Array.isArray(data)?data:(data?[data]:[]); const ids=[]; A.forEach(function(x){ if(x&&x.id!=null) ids.push(x.id); });
+  const M={};
+  for(let i=0;i<ids.length;i+=1000){ let r=await sb.rpc("cc_q_answers",{p_ids:ids.slice(i,i+1000)});
+    if(r.error&&window.__ccFromRaw&&(r.error.code==="PGRST202"||/cc_q_answers/.test(r.error.message||""))) r=await window.__ccFromRaw("cc_questions").select("id,model_answer,grid").in("id",ids.slice(i,i+1000));  /* 서버 함수를 아직 안 만든 때(SQL 실행 전) — 예전 방식으로 */
+    if(r.error) throw r.error; (r.data||[]).forEach(function(z){ M[z.id]=z; }); }
+  A.forEach(function(x){ if(!x) return; const z=M[x.id]; if(wMA) x.model_answer=z?z.model_answer:null; if(wG) x.grid=z?z.grid:null; });
+}
+if(sb){ const _from=sb.from.bind(sb); window.__ccFromRaw=_from;
+  sb.from=function(t){ const qb=_from(t); if(t!=="cc_questions") return qb;
+    const _sel=qb.select.bind(qb);
+    qb.select=function(cols,opt){ cols=(cols==null)?"*":String(cols); const L=cols.replace(/\s/g,"").split(",");
+      const all=L.indexOf("*")>=0, wMA=all||L.indexOf("model_answer")>=0, wG=all||L.indexOf("grid")>=0;
+      if(!wMA&&!wG) return _sel(cols,opt);
+      let c2=all?CC_QCOLS:L.filter(function(c){ return c!=="model_answer"&&c!=="grid"; }); if(!all&&c2.indexOf("id")<0) c2.push("id"); if(!all) c2=c2.join(",");
+      const fb=_sel(c2,opt); if(opt&&opt.head) return fb;
+      const _then=fb.then.bind(fb);
+      fb.then=function(ok,ng){ return _then(async function(r){ if(r&&!r.error&&r.data){ try{ await ccQAnsMerge(r.data,wMA,wG); }catch(e){ return Object.assign({},r,{data:null,error:e}); } } return r; }).then(ok,ng); };
+      return fb; };
+    return qb; };
+}
 function ccEmail(id){ id=String(id||"").trim().toLowerCase(); return id.indexOf("@")>=0?id:id+"@"+CC.domain; }
 function ccErr(e){
   const m=(e&&(e.message||e.error_description||e.msg))||String(e||"");
