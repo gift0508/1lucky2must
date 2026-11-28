@@ -9542,20 +9542,20 @@ html #nxHofAdm .hr{display:grid;grid-template-columns:40px 1fr 110px 130px;gap:1
   const draw=function(){
     const c=col(); if(!c) return; try{ open=!!(c.querySelector(".how")||{}).open; }catch(e){}
     const L=wk(-1), C=wk(0);
-    let a='<div class="hof"><h3>🏆 금주의 명예의 전당 <small>지난주 '+ccMD(L.mon)+'(월) ~ '+ccMD(L.sun)+'(일) 확정</small></h3>';
+    let a='<div class="hof"><h3>🏆 금주의 명예의 전당 <span class="hofmin" style="font-size:.72em;font-weight:800;color:var(--gold);margin-left:6px">최저시상기준(주 '+HOFMIN()+'시간)</span> <small>지난주 '+ccMD(L.mon)+'(월) ~ '+ccMD(L.sun)+'(일) 확정</small></h3>';
     const last=(D.last||[]).filter(function(x){ return x.rk<=3; });
     if(!HOFON()&&!D.err){ const C0=wk(0), me0=(D.cur||[]).filter(function(x){ return x.me; })[0];
       a+='<div class="emp">수강생이 '+((D.hs&&D.hs.need)||5)+'명 이상 모이면 명예의 전당이 시작됩니다</div></div>';
       a+='<div class="hof"><h3>⏱ 이번 주 나의 공부시간 <small>'+ccMD(C0.mon)+'(월) ~</small></h3><div class="me">'+(me0?('이번 주 <b>'+HM(me0.sec)+'</b>'):'아직 이번 주 기록이 없습니다')+'</div></div>';
       c.innerHTML=a+HOWF(); if(open){ const d=c.querySelector(".how"); if(d) d.open=true; } return; }
     a+=D.err?'<div class="emp">명예의 전당을 준비하고 있습니다</div>':(!D.last?'<div class="emp">불러오는 중…</div>':(last.length?last.map(function(x){ const tk=x.tk!=null?x.tk:PRIZE[x.rk];
-        return '<div class="r t3'+(x.me?' mine':'')+'"><span class="m">'+["","🥇","🥈","🥉"][x.rk]+'</span><span class="n">'+E(x.nm)+' '+TB(x.track)+'<span class="prize">응시권 '+tk+'장</span></span><span class="h">'+HM(x.sec)+'</span></div>'; }).join(""):'<div class="emp">지난주 시상 기준(주 '+HOFMIN()+'시간)을 넘은 수강생이 없습니다</div>'));
+        return '<div class="r t3'+(x.me?' mine':'')+'"><span class="m">'+["","🥇","🥈","🥉"][x.rk]+'</span><span class="n">'+E(x.nm)+' '+TB(x.track)+'<span class="prize">응시권 '+tk+'장</span></span><span class="h">'+HM(x.sec)+'</span></div>'; }).join(""):'<div class="emp">지난주 최저시상기준을 넘은 수강생이 없습니다</div>'));
     a+='</div>';
     let b='<div class="hof"><h3>⏱ 실시간 순위 <small>이번 주 '+ccMD(C.mon)+'(월) ~ · 전체 통합</small></h3>';
     const cur=D.cur||[], top=cur.filter(function(x){ return x.rk<=5; }), me=cur.filter(function(x){ return x.me; })[0], t3=cur.filter(function(x){ return x.rk===3; })[0];
     b+=D.err?'<div class="emp">명예의 전당을 준비하고 있습니다</div>':(!D.cur?'<div class="emp">불러오는 중…</div>':(top.length?top.map(function(x){
         return '<div class="r'+(x.rk<=3?' t3':'')+(x.me?' mine':'')+'"><span class="m">'+x.rk+'</span><span class="n">'+E(x.nm)+' '+TB(x.track)+'</span><span class="h">'+HM(x.sec)+'</span></div>'; }).join(""):'<div class="emp">아직 이번 주 기록이 없습니다</div>'));
-    if(D.cur&&!D.err) b+='<div class="me">'+(me?('나: <b>'+me.rk+'위</b> · 이번 주 <b>'+HM(me.sec)+'</b>'+(me.sec<HOFMIN()*3600?' — 시상 기준(주 '+HOFMIN()+'시간)까지 <b>'+HM(HOFMIN()*3600-me.sec)+'</b>':(me.rk>3&&t3?' — 3위까지 <b>'+HM(t3.sec-me.sec+60)+'</b>':(me.rk<=3?' — 🎉 시상권입니다':'')))):'나: 아직 이번 주 기록이 없습니다 — 공부를 시작하면 순위에 오릅니다')+'</div>';
+    if(D.cur&&!D.err) b+='<div class="me">'+(me?('나: <b>'+me.rk+'위</b> · 이번 주 <b>'+HM(me.sec)+'</b>'+(me.sec<HOFMIN()*3600?' — 최저시상기준까지 <b>'+HM(HOFMIN()*3600-me.sec)+'</b>':(me.rk>3&&t3?' — 3위까지 <b>'+HM(t3.sec-me.sec+60)+'</b>':(me.rk<=3?' — 🎉 시상권입니다':'')))):'나: 아직 이번 주 기록이 없습니다 — 공부를 시작하면 순위에 오릅니다')+'</div>';
     b+='</div>';
     c.innerHTML=a+b+HOWF(); if(open){ const d=c.querySelector(".how"); if(d) d.open=true; }
   };
