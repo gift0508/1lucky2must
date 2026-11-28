@@ -2279,6 +2279,7 @@ async function ccWithdraw(i){
     '<div class="ccwarn">수강생이 로그인을 시도하면 같은 내용(사유 · 삭제 예정일 · 재신청 안내)이 화면에도 뜹니다.</div></div>'; }
   await ccLoadAdmin(true);
 }
+/* (2026-11-28) 관리자 맨 위 「👥 수강생 목록」 — 콘텐츠 관리 칸들 아래로 밀린 수강생 명부로 바로 이동 */
 function ccRenderWithdrawn(){
   let el=document.getElementById("ccWithdrawn");
   if(!el){ const ro=document.getElementById("roster"); if(!ro) return;
@@ -9533,14 +9534,20 @@ html #nxHofAdm .hr{display:grid;grid-template-columns:40px 1fr 110px 130px;gap:1
     '<li><b>집계</b> — 월요일 0시에 새로 시작해 일요일 밤에 확정됩니다</li>'+
     '<li><b>시상</b> — 1~3위에게 소정의 축문첨삭 응시권을 드립니다(1위:3장, 2위:2장, 3위:1장 — 환불대상이 아닙니다.)</li>'+
     '<li><b>시상 기준</b> — 그 주 공부시간이 <b>주 '+HOFMIN()+'시간 이상</b>인 수강생끼리 1~3위를 정합니다 (기준을 넘은 사람이 없으면 그 순위는 시상하지 않습니다)</li>'+
+    '<li><b>운영</b> — 수강생이 '+((D.hs&&D.hs.need)||5)+'명 이상일 때 운영합니다</li>'+
     '<li><b>이름</b> — 가운데 글자를 가리고, 순위와 시간만 보입니다</li></ul></details>'; };
-  let D={last:null,cur:null,err:null,at:0,min:30}, open=false;
+  let D={last:null,cur:null,err:null,at:0,min:30,hs:null}, open=false;
+  function HOFON(){ return !D.hs||D.hs.open!==false; }   /* (2026-11-28) 수강생 기준 인원 이상일 때만 운영 — 서버 cc_hof_status */
   function HOFMIN(){ return (D&&D.min)||30; }   /* (2026-11-28) 시상 최소 공부시간(시간) — 서버 cc_hof_min */
   const draw=function(){
     const c=col(); if(!c) return; try{ open=!!(c.querySelector(".how")||{}).open; }catch(e){}
     const L=wk(-1), C=wk(0);
     let a='<div class="hof"><h3>🏆 금주의 명예의 전당 <small>지난주 '+ccMD(L.mon)+'(월) ~ '+ccMD(L.sun)+'(일) 확정</small></h3>';
     const last=(D.last||[]).filter(function(x){ return x.rk<=3; });
+    if(!HOFON()&&!D.err){ const C0=wk(0), me0=(D.cur||[]).filter(function(x){ return x.me; })[0];
+      a+='<div class="emp">수강생이 '+((D.hs&&D.hs.need)||5)+'명 이상 모이면 명예의 전당이 시작됩니다</div></div>';
+      a+='<div class="hof"><h3>⏱ 이번 주 나의 공부시간 <small>'+ccMD(C0.mon)+'(월) ~</small></h3><div class="me">'+(me0?('이번 주 <b>'+HM(me0.sec)+'</b>'):'아직 이번 주 기록이 없습니다')+'</div></div>';
+      c.innerHTML=a+HOWF(); if(open){ const d=c.querySelector(".how"); if(d) d.open=true; } return; }
     a+=D.err?'<div class="emp">명예의 전당을 준비하고 있습니다</div>':(!D.last?'<div class="emp">불러오는 중…</div>':(last.length?last.map(function(x){ const tk=x.tk!=null?x.tk:PRIZE[x.rk];
         return '<div class="r t3'+(x.me?' mine':'')+'"><span class="m">'+["","🥇","🥈","🥉"][x.rk]+'</span><span class="n">'+E(x.nm)+' '+TB(x.track)+'<span class="prize">응시권 '+tk+'장</span></span><span class="h">'+HM(x.sec)+'</span></div>'; }).join(""):'<div class="emp">지난주 시상 기준(주 '+HOFMIN()+'시간)을 넘은 수강생이 없습니다</div>'));
     a+='</div>';
@@ -9557,6 +9564,7 @@ html #nxHofAdm .hr{display:grid;grid-template-columns:40px 1fr 110px 130px;gap:1
     D.at=Date.now();
     if(!live()){ D.err=window.ccPreview?null:"off"; D.last=D.last||[]; D.cur=D.cur||[]; draw(); return; }
     try{ try{ const mm=await sb.rpc("cc_hof_min"); if(!mm.error&&mm.data) D.min=Math.round(mm.data/3600); }catch(_){}
+      try{ const hs=await sb.rpc("cc_hof_status"); D.hs=(!hs.error&&hs.data)?hs.data:null; }catch(_){ D.hs=null; }
       await flush(); const r1=await sb.rpc("cc_hof_week",{p_off:-1,p_top:3}), r2=await sb.rpc("cc_hof_week",{p_off:0,p_top:5});
       if(r1.error||r2.error) throw (r1.error||r2.error); D.last=r1.data||[]; D.cur=r2.data||[]; D.err=null;
     }catch(e){ console.warn("[명예의 전당]",e); D.err=e; }
@@ -9578,7 +9586,8 @@ html #nxHofAdm .hr{display:grid;grid-template-columns:40px 1fr 110px 130px;gap:1
     const p=admBox(); if(!p||typeof sb==="undefined"||!sb) return;
     p.innerHTML='<h3>🏆 명예의 전당 — 지난주 시상</h3><div class="sub">지난주 실제 공부시간 1~3위 (주 30시간 이상인 수강생끼리) · 1위 축문첨삭 응시권 3장 · 2위 2장 · 3위 1장 · [지급]을 누르면 응시권이 들어가고 홈에 지급으로 표시됩니다</div><div id="nxHofAdmL">불러오는 중…</div>';
     const L=document.getElementById("nxHofAdmL");
-    try{ const r=await sb.rpc("cc_hof_admin",{p_off:-1}); if(r.error) throw r.error; const rows=r.data||[];
+    try{ try{ const hs=await sb.rpc("cc_hof_status"); if(!hs.error&&hs.data&&hs.data.open===false){ L.innerHTML='<div class="sub">현재 수강생 <b>'+hs.data.n+'명</b>(test 계정 제외) — <b>'+hs.data.need+'명 이상</b>이 되면 명예의 전당·시상이 자동으로 시작됩니다</div>'; return; } }catch(_){}
+      const r=await sb.rpc("cc_hof_admin",{p_off:-1}); if(r.error) throw r.error; const rows=r.data||[];
       window.__nxHofAdm=rows;
       L.innerHTML=rows.length?rows.map(function(x,i){ const n=PRIZE[x.rk];
         return '<div class="hr"><b>'+["","🥇","🥈","🥉"][x.rk]+'</b><span>'+E(x.name||x.login_id)+' <small style="opacity:.7">'+E(x.login_id)+' · '+E(x.track||"")+'</small></span><span>'+HM(x.sec)+'</span>'+
