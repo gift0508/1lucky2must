@@ -1314,20 +1314,23 @@ function ccGyCtxIn(H,ctx){ H=String(H||""); if(!ctx||!CC||!CC.url||!CC.key) retu
   /* 교안 창 안의 연결: 녹음 올리기 = 미리 받은 업로드 허가로(로그인 불필요) · 녹음 듣기 = OS 창의 연결 */
   /* (2026-11-28) 촬영은 갤럭시탭 화면 녹화로 → 교안의 ⏺ 녹음 · 📹 영상 내보내기 버튼은 숨김 */
   var HIDE=ctx.admin?'<style>#bRec,#bVid,#bPlay,#rmsg{display:none!important}</style>':'';
-  /* (2026-11-28) 도구함 옮기기 — 맨 위 「⠿ 이동」 손잡이를 끌면 도구함이 따라옴 · 위치는 이 기기에 기억 · 손잡이 두 번 누르면 제자리 */
-  if(ctx.admin) HIDE+='<style>body.tb-moved #bar:not(.bar),body.tb-moved .tools{left:var(--tbx)!important;top:var(--tby)!important;right:auto!important;bottom:auto!important;transform:none!important}'+
-    'body.tb-moved:not(.tb-open) #bar:not(.bar),body.tb-moved:not(.tb-open) .tools{visibility:hidden!important;opacity:0!important}'+
-    'body.tb-moved #tbTab{top:calc(var(--tby) + 20px)!important;transform:none!important}'+
-    '#tbMv{font:700 12px sans-serif!important;background:rgba(255,255,255,.12)!important;color:#ffd54f!important;border:1px dashed rgba(255,213,79,.7)!important;border-radius:8px!important;padding:6px 8px!important;cursor:grab;touch-action:none;user-select:none}#tbMv:active{cursor:grabbing}</style>'+
-    '<script>(function(){var K="gyTbPos";function ap(x,y){var b=document.body;b.style.setProperty("--tbx",x+"px");b.style.setProperty("--tby",y+"px");b.classList.add("tb-moved");}'+
-    'function go(){var bar=document.querySelector(".tools")||document.querySelector("#bar:not(.bar)");if(!bar||document.getElementById("tbMv"))return;'+
-    'var h=document.createElement("button");h.id="tbMv";h.type="button";h.textContent="⠿ 이동";h.title="끌어서 도구함 옮기기 · 두 번 누르면 제자리";bar.insertBefore(h,bar.firstChild);'+
-    'try{var p=JSON.parse(localStorage.getItem(K)||"null");if(p&&p.x>=0&&p.y>=0)ap(Math.min(p.x,innerWidth-60),Math.min(p.y,innerHeight-60));}catch(e){}'+
-    'var dx=0,dy=0,on=false;h.addEventListener("pointerdown",function(e){var r=bar.getBoundingClientRect();dx=e.clientX-r.left;dy=e.clientY-r.top;on=true;try{h.setPointerCapture(e.pointerId);}catch(_){}ap(r.left,r.top);e.preventDefault();e.stopPropagation();});'+
-    'h.addEventListener("pointermove",function(e){if(!on)return;var r=bar.getBoundingClientRect();var x=Math.max(0,Math.min(innerWidth-r.width,e.clientX-dx)),y=Math.max(0,Math.min(innerHeight-r.height,e.clientY-dy));ap(x,y);e.preventDefault();});'+
-    'function up(e){if(!on)return;on=false;var r=bar.getBoundingClientRect();try{localStorage.setItem(K,JSON.stringify({x:Math.round(r.left),y:Math.round(r.top)}));}catch(_){}e.stopPropagation();}h.addEventListener("pointerup",up);h.addEventListener("pointercancel",up);'+
-    'h.addEventListener("dblclick",function(e){document.body.classList.remove("tb-moved");try{localStorage.removeItem(K);}catch(_){}e.stopPropagation();});'+
-    '["click","pointerup"].forEach(function(ev){h.addEventListener(ev,function(e){e.stopPropagation();});});}'+
+  /* (2026-11-28) 도구함 옮기기 — 접힌 금색 「◂ 도구」 탭을 그대로 끌어서 옮김(살짝 누르면 펼침) · 펼치면 탭 자리 옆에 열림 · 위치는 이 기기에 기억 */
+  if(ctx.admin) HIDE+='<style>body.tb-moved #tbTab{left:var(--tx)!important;top:var(--ty)!important;right:auto!important;transform:none!important;border-radius:10px!important;touch-action:none}'+
+    'body.tb-moved #bar:not(.bar),body.tb-moved .tools{left:var(--bx)!important;top:var(--by)!important;right:auto!important;bottom:auto!important;transform:none!important}'+
+    'body.tb-moved:not(.tb-open) #bar:not(.bar),body.tb-moved:not(.tb-open) .tools{visibility:hidden!important;opacity:0!important}#tbTab{touch-action:none}#tbTab.drag{opacity:1!important;cursor:grabbing;box-shadow:0 6px 18px rgba(0,0,0,.45)}</style>'+
+    '<script>(function(){var K="gyTbPos2";function B(){return document.querySelector(".tools")||document.querySelector("#bar:not(.bar)");}'+
+    'function place(){var b=document.body,t=document.getElementById("tbTab"),bar=B();if(!b.classList.contains("tb-moved")||!t||!bar)return;var tx=parseFloat(b.style.getPropertyValue("--tx"))||0,ty=parseFloat(b.style.getPropertyValue("--ty"))||0,tw=t.offsetWidth||34,bw=bar.offsetWidth||150,bh=bar.offsetHeight||420;'+
+    'var bx=tx+tw/2>innerWidth/2?tx+tw-bw:tx,by=Math.max(0,Math.min(innerHeight-bh,ty-20));b.style.setProperty("--bx",Math.max(0,Math.min(innerWidth-bw,bx))+"px");b.style.setProperty("--by",by+"px");}'+
+    'function setT(x,y){var b=document.body,t=document.getElementById("tbTab"),w=t?t.offsetWidth:34,h=t?t.offsetHeight:90;x=Math.max(0,Math.min(innerWidth-w,x));y=Math.max(0,Math.min(innerHeight-h,y));b.style.setProperty("--tx",x+"px");b.style.setProperty("--ty",y+"px");b.classList.add("tb-moved");place();return [x,y];}'+
+    'function go(){var t=document.getElementById("tbTab");if(!t||t.__mv)return;t.__mv=1;t.title="끌어서 옮기기 · 살짝 누르면 펼침";'+
+    'try{var p=JSON.parse(localStorage.getItem(K)||"null");if(p)setT(p.x,p.y);}catch(e){}'+
+    'var sx=0,sy=0,ox=0,oy=0,down=false,drag=false,eat=false;'+
+    't.addEventListener("pointerdown",function(e){var r=t.getBoundingClientRect();sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;down=true;drag=false;try{t.setPointerCapture(e.pointerId);}catch(_){}});'+
+    't.addEventListener("pointermove",function(e){if(!down)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!drag&&Math.abs(dx)+Math.abs(dy)>8){drag=true;t.classList.add("drag");}if(drag){setT(ox+dx,oy+dy);e.preventDefault();}});'+
+    'function up(e){if(!down)return;down=false;t.classList.remove("drag");if(drag){eat=true;var r=t.getBoundingClientRect();try{localStorage.setItem(K,JSON.stringify({x:Math.round(r.left),y:Math.round(r.top)}));}catch(_){}setTimeout(function(){eat=false;},400);}e.stopPropagation();}'+
+    't.addEventListener("pointerup",up);t.addEventListener("pointercancel",up);'+
+    'window.addEventListener("click",function(e){if(eat&&(e.target===t||t.contains(e.target))){eat=false;e.stopPropagation();e.preventDefault();}},true);'+
+    'try{new MutationObserver(function(){if(document.body.classList.contains("tb-open"))requestAnimationFrame(place);}).observe(document.body,{attributes:true,attributeFilter:["class"]});}catch(_){}addEventListener("resize",function(){var r=t.getBoundingClientRect();if(document.body.classList.contains("tb-moved"))setT(r.left,r.top);});}'+
     'function st(){go();setTimeout(go,400);setTimeout(go,1200);}if(document.readyState!=="loading")st();else document.addEventListener("DOMContentLoaded",st);})();<\/script>';
   var S=HIDE+L+'<script>(function(){try{var C='+C+';var op=(window.__GY&&window.__GY.sb)||null,own=null;try{if(window.supabase&&window.supabase.createClient)own=window.supabase.createClient(C.url,C.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});}catch(e){}'+
     'window.__GY={id:C.id,admin:C.admin,sb:{storage:{from:function(b){return{upload:function(p,blob,o){var t=C.up&&C.up[p];if(t&&own)return own.storage.from(b).uploadToSignedUrl(p,t,blob,{contentType:o&&o.contentType,upsert:true});return (op||own).storage.from(b).upload(p,blob,o);},download:function(p){return (op||own).storage.from(b).download(p);}};}}}};}catch(e){}})();<\/script>';
@@ -3137,7 +3140,13 @@ function ccMissedHTML(t,ms,per,inFrame){
 window.ccMissedHTML=ccMissedHTML;
 window.ccMissionRefresh=function(){ try{ openEngine('mission',true); }catch(e){} };
 /* 로그인 직후: 신규 강의 공개 정보를 받은 뒤 오늘 배정 */
+/* (2026-11-28) 단계 공개 설정 (cc_settings 「stage_open」) — 기본이론강의는 늘 열림 · 나머지는 적힌 만큼만
+   값: {"답안작성원리강의":true} = 그 단계 전부 · {"답안작성원리강의":2} = 모든 분야 2강까지 · {"답안작성강의":{"행정소송의 개관과 한계":3}} = 그 분야 3강까지 · 없으면 닫힘 */
+window.CC_STAGE_OPEN=window.CC_STAGE_OPEN||{};
+window.ccStageOpen=function(stage,subj,lec){ if(stage==="기본이론강의") return true; var v=(window.CC_STAGE_OPEN||{})[stage]; if(v===true) return true;
+  if(typeof v==="number") return (+lec||0)<=v; if(v&&typeof v==="object"){ var n=v[subj]; return n===true||(typeof n==="number"&&(+lec||0)<=n); } return false; };
 window.ccPlanStart=async function(){
+  try{ const r=await sb.from("cc_settings").select("value").eq("key","stage_open").maybeSingle(); window.CC_STAGE_OPEN=(r&&r.data&&r.data.value)?JSON.parse(r.data.value):{}; }catch(e){ window.CC_STAGE_OPEN={}; }
   if(window.CC_PUB_ON){
     try{ const r=await sb.from("cc_settings").select("value").eq("key","pub").maybeSingle(); if(r.error) throw r.error; window.CC_PUB=(r.data&&r.data.value)?JSON.parse(r.data.value):{}; }catch(e){ console.warn("공개 정보",e); }
     try{ await nxCatLoad(); }catch(e){ console.warn("강의 수",e); }
@@ -8695,6 +8704,8 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
   const MCL=function(){ return window.CC_MCL5||"5지택일 · 선다형"; };
   const steps=function(o,day){
     const st=o.stage, two=ccCase(o.t);
+    /* (2026-11-28) 단계 공개: 기본이론강의만 열고, 나머지 단계는 선생님이 열 때까지 「🔒 준비중」 */
+    if(two&&st!=="기본이론강의"&&window.ccStageOpen&&!ccStageOpen(st,o.qsubj||o.l,o.lecNo)) return [["🔒","준비중 — 곧 열립니다","lock"]];
     if(!two&&o.light){
       const th=o.light==="theme", nm=th?"암기노트":"강의노트";
       if(day>0&&noteHas(o.key)) return [["🧠","떠올리기 복습 (내 노트)","noter"]];
@@ -8725,6 +8736,7 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
   };
   const run=function(o,day,act){
     const q=o.qsubj, s=o.stage, n=o.lecNo;
+    if(act==="lock"){ try{ toast("🔒 이 강의는 준비중입니다 — 열리면 바로 들을 수 있습니다"); }catch(e){} return; }
     if(act==="sum") return ccOpenSum(q,s,n,o.t,day);
     if(act==="memor") return ccOpenSum(q,s,n,o.t,day,"memo");
     if(act==="sumt") return ccOpenSum(q,s,n,o.t,day,"sum");   /* (2026-11-27) 답안작성원리강의 강의요약 = 머리쏙쏙의 「답안 틀」 탭 */   /* (2026-11-26) 필수문장 덮고 떠올리기 = 머리쏙쏙 필수암기문구 탭(모두 덮인 채로) */
@@ -9072,6 +9084,13 @@ html #nxWiz .gorow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin
     '<button class="mini nxtab" data-nx="dt" onclick="ccOpenDt()">🎓 베리답안특강</button><button class="mini nxtab" data-nx="book" data-book="1" onclick="ccOpenBooks()">📚 교재</button><button class="mini nxtab" data-nx="story" data-story="1" onclick="ccOpenStory()">💬 이용의 이유</button>'+
     '<button class="mini nxout" onclick="nxLogout()">로그아웃</button>'; };
   const navOn=function(k){ document.querySelectorAll("#engmenu .nxtab").forEach(function(b){ b.classList.toggle("on",b.getAttribute("data-nx")===k); }); };
+  /* (2026-11-28) 실전 메뉴(변시실전선택형 · 실전문제풀이 · 실전답안첨삭)도 열 때까지 「준비중」 — cc_settings stage_open 의 "실전메뉴": true 면 모두 열림 (관리자는 늘 열림) */
+  const NX_LOCK=["sel","qb2","qb3"];
+  const nxMenuOpen=function(k){ if(window.adminAuthed) return true; const v=(window.CC_STAGE_OPEN||{})["실전메뉴"]; return v===true||(v&&typeof v==="object"&&v[k]===true); };
+  const nxLockMark=function(){ document.querySelectorAll("#engmenu .nxtab").forEach(function(b){ const k=b.getAttribute("data-nx"); if(NX_LOCK.indexOf(k)>=0) b.classList.toggle("nxlock",!nxMenuOpen(k)); }); };
+  try{ const st=document.createElement("style"); st.textContent="#engmenu .nxtab.nxlock{opacity:.55}#engmenu .nxtab.nxlock::after{content:' · 준비중';color:#E8C66A;font-weight:800;font-size:.85em}"; document.head.appendChild(st); }catch(e){}
+  document.addEventListener("click",function(e){ const b=e.target&&e.target.closest&&e.target.closest("#engmenu .nxtab"); if(!b) return; const k=b.getAttribute("data-nx"); if(NX_LOCK.indexOf(k)<0||nxMenuOpen(k)) return; e.stopPropagation(); e.preventDefault(); try{ toast("🔒 준비중입니다 — 열리면 바로 이용할 수 있습니다"); }catch(_){} },true);
+  setInterval(nxLockMark,1500);
   const setNav=function(){ const em=document.getElementById("engmenu"); if(!em) return; if(em.getAttribute("data-nxnav")==="1"&&em.querySelector(".nxtab")) return;
     em.setAttribute("data-nxnav","1"); em.innerHTML=NAVF(); const m=document.getElementById("nxMine"); navOn(m&&m.style.display!=="none"?"mine":"home"); };
   try{ const o=applyTrackChrome; applyTrackChrome=function(){ const r=o.apply(this,arguments); const em=document.getElementById("engmenu"); if(em) em.removeAttribute("data-nxnav"); setNav(); return r; }; window.applyTrackChrome=applyTrackChrome; }catch(e){}
